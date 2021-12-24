@@ -5,22 +5,41 @@ import sys
 import pygame
 
 
+def mouse_choose(mouse):
+    x, y = mouse
+    if 435 <= x <= 631 - 1 and 135 <= y <= 312:
+        return 'red'
+    elif 180 <= x <= 368 - 1 and 141 <= y <= 300:
+        return 'yellow'
+    elif 31 <= x <= 146 and 85 <= x <= 230:
+        return 'blue'
+
+
 def start_screen():
     """Функция вызова(отображения) стартового экрана"""
     fon = pygame.transform.scale(load_image('start.png'), (WIDTH, HEIGHT))  # стартовая картинка
     screen.blit(fon, (0, 0))
-
+    flag = False
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()  # выход из игры
-            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                return  # переход дальше
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                flag = True
+            elif event.type == pygame.MOUSEBUTTONUP and flag:
+                print(event.pos)
+                color = mouse_choose(event.pos)
+                if color == 'red':
+                    return game_screen1()  # бело красный
+                elif color == 'yellow':
+                    return game_screen2()  # бело желтый
+                elif color == 'blue':
+                    game_screen3()  # красно синий
         pygame.display.flip()
         clock.tick(fps)
 
 
-def game_screen():
+def game_screen1():
     """Функция вызова(отображения) экрана игры"""
     for i in range(10):
         Ball(20, 100, 100)
@@ -34,6 +53,44 @@ def game_screen():
                 # all_sprites.update(event)
                 return  # переход дальше
         screen.fill(pygame.Color("white"))
+        all_sprites.draw(screen)
+        pygame.display.flip()
+        clock.tick(fps)
+
+
+def game_screen2():
+    """Функция вызова(отображения) экрана игры"""
+    for i in range(10):
+        Ball(20, 100, 100)
+    running = True
+    while running:
+        all_sprites.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()  # выход из игры
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # all_sprites.update(event)
+                return  # переход дальше
+        screen.fill(pygame.Color("yellow"))
+        all_sprites.draw(screen)
+        pygame.display.flip()
+        clock.tick(fps)
+
+
+def game_screen3():
+    """Функция вызова(отображения) экрана игры"""
+    for i in range(10):
+        Ball(20, 100, 100)
+    running = True
+    while running:
+        all_sprites.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()  # выход из игры
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # all_sprites.update(event)
+                return  # переход дальше
+        screen.fill(pygame.Color("blue"))
         all_sprites.draw(screen)
         pygame.display.flip()
         clock.tick(fps)
@@ -103,6 +160,7 @@ class Ball(pygame.sprite.Sprite):
 
 class Border(pygame.sprite.Sprite):
     """Класс стенок"""
+
     # строго вертикальный или строго горизонтальный отрезок
     def __init__(self, x1, y1, x2, y2):
         super().__init__(all_sprites)
@@ -134,5 +192,5 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     """Поочередный вызов функций для игры старт - игра - финиш"""
     start_screen()
-    game_screen()
+    # game_screen()
     finish_screen()
