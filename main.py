@@ -5,19 +5,137 @@ import sys
 import pygame
 
 
+def load_image(name, colorkey=None):
+    """Функция загрузки изображения"""
+    fullname = os.path.join('data', name)
+    # если файл не существует, то выходим
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if colorkey:
+        # image = image.convert()
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
+
+
 def start_screen():
     """Функция вызова(отображения) стартового экрана"""
     fon = pygame.transform.scale(load_image('start.png'), (WIDTH, HEIGHT))  # стартовая картинка
     screen.blit(fon, (0, 0))
-
+    houses.update()
     while True:
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()  # выход из игры
-            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                return  # переход дальше
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                houses.update(pygame.mouse, 1)
+                game_screen()  # переход дальше
+            if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
+                houses.update(pygame.mouse)
+        screen.blit(fon, (0, 0))
+        houses.draw(screen)
         pygame.display.flip()
         clock.tick(fps)
+
+
+class House_1(pygame.sprite.Sprite):
+    image_small = load_image("house_1_small.png", colorkey=-1)
+    image_big = load_image("house_1_big.png", colorkey=-1)
+
+    def __init__(self, x, y, *group):
+        super().__init__(*group)
+        self.image = House_1.image_small
+        self.rect = self.image_small.get_rect()
+        self.pos = [x, y]
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self, *args):
+        if args and self.rect.collidepoint(args[0].get_pos()):
+            self.image = self.image_big
+            self.rect.x = self.pos[0] - 2
+            self.rect.y = self.pos[1] - 2
+        else:
+            self.image = self.image_small
+            self.rect.x = self.pos[0]
+            self.rect.y = self.pos[1]
+
+
+class House_2(pygame.sprite.Sprite):
+    image_small = load_image("house_2_small.png", colorkey=-1)
+    image_big = load_image("house_2_big.png", colorkey=-1)
+
+    def __init__(self, x, y, *group):
+        super().__init__(*group)
+        self.image = House_1.image_small
+        self.rect = self.image_small.get_rect()
+        self.pos = [x, y]
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self, *args):
+        if args and self.rect.collidepoint(args[0].get_pos()):
+            self.image = self.image_big
+            self.rect.x = self.pos[0] - 2
+            self.rect.y = self.pos[1] - 2
+        else:
+            self.image = self.image_small
+            self.rect.x = self.pos[0]
+            self.rect.y = self.pos[1]
+
+
+class House_3(pygame.sprite.Sprite):
+    image_small = load_image("house_3_small.png", colorkey=-1)
+    image_big = load_image("house_3_big.png", colorkey=-1)
+
+    def __init__(self, x, y, *group):
+        super().__init__(*group)
+        self.image = House_1.image_small
+        self.rect = self.image_small.get_rect()
+        self.pos = [x, y]
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self, *args):
+        if args and self.rect.collidepoint(args[0].get_pos()):
+            self.image = self.image_big
+            self.rect.x = self.pos[0] - 2
+            self.rect.y = self.pos[1] - 2
+        else:
+            self.image = self.image_small
+            self.rect.x = self.pos[0]
+            self.rect.y = self.pos[1]
+
+
+class Exit_1(pygame.sprite.Sprite):
+    image_small = load_image("exit_small.png", colorkey=-1)
+    image_big = load_image("exit_big.png", colorkey=-1)
+
+    def __init__(self, x, y, *group):
+        super().__init__(*group)
+        self.image = House_1.image_small
+        self.rect = self.image_small.get_rect()
+        self.pos = [x, y]
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self, *args):
+        if args and args[-1] == 1 and self.rect.collidepoint(args[0].get_pos()):
+            terminate()
+        if args and self.rect.collidepoint(args[0].get_pos()):
+            self.image = self.image_big
+            self.rect.x = self.pos[0] - 2
+            self.rect.y = self.pos[1] - 2
+        else:
+            self.image = self.image_small
+            self.rect.x = self.pos[0]
+            self.rect.y = self.pos[1]
 
 
 def game_screen():
@@ -30,11 +148,13 @@ def game_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()  # выход из игры
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # all_sprites.update(event)
                 return  # переход дальше
         screen.fill(pygame.Color("white"))
         all_sprites.draw(screen)
+
         pygame.display.flip()
         clock.tick(fps)
 
@@ -58,24 +178,6 @@ def terminate():
     """Функция выхода из игры"""
     pygame.quit()
     sys.exit()
-
-
-def load_image(name, colorkey=None):
-    """Функция загрузки изображения"""
-    fullname = os.path.join('data', name)
-    # если файл не существует, то выходим
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    if colorkey:
-        # image = image.convert()
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
 
 
 class Ball(pygame.sprite.Sprite):
@@ -103,6 +205,7 @@ class Ball(pygame.sprite.Sprite):
 
 class Border(pygame.sprite.Sprite):
     """Класс стенок"""
+
     # строго вертикальный или строго горизонтальный отрезок
     def __init__(self, x1, y1, x2, y2):
         super().__init__(all_sprites)
@@ -123,6 +226,11 @@ if __name__ == '__main__':
     pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
 
     all_sprites = pygame.sprite.Group()
+    houses = pygame.sprite.Group()
+    House_1(11, 85, houses)
+    House_2(147, 130, houses)
+    House_3(425, 132, houses)
+    Exit_1(9, 307, houses)
     horizontal_borders = pygame.sprite.Group()
     Border(3, 3, WIDTH - 3, 3)
     Border(3, HEIGHT - 3, WIDTH - 3, HEIGHT - 3)
