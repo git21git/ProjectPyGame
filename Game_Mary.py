@@ -15,6 +15,7 @@ screen_rect = (0, 0, WIDTH, HEIGHT)
 # Состояние игры
 score_time = 0
 score_coins = 0
+score_buckets = 0
 
 black = (0, 0, 0)
 white = (255, 255, 255)
@@ -25,10 +26,13 @@ tile_images = {
     'fire': load_image('fire.png', color_key=-1),
     'exit': load_image('stones.png'),
     'flag': load_image('flag.png', color_key=-1),
-    'coin': load_image('coin.png', color_key=-1)
+    'coin': load_image('coin.png', color_key=-1),
+    'bucket': load_image('bucket.png', color_key=-1),
 }
 player_image = load_image('snowman.png', color_key=-1)
-player_image_left = pygame.transform.flip(player_image, True, False)
+player_image_up = load_image('snowman_up.png', color_key=-1)
+player_image_down = load_image('snowman_down.png', color_key=-1)
+player_image_left = load_image('snowman_left.png', color_key=-1)
 
 
 def generate_level(level):
@@ -55,6 +59,9 @@ def generate_level(level):
             elif level[y][x] == '5':  # final_level_exit
                 Tile('empty', x, y)
                 finish = Finish(x, y)
+            elif level[y][x] == '0':  # final_level_exit
+                Tile('empty', x, y)
+                finish = Bucket(x, y)
     return new_player, x, y
 
 
@@ -79,11 +86,15 @@ class Player(pygame.sprite.Sprite):
         self.died = False
         self.add(player_group, all_sprites)
 
-    def move_up(self):
-        self.rect = self.rect.move(0, -50)
+    def move_up(self, num=1):
+        for i in range(num):
+            self.rect = self.rect.move(0, -50)
+        self.image = player_image_up
 
-    def move_down(self):
-        self.rect = self.rect.move(0, +50)
+    def move_down(self, num=1):
+        for i in range(num):
+            self.rect = self.rect.move(0, +50)
+        self.image = player_image_down
 
     def move_left(self, num=1):
         for i in range(num):
@@ -104,6 +115,16 @@ class Fire(pygame.sprite.Sprite):
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
 
         self.add(fire_group, all_sprites)
+
+
+class Bucket(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__()
+        self.image = tile_images['bucket']
+        self.rect = self.image.get_rect()
+        self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
+
+        self.add(bucket_group, all_sprites)
 
 
 #
@@ -275,8 +296,9 @@ exit_group = pygame.sprite.Group()
 finish_group = pygame.sprite.Group()
 star_group = pygame.sprite.Group()
 res_group = pygame.sprite.Group()
+bucket_group = pygame.sprite.Group()
 
-player, level_x, level_y = generate_level(load_level("level_1.txt"))
+player, level_x, level_y = generate_level(load_level("level_6.txt"))
 camera = Camera((level_x, level_y))
 running = True
 while running:
@@ -285,11 +307,13 @@ while running:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
             player.move_up()
             if pygame.sprite.spritecollideany(player, box_group):
-                player.move_down()
+                player.move_down(num=2)
+                player.move_up()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
             player.move_down()
             if pygame.sprite.spritecollideany(player, box_group):
-                player.move_up()
+                player.move_up(num=2)
+                player.move_down()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
             player.move_left()
             if pygame.sprite.spritecollideany(player, box_group):
@@ -314,16 +338,23 @@ while running:
     finish_group.draw(screen)
     exit_group.draw(screen)
     player_group.draw(screen)
+    bucket_group.draw(screen)
     if pygame.sprite.groupcollide(player_group, coins_group, False, True):
         score_coins += 1
+    if pygame.sprite.groupcollide(player_group, bucket_group, False, True):
+        score_buckets += 1
     if pygame.sprite.groupcollide(player_group, exit_group, False, False):
         res_of_play()
     if pygame.sprite.groupcollide(player_group, finish_group, False, False):
         res_of_play()
         running = False
-    if pygame.sprite.groupcollide(player_group, fire_group, False, False):
-        player.died = True
-        running = False
+    if pygame.sprite.groupcollide(player_group, fire_group, False, True):
+        if score_buckets < 1:
+            player.died = True
+            running = False
+        else:
+            score_buckets -= 1
+
     if player.died:
         res_of_play()
     pygame.display.flip()
