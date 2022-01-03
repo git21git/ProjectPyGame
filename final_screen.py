@@ -117,6 +117,3 @@ def final_game_screen():
         pygame.display.flip()
         clock.tick(FPS)
     terminate()
-
-
-final_game_screen()
