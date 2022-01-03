@@ -7,7 +7,6 @@ pygame.init()
 size = screen_width, screen_height = (645, 400)
 tile_size = 50
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Снеговик')  # Название приложения
 clock = pygame.time.Clock()
 fps = 60
 WIDTH, HEIGHT = 645, 400
@@ -16,9 +15,6 @@ screen_rect = (0, 0, WIDTH, HEIGHT)
 score_time = 0
 score_coins = 0
 score_buckets = 0
-
-black = (0, 0, 0)
-white = (255, 255, 255)
 
 tile_images = {
     'box': load_image('box.png'),
@@ -300,64 +296,67 @@ bucket_group = pygame.sprite.Group()
 
 player, level_x, level_y = generate_level(load_level("level_6.txt"))
 camera = Camera((level_x, level_y))
-running = True
-while running:
-    score_time += 1
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-            player.move_up()
-            if pygame.sprite.spritecollideany(player, box_group):
-                player.move_down(num=2)
+
+
+def game_snowman():
+    global score_time, score_buckets, score_coins
+    running = True
+    pygame.display.set_caption('Снеговик')
+    while running:
+        score_time += 1
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                 player.move_up()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-            player.move_down()
-            if pygame.sprite.spritecollideany(player, box_group):
-                player.move_up(num=2)
+                if pygame.sprite.spritecollideany(player, box_group):
+                    player.move_down(num=2)
+                    player.move_up()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
                 player.move_down()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            player.move_left()
-            if pygame.sprite.spritecollideany(player, box_group):
-                player.move_right(num=2)
+                if pygame.sprite.spritecollideany(player, box_group):
+                    player.move_up(num=2)
+                    player.move_down()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
                 player.move_left()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            player.move_right()
-            if pygame.sprite.spritecollideany(player, box_group):
-                player.move_left(num=2)
+                if pygame.sprite.spritecollideany(player, box_group):
+                    player.move_right(num=2)
+                    player.move_left()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 player.move_right()
+                if pygame.sprite.spritecollideany(player, box_group):
+                    player.move_left(num=2)
+                    player.move_right()
 
-        if event.type == pygame.QUIT:
-            terminate()
+            if event.type == pygame.QUIT:
+                terminate()
 
-    camera.update(player)
-    for sprite in all_sprites:
-        camera.apply(sprite)
-    screen.fill(pygame.Color(0, 0, 0))
-    tiles_group.draw(screen)
-    fire_group.draw(screen)
-    coins_group.draw(screen)
-    finish_group.draw(screen)
-    exit_group.draw(screen)
-    player_group.draw(screen)
-    bucket_group.draw(screen)
-    if pygame.sprite.groupcollide(player_group, coins_group, False, True):
-        score_coins += 1
-    if pygame.sprite.groupcollide(player_group, bucket_group, False, True):
-        score_buckets += 1
-    if pygame.sprite.groupcollide(player_group, exit_group, False, False):
-        res_of_play()
-    if pygame.sprite.groupcollide(player_group, finish_group, False, False):
-        res_of_play()
-        running = False
-    if pygame.sprite.groupcollide(player_group, fire_group, False, True):
-        if score_buckets < 1:
-            player.died = True
+        camera.update(player)
+        for sprite in all_sprites:
+            camera.apply(sprite)
+        screen.fill(pygame.Color(0, 0, 0))
+        tiles_group.draw(screen)
+        fire_group.draw(screen)
+        coins_group.draw(screen)
+        finish_group.draw(screen)
+        exit_group.draw(screen)
+        player_group.draw(screen)
+        bucket_group.draw(screen)
+        if pygame.sprite.groupcollide(player_group, coins_group, False, True):
+            score_coins += 1
+        if pygame.sprite.groupcollide(player_group, bucket_group, False, True):
+            score_buckets += 1
+        if pygame.sprite.groupcollide(player_group, exit_group, False, False):
+            res_of_play()
+        if pygame.sprite.groupcollide(player_group, finish_group, False, False):
+            res_of_play()
             running = False
-        else:
-            score_buckets -= 1
+        if pygame.sprite.groupcollide(player_group, fire_group, False, True):
+            if score_buckets < 1:
+                player.died = True
+                running = False
+            else:
+                score_buckets -= 1
 
-    if player.died:
-        res_of_play()
-    pygame.display.flip()
-    clock.tick(fps)
-
-terminate()
+        if player.died:
+            res_of_play()
+        pygame.display.flip()
+        clock.tick(fps)
