@@ -1,10 +1,11 @@
 import csv
+import random
 
 from main_functions import *
 
 pygame.init()
-FPS = 10
-gravity = 0.75
+FPS = 60
+gravity = 0.5
 WIDTH, HEIGHT = 645, 400
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
@@ -31,17 +32,15 @@ def draw_text(screen):
 class Particle(pygame.sprite.Sprite):
     """Класс для системы частиц(звездочек)"""
     fire = [load_image("star.png", color_key=-1)]
-    for scale in (5, 10, 20):
+    for scale in (10, 15, 25):
         fire.append(pygame.transform.scale(fire[0], (scale, scale)))
 
     def __init__(self, pos, dx, dy):
         super().__init__(star_group)
         self.image = random.choice(self.fire)
         self.rect = self.image.get_rect()
-
         self.velocity = [dx, dy]
         self.rect.x, self.rect.y = pos
-
         self.gravity = gravity
 
     def update(self):
@@ -54,7 +53,7 @@ class Particle(pygame.sprite.Sprite):
 
 def create_particles(position):
     """Функция для создания объектов класса частиц (звездочек)"""
-    numbers = range(-5, 6)
+    numbers = range(-6, 5)
     for _ in range(20):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
@@ -64,6 +63,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites)
+        self.count_iteration = 0
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
@@ -78,15 +78,17 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
     def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
+        self.count_iteration += 1
+        if self.count_iteration % 8 == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
 
 
 all_sprites = pygame.sprite.Group()
 star_group = pygame.sprite.Group()
 
 pygame.mouse.set_visible(False)
-for i in range(-300, 310, 50):
+for i in range(-300, 400, 50):
     create_particles((WIDTH // 2 + i, 0))
 pygame.display.set_caption('ДОПИСАТЬ НАЗВАНИЕ')  # Название приложения
 dragon = AnimatedSprite(load_image("dragon_sheet8x2.png", color_key=-1), 8, 2, 483, 299)
@@ -115,3 +117,6 @@ def final_game_screen():
         pygame.display.flip()
         clock.tick(FPS)
     terminate()
+
+
+final_game_screen()
