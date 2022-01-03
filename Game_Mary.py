@@ -1,8 +1,5 @@
-import os
 import random
-import sys
 
-import pygame
 from final_screen import final_game_screen
 from main_functions import *
 
@@ -88,15 +85,15 @@ class Player(pygame.sprite.Sprite):
     def move_down(self):
         self.rect = self.rect.move(0, +50)
 
-    def move_left(self):
-        self.rect = self.rect.move(-50, 0)
-        if self.image == player_image:
-            self.image = player_image_left
+    def move_left(self, num=1):
+        for i in range(num):
+            self.rect = self.rect.move(-50, 0)
+        self.image = player_image_left
 
-    def move_right(self):
-        self.rect = self.rect.move(+50, 0)
-        if self.image == player_image_left:
-            self.image = player_image
+    def move_right(self, num=1):
+        for i in range(num):
+            self.rect = self.rect.move(+50, 0)
+        self.image = player_image
 
 
 class Fire(pygame.sprite.Sprite):
@@ -296,11 +293,13 @@ while running:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
             player.move_left()
             if pygame.sprite.spritecollideany(player, box_group):
-                player.move_right()
+                player.move_right(num=2)
+                player.move_left()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
             player.move_right()
             if pygame.sprite.spritecollideany(player, box_group):
-                player.move_left()
+                player.move_left(num=2)
+                player.move_right()
 
         if event.type == pygame.QUIT:
             terminate()
