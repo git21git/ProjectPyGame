@@ -1,6 +1,3 @@
-import random
-
-import pygame
 from main_functions import *
 
 
