@@ -1,26 +1,7 @@
-import os
 import random
-import sys
 
 import pygame
-
-
-def load_image(name, colorkey=None):
-    """Функция загрузки изображения"""
-    fullname = os.path.join('data', name)
-    # если файл не существует, то выходим
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    if colorkey:
-        # image = image.convert()
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
+from main_functions import *
 
 
 def start_screen():
@@ -45,8 +26,8 @@ def start_screen():
 
 
 class House_1(pygame.sprite.Sprite):
-    image_small = load_image("house_1_small.png", colorkey=-1)
-    image_big = load_image("house_1_big.png", colorkey=-1)
+    image_small = load_image("house_1_small.png", color_key=-1)
+    image_big = load_image("house_1_big.png", color_key=-1)
 
     def __init__(self, x, y, *group):
         super().__init__(*group)
@@ -68,8 +49,8 @@ class House_1(pygame.sprite.Sprite):
 
 
 class House_2(pygame.sprite.Sprite):
-    image_small = load_image("house_2_small.png", colorkey=-1)
-    image_big = load_image("house_2_big.png", colorkey=-1)
+    image_small = load_image("house_2_small.png", color_key=-1)
+    image_big = load_image("house_2_big.png", color_key=-1)
 
     def __init__(self, x, y, *group):
         super().__init__(*group)
@@ -91,8 +72,8 @@ class House_2(pygame.sprite.Sprite):
 
 
 class House_3(pygame.sprite.Sprite):
-    image_small = load_image("house_3_small.png", colorkey=-1)
-    image_big = load_image("house_3_big.png", colorkey=-1)
+    image_small = load_image("house_3_small.png", color_key=-1)
+    image_big = load_image("house_3_big.png", color_key=-1)
 
     def __init__(self, x, y, *group):
         super().__init__(*group)
@@ -114,8 +95,8 @@ class House_3(pygame.sprite.Sprite):
 
 
 class Exit_1(pygame.sprite.Sprite):
-    image_small = load_image("exit_small.png", colorkey=-1)
-    image_big = load_image("exit_big.png", colorkey=-1)
+    image_small = load_image("exit_small.png", color_key=-1)
+    image_big = load_image("exit_big.png", color_key=-1)
 
     def __init__(self, x, y, *group):
         super().__init__(*group)
@@ -172,12 +153,6 @@ def finish_screen():
                 terminate()  # выход из игры
         pygame.display.flip()
         clock.tick(fps)
-
-
-def terminate():
-    """Функция выхода из игры"""
-    pygame.quit()
-    sys.exit()
 
 
 class Ball(pygame.sprite.Sprite):
