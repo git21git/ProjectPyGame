@@ -31,6 +31,7 @@ tile_images = {
     'coin': load_image('coin.png', color_key=-1)
 }
 player_image = load_image('snowman.png', color_key=-1)
+player_image_left = pygame.transform.flip(player_image, True, False)
 
 
 def generate_level(level):
@@ -89,9 +90,13 @@ class Player(pygame.sprite.Sprite):
 
     def move_left(self):
         self.rect = self.rect.move(-50, 0)
+        if self.image == player_image:
+            self.image = player_image_left
 
     def move_right(self):
         self.rect = self.rect.move(+50, 0)
+        if self.image == player_image_left:
+            self.image = player_image
 
 
 class Fire(pygame.sprite.Sprite):

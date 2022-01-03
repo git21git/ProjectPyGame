@@ -1,5 +1,5 @@
 from main_functions import *
-
+import random
 
 def start_screen():
     """Функция вызова(отображения) стартового экрана"""
