@@ -30,6 +30,12 @@ player_image_up = load_image('snowman_up.png', color_key=-1)
 player_image_down = load_image('snowman_down.png', color_key=-1)
 player_image_left = load_image('snowman_left.png', color_key=-1)
 
+levels = ['level_1.txt', 'level_2.txt', 'level_3.txt',
+          'level_4.txt', 'level_5.txt']
+random.shuffle(levels)
+levels.append('level_6.txt')
+max_level = min(len(levels) + 1, 5)
+
 
 def generate_level(level):
     new_player, x, y = None, None, None
@@ -59,6 +65,25 @@ def generate_level(level):
                 Tile('empty', x, y)
                 bucket = Bucket(x, y)
     return new_player, x, y
+
+
+def open_level(cur_level):
+    global camera, player, level_x, level_y
+
+    all_sprites.empty()
+    player_group.empty()
+    tiles_group.empty()
+    box_group.empty()
+    fire_group.empty()
+    coins_group.empty()
+    exit_group.empty()
+    finish_group.empty()
+    star_group.empty()
+    res_group.empty()
+    bucket_group.empty()
+
+    player, level_x, level_y = generate_level(load_level(levels[cur_level]))
+    camera = Camera((level_x, level_y))
 
 
 class Tile(pygame.sprite.Sprite):
@@ -179,6 +204,13 @@ class Camera:
         self.dy = -(target.rect.y + target.rect.h // 2 - screen_height // 2)
 
 
+def draw_mini_text(text, color, pos):
+    font = pygame.font.Font(None, 20)
+    x, y = pos
+    text = font.render(text, True, color)
+    screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
+
+
 def draw_text(intro_text):
     font = pygame.font.Font(None, 40)
     text_coord = 50
@@ -224,9 +256,10 @@ def create_particles(position):
 class AnimatedSprite(pygame.sprite.Sprite):
     """Класс анимации для спрайтов"""
 
-    def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(res_group)
+    def __init__(self, sheet, columns, rows, x, y, group, t):
+        super().__init__(group)
         self.count_iteration = 0
+        self.timer = t
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
@@ -242,7 +275,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
     def update(self):
         self.count_iteration += 1
-        if self.count_iteration % 5 == 0:
+        if self.count_iteration % self.timer == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
 
@@ -252,8 +285,8 @@ def res_of_play():
     if not player.died:
         for i in range(-300, 310, 50):
             create_particles((WIDTH // 2 + i, 0))
-        coins = AnimatedSprite(load_image("coins.png", color_key=-1), 3, 2, 155, 212)
-        clocks = AnimatedSprite(load_image("clocks.png", color_key=-1), 7, 2, 148, 130)
+        coins = AnimatedSprite(load_image("coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
+        clocks = AnimatedSprite(load_image("clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
         intro_text = ["Вы Выиграли!", "",
                       f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                       '', f"Монеты: {score_coins}"]
@@ -293,17 +326,34 @@ finish_group = pygame.sprite.Group()
 star_group = pygame.sprite.Group()
 res_group = pygame.sprite.Group()
 bucket_group = pygame.sprite.Group()
+menu_group = pygame.sprite.Group()
+# меню
+coins = AnimatedSprite(load_image("menu_coins.png", color_key=-1), 3, 2, 5, 0, menu_group, 9)
+clocks = AnimatedSprite(load_image("menu_clocks.png", color_key=-1), 7, 2, tile_size + 12, 0, menu_group, 6)
+waters = AnimatedSprite(load_image("menu_water.png", color_key=-1), 3, 2, tile_size * 2.9, 0, menu_group, 8)
+doors = AnimatedSprite(load_image("menu_doors.png", color_key=-1), 2, 1, WIDTH - tile_size * 1.3, 0, menu_group, 35)
 
-player, level_x, level_y = generate_level(load_level("level_6.txt"))
+level_completed = False
+
+cur_level = 0
+player, level_x, level_y = generate_level(load_level(levels[cur_level]))
 camera = Camera((level_x, level_y))
 
 
 def game_snowman():
-    global score_time, score_buckets, score_coins
+    global score_time, score_buckets, score_coins, level_completed, cur_level
     running = True
     pygame.display.set_caption('Снеговик')
     while running:
         score_time += 1
+        if level_completed:
+            cur_level += 1
+            if cur_level <= max_level:
+                open_level(cur_level)
+            else:
+                cur_level = max_level + 1
+            level_completed = False
+
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                 player.move_up()
@@ -332,7 +382,7 @@ def game_snowman():
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
-        screen.fill(pygame.Color(0, 0, 0))
+        screen.fill(pygame.Color(255, 100, 100))
         tiles_group.draw(screen)
         fire_group.draw(screen)
         coins_group.draw(screen)
@@ -340,12 +390,23 @@ def game_snowman():
         exit_group.draw(screen)
         player_group.draw(screen)
         bucket_group.draw(screen)
+
+        # Меню:
+        pygame.draw.rect(screen, (181, 146, 146), (0, 0, WIDTH, tile_size // 2))
+        draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size - 10, 12))
+        time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
+        draw_mini_text(f'  {time}', (255, 255, 255), (tile_size * 2, 12))
+        draw_mini_text(f'X {score_buckets}', (255, 255, 255), (tile_size * 3.75, 12))
+        draw_mini_text(f'X {cur_level}', (255, 255, 255), (WIDTH - tile_size // 2, 12))
+        menu_group.draw(screen)
+        menu_group.update()
+
         if pygame.sprite.groupcollide(player_group, coins_group, False, True):
             score_coins += 1
         if pygame.sprite.groupcollide(player_group, bucket_group, False, True):
             score_buckets += 1
         if pygame.sprite.groupcollide(player_group, exit_group, False, False):
-            res_of_play()
+            level_completed = True
         if pygame.sprite.groupcollide(player_group, finish_group, False, False):
             res_of_play()
             running = False
