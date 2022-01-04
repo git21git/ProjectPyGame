@@ -20,7 +20,7 @@ tile_images = {
     'box': load_image('box.png'),
     'empty': load_image('ice.png'),
     'fire': load_image('fire.png', color_key=-1),
-    'exit': load_image('stones.png'),
+    'exit': load_image('new_level.png', color_key=-1),
     'flag': load_image('flag.png', color_key=-1),
     'coin': load_image('coin.png', color_key=-1),
     'bucket': load_image('bucket.png', color_key=-1),
@@ -51,13 +51,13 @@ def generate_level(level):
                 coins = Coins(x, y)
             elif level[y][x] == '2':  # exit_next_level
                 Tile('empty', x, y)
-                coins = Exit(x, y)
+                exit = Exit(x, y)
             elif level[y][x] == '5':  # final_level_exit
                 Tile('empty', x, y)
                 finish = Finish(x, y)
-            elif level[y][x] == '0':  # final_level_exit
+            elif level[y][x] == '0':  # ведро с водой
                 Tile('empty', x, y)
-                finish = Bucket(x, y)
+                bucket = Bucket(x, y)
     return new_player, x, y
 
 
