@@ -117,3 +117,7 @@ def final_game_screen():
         pygame.display.flip()
         clock.tick(FPS)
     terminate()
+
+
+if __name__ == '__main__':
+    final_game_screen()

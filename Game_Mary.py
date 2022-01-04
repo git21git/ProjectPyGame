@@ -360,3 +360,7 @@ def game_snowman():
             res_of_play()
         pygame.display.flip()
         clock.tick(fps)
+
+
+if __name__ == '__main__':
+    game_snowman()

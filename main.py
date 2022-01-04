@@ -12,7 +12,7 @@ def start_screen():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()  # выход из игры
+                terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pressed = True
             if event.type == pygame.MOUSEBUTTONUP:
