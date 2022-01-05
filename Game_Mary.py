@@ -365,25 +365,26 @@ camera = Camera((level_x, level_y))
 
 def move(hero, direction):
     x, y = hero.pos
+    green_move = [".", '2', '5', '*', '0', '%']
     if direction == "up":
-        if y > 0 and level_map[y - 1][x] in [".", '2', '5', '*', '0']:
+        if y > 0 and level_map[y - 1][x] in green_move:
             hero.move(direction, x, y - 1)
-        elif y == 0 and level_map[y - 1][x] in [".", '2', '5', '*', '0']:
+        elif y == 0 and level_map[y - 1][x] in green_move:
             hero.move(direction, x, level_y)
     elif direction == "down":
-        if y < level_y and level_map[y + 1][x] in [".", '2', '5', '*', '0']:
+        if y < level_y and level_map[y + 1][x] in green_move:
             hero.move(direction, x, y + 1)
-        elif y == level_y and level_map[0][x] in [".", '2', '5', '*', '0']:
+        elif y == level_y and level_map[0][x] in green_move:
             hero.move(direction, x, 0)
     elif direction == "left":
-        if x > 0 and level_map[y][x - 1] in [".", '2', '5', '*', '0']:
+        if x > 0 and level_map[y][x - 1] in green_move:
             hero.move(direction, x - 1, y)
-        elif x == 0 and level_map[y][level_x] in [".", '2', '5', '*', '0']:
+        elif x == 0 and level_map[y][level_x] in green_move:
             hero.move(direction, level_x, y)
     elif direction == "right":
-        if x < level_x and level_map[y][x + 1] in [".", '2', '5', '*', '0']:
+        if x < level_x and level_map[y][x + 1] in green_move:
             hero.move(direction, x + 1, y)
-        elif x == level_x and level_map[y][0] in [".", '2', '5', '*', '0']:
+        elif x == level_x and level_map[y][0] in green_move:
             hero.move(direction, 0, y)
 
 
