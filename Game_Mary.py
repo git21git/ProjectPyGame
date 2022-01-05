@@ -34,7 +34,7 @@ levels = ['snow/level_1.txt', 'snow/level_2.txt', 'snow/level_3.txt',
           'snow/level_4.txt', 'snow/level_5.txt']
 random.shuffle(levels)
 levels.append('snow/level_6.txt')
-max_level = min(len(levels) + 1, 5)
+max_level = len(levels)
 
 
 def generate_level(level):
@@ -349,10 +349,7 @@ def game_snowman():
         score_time += 1
         if level_completed:
             cur_level += 1
-            if cur_level <= max_level:
-                open_level(cur_level)
-            else:
-                cur_level = max_level + 1
+            open_level(cur_level)
             level_completed = False
 
         for event in pygame.event.get():

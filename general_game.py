@@ -1,6 +1,7 @@
 import os
 import pygame
 import sys
+from Game_Mary import draw_text
 from final_screen import final_game_screen
 from main_functions import *
 
@@ -12,20 +13,29 @@ FPS = 60
 tile_images = {
     'wall': load_image('mario/box.png'),
     'empty': load_image('mario/grass.png'),
-    'bg': load_image('mario/bg.png'),
     'exit': load_image('mario/new_level.png', color_key=-1),
     'princess': load_image('mario/princess_l.png', color_key=-1),
-    'menu': load_image('mario/menu.png')
+    'menu': load_image('mario/menu.png'),
+    'menu_coins': load_image("mario/menu_coins.png", color_key=-1),
+    'menu_clocks': load_image("mario/menu_clocks.png", color_key=-1),
+    'menu_door': load_image("mario/block.png", color_key=-1)
+
 }
 player_image = load_image('mario/mario.png', color_key=-1)
 
 tile_size = tile_width = tile_height = 50
-level_completed = False
+level_completed = True
 cur_level = 0
+score_coins = 0
 score_time = 0
-levels = ['mario/level_1.txt', 'mario/level_2.txt', 'mario/level_3.txt']
-n_lvl = ['Начало', 'Так держать', 'Спаси принцессу!']
-max_level = min(len(levels) + 1, 5)
+levels = ['mario/level_1.txt', 'mario/level_2.txt', 'mario/level_3.txt',
+          'mario/level_4.txt', 'mario/level_5.txt', 'mario/level_6.txt']
+f_lvl = [load_image('mario/sky_1.png'), load_image('mario/sky_2.png'),
+         load_image('mario/sky_3.png'), load_image('mario/sky_4.png'),
+         load_image('mario/sky_5.png'), load_image('mario/sky_6.png')]  # словарь фонов для уровней
+n_lvl = ['Начало', 'Так держать', 'Продолжай!',
+         'Бонусный уровень', 'Black forrest', 'Спаси принцессу!']  # Названия для уровней
+max_level = len(levels)
 
 
 def draw_mini_text(text, color, pos):
@@ -50,9 +60,12 @@ def generate_level(level):
                 new_player = Player(x, y)
                 level[y][x] = "."
             elif level[y][x] == '2':
-                exit = Exit(x, y)
+                Exit(x, y)
             elif level[y][x] == 'P':
-                princess = Princess(x, y)
+                Princess(x, y)
+            elif level[y][x] == '*':
+                AnimatedSprite(load_image("mario/menu_coins.png", color_key=-1), 3, 2,
+                               tile_size * x + tile_size // 4, tile_size * y + tile_size // 4, coins_group, 9)
     return new_player, x, y
 
 
@@ -118,6 +131,7 @@ class Player(Sprite):
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 15, tile_height * pos_y + 5)
         self.pos = (pos_x, pos_y)
+        self.died = False
 
     def move(self, x, y):
         self.pos = (x, y)
@@ -135,13 +149,44 @@ class Exit(Sprite):
 
 class Princess(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__(exit_group)
+        super().__init__(princess_group)
         self.image = tile_images['princess']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
 
 
-player = None
+def res_of_play():
+    pygame.mouse.set_visible(False)
+    if not hero.died:
+        # for i in range(-300, 310, 50):
+        #    create_particles((WIDTH // 2 + i, 0))
+        # coins = AnimatedSprite(load_image("mario/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
+        # clocks = AnimatedSprite(load_image("mario/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
+        intro_text = ["Вы Выиграли, Принцесса спасена!", "",
+                      f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
+                      '', f"Монеты: {score_coins}"]
+        fon = pygame.transform.scale(load_image('final.png'), size)
+        screen.blit(fon, (0, 0))
+        draw_text(intro_text)
+    else:
+        intro_text = ['']
+        fon = load_image('mario/gameover.png', color_key=-1)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                final_game_screen()
+        screen.blit(fon, (0, 0))
+        draw_text(intro_text)
+        res_group.draw(screen)
+        res_group.update()
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 running = True
 clock = pygame.time.Clock()
 sprite_group = SpriteGroup()
@@ -149,14 +194,20 @@ hero_group = SpriteGroup()
 exit_group = SpriteGroup()
 princess_group = SpriteGroup()
 menu_group = SpriteGroup()
-clocks = AnimatedSprite(load_image("mario/menu_clocks.png", color_key=-1), 7, 2, tile_size, 0, menu_group, 6)
+coins_group = SpriteGroup()
+res_group = SpriteGroup()
+# анимация панели меню
+coins = AnimatedSprite(tile_images['menu_coins'], 3, 2, 5, 0, menu_group, 9)
+clocks = AnimatedSprite(tile_images['menu_clocks'], 7, 2, tile_size * 1.9, 0, menu_group, 6)
+door = AnimatedSprite(tile_images['menu_door'], 1, 1, tile_size * 11.2, 0, menu_group, 6)
 
 
 def start_screen():
+    pygame.display.set_caption('Марио')  # Название приложения
     intro_text = ['НУЖНО СДЕЛАТЬ МЕНЮ)))', "",
                   "Герой двигается",
                   "Карта на месте", '', 'Press any to start game']
-    fon = pygame.transform.scale(load_image(r'mario\bg.png'), screen_size)
+    fon = pygame.transform.scale(load_image(r'mario\fon.png'), screen_size)
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
     text_coord = 50
@@ -183,29 +234,28 @@ def start_screen():
 def move(hero, direction):
     x, y = hero.pos
     if direction == "up":
-        if y > 0 and level_map[y - 1][x] in [".", '2', 'P']:
+        if y > 0 and level_map[y - 1][x] in [".", '2', 'P', '*']:
             hero.move(x, y - 1)
     elif direction == "down":
-        if y < max_y - 1 and level_map[y + 1][x] in [".", '2', 'P']:
+        if y < max_y and level_map[y + 1][x] in [".", '2', 'P', '*']:
             hero.move(x, y + 1)
     elif direction == "left":
-        if x > 0 and level_map[y][x - 1] in [".", '2', 'P']:
+        if x > 0 and level_map[y][x - 1] in [".", '2', 'P', '*']:
             hero.move(x - 1, y)
     elif direction == "right":
-        if x < max_x - 1 and level_map[y][x + 1] in [".", '2', 'P']:
+        if x < max_x and level_map[y][x + 1] in [".", '2', 'P', '*']:
             hero.move(x + 1, y)
 
 
-def open_level(cur_level):
+def open_level(level):
     global hero, max_x, max_y, level_map
 
     sprite_group.empty()
     hero_group.empty()
     exit_group.empty()
     princess_group.empty()
-    menu_group.empty()
-
-    level_map = load_level(levels[cur_level])
+    coins_group.empty()
+    level_map = load_level(levels[level - 1])
     hero, max_x, max_y = generate_level(level_map)
 
 
@@ -214,17 +264,14 @@ hero, max_x, max_y = generate_level(level_map)
 
 
 def game_mario():
-    global running, score_time, level_completed, cur_level
+    global running, score_time, level_completed, cur_level, score_coins
     start_screen()
 
     while running:
         score_time += 1
         if level_completed:
             cur_level += 1
-            if cur_level <= max_level:
-                open_level(cur_level)
-            else:
-                cur_level = max_level + 1
+            open_level(cur_level)
             level_completed = False
 
         for event in pygame.event.get():
@@ -239,23 +286,30 @@ def game_mario():
                     move(hero, "left")
                 elif event.key == pygame.K_RIGHT:
                     move(hero, "right")
-        fon = pygame.transform.scale(tile_images['bg'], (WIDTH, HEIGHT))  # картинка
+        fon = pygame.transform.scale(f_lvl[cur_level - 1], (WIDTH, HEIGHT))  # картинка
         screen.blit(fon, (0, 0))
         sprite_group.draw(screen)
         hero_group.draw(screen)
         exit_group.draw(screen)
         princess_group.draw(screen)
+        coins_group.draw(screen)
+        coins_group.update()
         clock.tick(FPS)
         # Меню:
-        # draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size - 10, 12))  # монетки
+        draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size + 5, 15))  # монетки
         time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
-        draw_mini_text(f'  {time}', (255, 255, 255), (tile_size * 2, 15))
-        draw_mini_text(f'LEVEL {cur_level + 1}: {n_lvl[cur_level]}', (255, 255, 255), (tile_size * 7, 15))
-        draw_mini_text(f'X {cur_level}', (255, 255, 255), (WIDTH - tile_size // 2, 12))
+        draw_mini_text(f'  {time}', (255, 255, 255), (tile_size * 3, 15))
+        draw_mini_text(f'LEVEL {cur_level}: {n_lvl[cur_level - 1]}', (255, 255, 255), (tile_size * 7, 15))
+        draw_mini_text(f'X {cur_level - 1}', (255, 255, 255), (WIDTH - tile_size // 2, 15))
         menu_group.draw(screen)
         menu_group.update()
+        if pygame.sprite.groupcollide(hero_group, coins_group, False, True):
+            score_coins += 1
         if pygame.sprite.groupcollide(hero_group, exit_group, False, False):
             level_completed = True
+        if pygame.sprite.groupcollide(hero_group, princess_group, False, False):
+            res_of_play()
+            running = False
         pygame.display.flip()
     pygame.quit()
 
