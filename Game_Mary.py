@@ -205,6 +205,7 @@ class Camera:
 
 
 def draw_mini_text(text, color, pos):
+    """Рисование текста маленького размера для меню (снеговик)"""
     font = pygame.font.Font(None, 20)
     x, y = pos
     text = font.render(text, True, color)
