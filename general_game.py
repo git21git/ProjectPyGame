@@ -239,7 +239,8 @@ def game_mario():
                     move(hero, "left")
                 elif event.key == pygame.K_RIGHT:
                     move(hero, "right")
-        screen.blit(tile_images['bg'], (0, 0))
+        fon = pygame.transform.scale(tile_images['bg'], (WIDTH, HEIGHT))  # картинка
+        screen.blit(fon, (0, 0))
         sprite_group.draw(screen)
         hero_group.draw(screen)
         exit_group.draw(screen)

@@ -1,12 +1,8 @@
-import random
 import os
-import sys
 import pygame
-
-
-def terminate():
-    pygame.quit()
-    sys.exit()
+import random
+import sys
+from main_functions import terminate
 
 
 def start_screen():
@@ -229,11 +225,11 @@ Border(-10, -1, -10, HEIGHT + 1)
 Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
 
 pygame.init()
-start_screen()
-build_level()
 
 
-def main():
+def game_forrest():
+    start_screen()
+    build_level()
     fps = 85
     score_time = 0
     clock = pygame.time.Clock()
@@ -278,4 +274,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    game_forrest()

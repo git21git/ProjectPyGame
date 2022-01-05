@@ -1,6 +1,7 @@
+from Game_Alex import game_forrest
 from Game_Mary import game_snowman
-from general_game import game_mario
 from final_screen import final_game_screen
+from general_game import game_mario
 from main_functions import *
 
 
@@ -24,7 +25,7 @@ def start_screen():
                     elif 'house_2' in lst:
                         game_mario()
                     elif 'house_1' in lst:
-                        pass
+                        game_forrest()
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                 houses.update(pygame.mouse)
         screen.blit(fon, (0, 0))
