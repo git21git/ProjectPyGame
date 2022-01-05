@@ -72,8 +72,8 @@ class Houses(pygame.sprite.Sprite):
                 self.image = Houses.house_2_big
             elif self.name == 'house_3':
                 self.image = Houses.house_3_big
-            self.rect.x = self.pos[0] - 2
-            self.rect.y = self.pos[1] - 2
+            self.rect.x = self.pos[0] - 4
+            self.rect.y = self.pos[1] - 3
         else:
             if self.name == 'exit':
                 self.image = Houses.exit_small
