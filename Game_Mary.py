@@ -34,7 +34,10 @@ levels = ['snow/level_1.txt', 'snow/level_2.txt', 'snow/level_3.txt',
           'snow/level_4.txt', 'snow/level_5.txt']
 random.shuffle(levels)
 levels.append('snow/level_6.txt')
+n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так держать', 'snow/level_4.txt': 'Продолжай!',
+         'snow/level_3.txt': 'Бонусный уровень', 'snow/level_5.txt': 'Black forrest!'}  # Названия для уровней
 max_level = len(levels)
+white = (255, 255, 255)
 
 
 def generate_level(level):
@@ -67,7 +70,7 @@ def generate_level(level):
     return new_player, x, y
 
 
-def open_level(cur_level):
+def open_level(level):
     global camera, player, level_x, level_y, level_map
 
     all_sprites.empty()
@@ -82,7 +85,7 @@ def open_level(cur_level):
     res_group.empty()
     bucket_group.empty()
 
-    level_map = load_level(levels[cur_level])
+    level_map = load_level(levels[level])
     player, level_x, level_y = generate_level(level_map)
     camera = Camera((level_x, level_y))
 
@@ -400,16 +403,16 @@ def game_snowman():
             level_completed = False
 
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+            keys = pygame.key.get_pressed()
+            if keys:
+                if keys[pygame.K_UP]:
                     move(player, "up")
-                elif event.key == pygame.K_DOWN:
+                elif keys[pygame.K_DOWN]:
                     move(player, "down")
-                elif event.key == pygame.K_LEFT:
+                elif keys[pygame.K_LEFT]:
                     move(player, "left")
-                elif event.key == pygame.K_RIGHT:
+                elif keys[pygame.K_RIGHT]:
                     move(player, "right")
-
             if event.type == pygame.QUIT:
                 terminate()
 
@@ -427,11 +430,13 @@ def game_snowman():
 
         # Меню:
         pygame.draw.rect(screen, (181, 146, 146), (0, 0, WIDTH, tile_size // 2))
-        draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size - 10, 12))
+        draw_mini_text(f'X {score_coins}', white, (tile_size - 10, 12))
         time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
-        draw_mini_text(f'  {time}', (255, 255, 255), (tile_size * 2, 12))
-        draw_mini_text(f'X {score_buckets}', (255, 255, 255), (tile_size * 3.75, 12))
-        draw_mini_text(f'X {cur_level}', (255, 255, 255), (WIDTH - tile_size // 2, 12))
+        draw_mini_text(f'  {time}', white, (tile_size * 2, 12))
+        draw_mini_text(f'X {score_buckets}', white, (tile_size * 3.75, 12))
+        text = n_lvl[levels[cur_level]]
+        draw_mini_text(f'LEVEL {cur_level + 1}: {text}', white, (tile_size * 7, 12))
+        draw_mini_text(f'X {cur_level}', white, (WIDTH - tile_size // 2, 12))
         menu_group.draw(screen)
         menu_group.update()
 
