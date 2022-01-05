@@ -17,23 +17,23 @@ score_coins = 0
 score_buckets = 0
 
 tile_images = {
-    'box': load_image('box.png'),
-    'empty': load_image('ice.png'),
-    'fire': load_image('fire.png', color_key=-1),
-    'exit': load_image('new_level.png', color_key=-1),
-    'flag': load_image('flag.png', color_key=-1),
-    'coin': load_image('coin.png', color_key=-1),
-    'bucket': load_image('bucket.png', color_key=-1),
+    'box': load_image('snow/box.png'),
+    'empty': load_image('snow/ice.png'),
+    'fire': load_image('snow/fire.png', color_key=-1),
+    'exit': load_image('snow/new_level.png', color_key=-1),
+    'flag': load_image('snow/flag.png', color_key=-1),
+    'coin': load_image('snow/coin.png', color_key=-1),
+    'bucket': load_image('snow/bucket.png', color_key=-1),
 }
-player_image = load_image('snowman.png', color_key=-1)
-player_image_up = load_image('snowman_up.png', color_key=-1)
-player_image_down = load_image('snowman_down.png', color_key=-1)
-player_image_left = load_image('snowman_left.png', color_key=-1)
+player_image = load_image('snow/snowman.png', color_key=-1)
+player_image_up = load_image('snow/snowman_up.png', color_key=-1)
+player_image_down = load_image('snow/snowman_down.png', color_key=-1)
+player_image_left = load_image('snow/snowman_left.png', color_key=-1)
 
-levels = ['level_1.txt', 'level_2.txt', 'level_3.txt',
-          'level_4.txt', 'level_5.txt']
+levels = ['snow/level_1.txt', 'snow/level_2.txt', 'snow/level_3.txt',
+          'snow/level_4.txt', 'snow/level_5.txt']
 random.shuffle(levels)
-levels.append('level_6.txt')
+levels.append('snow/level_6.txt')
 max_level = min(len(levels) + 1, 5)
 
 
@@ -285,8 +285,8 @@ def res_of_play():
     if not player.died:
         for i in range(-300, 310, 50):
             create_particles((WIDTH // 2 + i, 0))
-        coins = AnimatedSprite(load_image("coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
-        clocks = AnimatedSprite(load_image("clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
+        coins = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
+        clocks = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
         intro_text = ["Вы Выиграли!", "",
                       f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                       '', f"Монеты: {score_coins}"]
@@ -295,7 +295,7 @@ def res_of_play():
         draw_text(intro_text)
     else:
         intro_text = ['']
-        fon = load_image('gameover.png', color_key=-1)
+        fon = load_image('snow/gameover.png', color_key=-1)
 
     while True:
         for event in pygame.event.get():
@@ -328,10 +328,10 @@ res_group = pygame.sprite.Group()
 bucket_group = pygame.sprite.Group()
 menu_group = pygame.sprite.Group()
 # меню
-coins = AnimatedSprite(load_image("menu_coins.png", color_key=-1), 3, 2, 5, 0, menu_group, 9)
-clocks = AnimatedSprite(load_image("menu_clocks.png", color_key=-1), 7, 2, tile_size + 12, 0, menu_group, 6)
-waters = AnimatedSprite(load_image("menu_water.png", color_key=-1), 3, 2, tile_size * 2.9, 0, menu_group, 8)
-doors = AnimatedSprite(load_image("menu_doors.png", color_key=-1), 2, 1, WIDTH - tile_size * 1.3, 0, menu_group, 35)
+coins = AnimatedSprite(load_image("snow/menu_coins.png", color_key=-1), 3, 2, 5, 0, menu_group, 9)
+clocks = AnimatedSprite(load_image("snow/menu_clocks.png", color_key=-1), 7, 2, tile_size + 12, 0, menu_group, 6)
+waters = AnimatedSprite(load_image("snow/menu_water.png", color_key=-1), 3, 2, tile_size * 2.9, 0, menu_group, 8)
+doors = AnimatedSprite(load_image("snow/menu_doors.png", color_key=-1), 2, 1, WIDTH - tile_size * 1.3, 0, menu_group, 35)
 
 level_completed = False
 
