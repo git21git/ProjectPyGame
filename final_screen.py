@@ -15,11 +15,11 @@ screen_rect = (0, 0, WIDTH, HEIGHT)
 
 def draw_text(screen):
     text = []
-    with open('data/text.csv', encoding="utf8") as csvfile:
+    with open('data/final/text.csv', encoding="utf8") as csvfile:
         reader = csv.reader(csvfile, delimiter=';', quotechar='"')
         for index, row in enumerate(reader):
             text.append(*row)
-    font = pygame.font.Font('data/seguisbi.ttf', 22)
+    font = pygame.font.Font('data/final/seguisbi.ttf', 22)
     text_coord = 26
     for line in text:
         text = font.render(line, True, pygame.Color('white'))
@@ -91,10 +91,10 @@ pygame.mouse.set_visible(False)
 for i in range(-300, 400, 50):
     create_particles((WIDTH // 2 + i, 0))
 pygame.display.set_caption('ДОПИСАТЬ НАЗВАНИЕ')  # Название приложения
-dragon = AnimatedSprite(load_image("dragon_sheet8x2.png", color_key=-1), 8, 2, 483, 299)
-girl = AnimatedSprite(load_image("girl.png", color_key=-1), 6, 1, 295, 299)
-bird = AnimatedSprite(load_image("bird.png", color_key=-1), 6, 2, 15, 1)
-boy = AnimatedSprite(load_image("boy.png", color_key=-1), 5, 4, 20, 250)
+dragon = AnimatedSprite(load_image("final/dragon_sheet8x2.png", color_key=-1), 8, 2, 483, 299)
+girl = AnimatedSprite(load_image("final/girl.png", color_key=-1), 6, 1, 295, 299)
+bird = AnimatedSprite(load_image("final/bird.png", color_key=-1), 6, 2, 15, 1)
+boy = AnimatedSprite(load_image("final/boy.png", color_key=-1), 5, 4, 20, 250)
 
 
 def final_game_screen():

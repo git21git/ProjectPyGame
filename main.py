@@ -5,7 +5,7 @@ from main_functions import *
 
 def start_screen():
     """Функция вызова(отображения) стартового экрана"""
-    fon = pygame.transform.scale(load_image('start.png'), (WIDTH, HEIGHT))  # стартовая картинка
+    fon = pygame.transform.scale(load_image('start/start.png'), (WIDTH, HEIGHT))  # стартовая картинка
     screen.blit(fon, (0, 0))
     houses.update()
     pressed = False
@@ -35,14 +35,14 @@ def start_screen():
 
 
 class Houses(pygame.sprite.Sprite):
-    house_1_small = load_image("house_1_small.png", color_key=-1)
-    house_1_big = load_image("house_1_big.png", color_key=-1)
-    house_2_small = load_image("house_2_small.png", color_key=-1)
-    house_2_big = load_image("house_2_big.png", color_key=-1)
-    house_3_small = load_image("house_3_small.png", color_key=-1)
-    house_3_big = load_image("house_3_big.png", color_key=-1)
-    exit_small = load_image("exit_small.png", color_key=-1)
-    exit_big = load_image("exit_big.png", color_key=-1)
+    house_1_small = load_image("start/house_1_small.png", color_key=-1)
+    house_1_big = load_image("start/house_1_big.png", color_key=-1)
+    house_2_small = load_image("start/house_2_small.png", color_key=-1)
+    house_2_big = load_image("start/house_2_big.png", color_key=-1)
+    house_3_small = load_image("start/house_3_small.png", color_key=-1)
+    house_3_big = load_image("start/house_3_big.png", color_key=-1)
+    exit_small = load_image("start/exit_small.png", color_key=-1)
+    exit_big = load_image("start/exit_big.png", color_key=-1)
 
     def __init__(self, x, y, group, name):
         super().__init__(group)
