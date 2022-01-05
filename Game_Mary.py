@@ -68,7 +68,7 @@ def generate_level(level):
 
 
 def open_level(cur_level):
-    global camera, player, level_x, level_y
+    global camera, player, level_x, level_y, level_map
 
     all_sprites.empty()
     player_group.empty()
@@ -82,13 +82,34 @@ def open_level(cur_level):
     res_group.empty()
     bucket_group.empty()
 
-    player, level_x, level_y = generate_level(load_level(levels[cur_level]))
+    level_map = load_level(levels[cur_level])
+    player, level_x, level_y = generate_level(level_map)
     camera = Camera((level_x, level_y))
 
 
-class Tile(pygame.sprite.Sprite):
+class SpriteGroup(pygame.sprite.Group):
+
+    def __init__(self):
+        super().__init__()
+
+    def get_event(self, event):
+        for sprite in self:
+            sprite.get_event(event)
+
+
+class Sprite(pygame.sprite.Sprite):
+
+    def __init__(self, group):
+        super().__init__(group)
+        self.rect = None
+
+    def get_event(self, event):
+        pass
+
+
+class Tile(Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tiles_group, all_sprites)
+        super().__init__(all_sprites)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
@@ -98,39 +119,38 @@ class Tile(pygame.sprite.Sprite):
             self.add(tiles_group, all_sprites)
 
 
-class Player(pygame.sprite.Sprite):
+class Player(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(player_group)
         self.image = player_image
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
         self.died = False
+        self.pos = [pos_x, pos_y]
         self.add(player_group, all_sprites)
 
-    def move_up(self, num=1):
-        for i in range(num):
+    def move(self, direction, x, y):
+        if direction == 'up':
             self.rect = self.rect.move(0, -50)
-        self.image = player_image_up
-
-    def move_down(self, num=1):
-        for i in range(num):
+            self.pos[1] = y
+            self.image = player_image_up
+        elif direction == 'down':
             self.rect = self.rect.move(0, +50)
-        self.image = player_image_down
-
-    def move_left(self, num=1):
-        for i in range(num):
+            self.pos[1] = y
+            self.image = player_image_down
+        elif direction == 'left':
             self.rect = self.rect.move(-50, 0)
-        self.image = player_image_left
-
-    def move_right(self, num=1):
-        for i in range(num):
+            self.pos[0] = x
+            self.image = player_image_left
+        elif direction == 'right':
             self.rect = self.rect.move(+50, 0)
-        self.image = player_image
+            self.pos[0] = x
+            self.image = player_image
 
 
-class Fire(pygame.sprite.Sprite):
+class Fire(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(fire_group)
         self.image = tile_images['fire']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -138,9 +158,9 @@ class Fire(pygame.sprite.Sprite):
         self.add(fire_group, all_sprites)
 
 
-class Bucket(pygame.sprite.Sprite):
+class Bucket(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(bucket_group)
         self.image = tile_images['bucket']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -149,9 +169,9 @@ class Bucket(pygame.sprite.Sprite):
 
 
 #
-class Finish(pygame.sprite.Sprite):
+class Finish(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(finish_group)
         self.image = tile_images['flag']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -159,9 +179,9 @@ class Finish(pygame.sprite.Sprite):
 
 
 #
-class Exit(pygame.sprite.Sprite):
+class Exit(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(exit_group)
         self.image = tile_images['exit']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -169,9 +189,9 @@ class Exit(pygame.sprite.Sprite):
 
 
 # монетки
-class Coins(pygame.sprite.Sprite):
+class Coins(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(coins_group)
         self.image = tile_images['coin']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -223,7 +243,7 @@ def draw_text(intro_text):
         screen.blit(text, (text_x, text_y))
 
 
-class Particle(pygame.sprite.Sprite):
+class Particle(Sprite):
     """Класс для системы частиц(звездочек)"""
     fire = [load_image("star.png", color_key=-1)]
     for scale in (5, 10, 20):
@@ -254,7 +274,7 @@ def create_particles(position):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
-class AnimatedSprite(pygame.sprite.Sprite):
+class AnimatedSprite(Sprite):
     """Класс анимации для спрайтов"""
 
     def __init__(self, sheet, columns, rows, x, y, group, t):
@@ -332,13 +352,39 @@ menu_group = pygame.sprite.Group()
 coins = AnimatedSprite(load_image("snow/menu_coins.png", color_key=-1), 3, 2, 5, 0, menu_group, 9)
 clocks = AnimatedSprite(load_image("snow/menu_clocks.png", color_key=-1), 7, 2, tile_size + 12, 0, menu_group, 6)
 waters = AnimatedSprite(load_image("snow/menu_water.png", color_key=-1), 3, 2, tile_size * 2.9, 0, menu_group, 8)
-doors = AnimatedSprite(load_image("snow/menu_doors.png", color_key=-1), 2, 1, WIDTH - tile_size * 1.3, 0, menu_group, 35)
+doors = AnimatedSprite(load_image("snow/menu_doors.png", color_key=-1), 2, 1, WIDTH - tile_size * 1.3, 0, menu_group,
+                       35)
 
 level_completed = False
 
 cur_level = 0
-player, level_x, level_y = generate_level(load_level(levels[cur_level]))
+level_map = load_level(levels[cur_level])
+player, level_x, level_y = generate_level(level_map)
 camera = Camera((level_x, level_y))
+
+
+def move(hero, direction):
+    x, y = hero.pos
+    if direction == "up":
+        if y > 0 and level_map[y - 1][x] in [".", '2', '5', '*', '0']:
+            hero.move(direction, x, y - 1)
+        elif y == 0 and level_map[y - 1][x] in [".", '2', '5', '*', '0']:
+            hero.move(direction, x, level_y)
+    elif direction == "down":
+        if y < level_y and level_map[y + 1][x] in [".", '2', '5', '*', '0']:
+            hero.move(direction, x, y + 1)
+        elif y == level_y and level_map[0][x] in [".", '2', '5', '*', '0']:
+            hero.move(direction, x, 0)
+    elif direction == "left":
+        if x > 0 and level_map[y][x - 1] in [".", '2', '5', '*', '0']:
+            hero.move(direction, x - 1, y)
+        elif x == 0 and level_map[y][level_x] in [".", '2', '5', '*', '0']:
+            hero.move(direction, level_x, y)
+    elif direction == "right":
+        if x < level_x and level_map[y][x + 1] in [".", '2', '5', '*', '0']:
+            hero.move(direction, x + 1, y)
+        elif x == level_x and level_map[y][0] in [".", '2', '5', '*', '0']:
+            hero.move(direction, 0, y)
 
 
 def game_snowman():
@@ -353,26 +399,15 @@ def game_snowman():
             level_completed = False
 
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                player.move_up()
-                if pygame.sprite.spritecollideany(player, box_group):
-                    player.move_down(num=2)
-                    player.move_up()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                player.move_down()
-                if pygame.sprite.spritecollideany(player, box_group):
-                    player.move_up(num=2)
-                    player.move_down()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                player.move_left()
-                if pygame.sprite.spritecollideany(player, box_group):
-                    player.move_right(num=2)
-                    player.move_left()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                player.move_right()
-                if pygame.sprite.spritecollideany(player, box_group):
-                    player.move_left(num=2)
-                    player.move_right()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    move(player, "up")
+                elif event.key == pygame.K_DOWN:
+                    move(player, "down")
+                elif event.key == pygame.K_LEFT:
+                    move(player, "left")
+                elif event.key == pygame.K_RIGHT:
+                    move(player, "right")
 
             if event.type == pygame.QUIT:
                 terminate()
