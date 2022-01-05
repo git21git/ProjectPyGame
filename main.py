@@ -1,4 +1,5 @@
 from Game_Mary import game_snowman
+from general_game import game_mario
 from final_screen import final_game_screen
 from main_functions import *
 
@@ -6,8 +7,6 @@ from main_functions import *
 def start_screen():
     """Функция вызова(отображения) стартового экрана"""
     fon = pygame.transform.scale(load_image('start/start.png'), (WIDTH, HEIGHT))  # стартовая картинка
-    screen.blit(fon, (0, 0))
-    houses.update()
     pressed = False
     while True:
         for event in pygame.event.get():
@@ -23,7 +22,7 @@ def start_screen():
                     elif 'house_3' in lst:
                         game_snowman()
                     elif 'house_2' in lst:
-                        pass
+                        game_mario()
                     elif 'house_1' in lst:
                         pass
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
