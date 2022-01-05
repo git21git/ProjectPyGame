@@ -18,13 +18,13 @@ def start_screen():
             if event.type == pygame.MOUSEBUTTONUP:
                 if pressed:
                     lst = [house.check_push(pygame.mouse) for house in houses]
-                    if 'Exit' in lst:
+                    if 'exit' in lst:
                         terminate()
-                    elif 'Mary' in lst:
+                    elif 'house_3' in lst:
                         game_snowman()
-                    elif 'Other' in lst:
+                    elif 'house_2' in lst:
                         pass
-                    elif 'Alex' in lst:
+                    elif 'house_1' in lst:
                         pass
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                 houses.update(pygame.mouse)
@@ -34,95 +34,28 @@ def start_screen():
         clock.tick(fps)
 
 
-class House_1(pygame.sprite.Sprite):
-    image_small = load_image("house_1_small.png", color_key=-1)
-    image_big = load_image("house_1_big.png", color_key=-1)
+class Houses(pygame.sprite.Sprite):
+    house_1_small = load_image("house_1_small.png", color_key=-1)
+    house_1_big = load_image("house_1_big.png", color_key=-1)
+    house_2_small = load_image("house_2_small.png", color_key=-1)
+    house_2_big = load_image("house_2_big.png", color_key=-1)
+    house_3_small = load_image("house_3_small.png", color_key=-1)
+    house_3_big = load_image("house_3_big.png", color_key=-1)
+    exit_small = load_image("exit_small.png", color_key=-1)
+    exit_big = load_image("exit_big.png", color_key=-1)
 
-    def __init__(self, x, y, *group):
-        super().__init__(*group)
-        self.image = House_1.image_small
-        self.rect = self.image_small.get_rect()
-        self.pos = [x, y]
-        self.rect.x = x
-        self.rect.y = y
-
-    def update(self, *args):
-        if args and self.rect.collidepoint(args[0].get_pos()):
-            self.image = self.image_big
-            self.rect.x = self.pos[0] - 2
-            self.rect.y = self.pos[1] - 2
-        else:
-            self.image = self.image_small
-            self.rect.x = self.pos[0]
-            self.rect.y = self.pos[1]
-
-    def check_push(self, *args):
-        if args and self.rect.collidepoint(args[0].get_pos()):
-            return 'Alex'
-
-
-class House_2(pygame.sprite.Sprite):
-    image_small = load_image("house_2_small.png", color_key=-1)
-    image_big = load_image("house_2_big.png", color_key=-1)
-
-    def __init__(self, x, y, *group):
-        super().__init__(*group)
-        self.image = House_1.image_small
-        self.rect = self.image_small.get_rect()
-        self.pos = [x, y]
-        self.rect.x = x
-        self.rect.y = y
-
-    def update(self, *args):
-        if args and self.rect.collidepoint(args[0].get_pos()):
-            self.image = self.image_big
-            self.rect.x = self.pos[0] - 2
-            self.rect.y = self.pos[1] - 2
-        else:
-            self.image = self.image_small
-            self.rect.x = self.pos[0]
-            self.rect.y = self.pos[1]
-
-    def check_push(self, *args):
-        if args and self.rect.collidepoint(args[0].get_pos()):
-            return 'Other'
-
-
-class House_3(pygame.sprite.Sprite):
-    image_small = load_image("house_3_small.png", color_key=-1)
-    image_big = load_image("house_3_big.png", color_key=-1)
-
-    def __init__(self, x, y, *group):
-        super().__init__(*group)
-        self.image = House_1.image_small
-        self.rect = self.image_small.get_rect()
-        self.pos = [x, y]
-        self.rect.x = x
-        self.rect.y = y
-
-    def update(self, *args):
-        if args and self.rect.collidepoint(args[0].get_pos()):
-            self.image = self.image_big
-            self.rect.x = self.pos[0] - 2
-            self.rect.y = self.pos[1] - 2
-        else:
-            self.image = self.image_small
-            self.rect.x = self.pos[0]
-            self.rect.y = self.pos[1]
-
-    def check_push(self, *args):
-        if args and self.rect.collidepoint(args[0].get_pos()):
-            return 'Mary'
-
-
-class Exit_1(pygame.sprite.Sprite):
-    image_small = load_image("exit_small.png", color_key=-1)
-    image_big = load_image("exit_big.png", color_key=-1)
-
-    def __init__(self, x, y, *group):
-        super().__init__(*group)
-        self.image = Exit_1.image_small
-        self.rect = self.image_small.get_rect()
+    def __init__(self, x, y, group, name):
+        super().__init__(group)
+        if name == 'exit':
+            self.image = Houses.exit_small
+        elif name == 'house_1':
+            self.image = Houses.house_1_small
+        elif name == 'house_2':
+            self.image = Houses.house_2_small
+        elif name == 'house_3':
+            self.image = Houses.house_3_small
+        self.name = name
+        self.rect = self.image.get_rect()
         self.pos = [x, y]
         self.rect.x = x
         self.rect.y = y
@@ -131,17 +64,31 @@ class Exit_1(pygame.sprite.Sprite):
         if args and args[-1] == 1 and self.rect.collidepoint(args[0].get_pos()):
             terminate()
         if args and self.rect.collidepoint(args[0].get_pos()):
-            self.image = self.image_big
+            if self.name == 'exit':
+                self.image = Houses.exit_big
+            elif self.name == 'house_1':
+                self.image = Houses.house_1_big
+            elif self.name == 'house_2':
+                self.image = Houses.house_2_big
+            elif self.name == 'house_3':
+                self.image = Houses.house_3_big
             self.rect.x = self.pos[0] - 2
             self.rect.y = self.pos[1] - 2
         else:
-            self.image = self.image_small
+            if self.name == 'exit':
+                self.image = Houses.exit_small
+            elif self.name == 'house_1':
+                self.image = Houses.house_1_small
+            elif self.name == 'house_2':
+                self.image = Houses.house_2_small
+            elif self.name == 'house_3':
+                self.image = Houses.house_3_small
             self.rect.x = self.pos[0]
             self.rect.y = self.pos[1]
 
     def check_push(self, *args):
         if args and self.rect.collidepoint(args[0].get_pos()):
-            return 'Exit'
+            return self.name
 
 
 if __name__ == '__main__':
@@ -152,10 +99,10 @@ if __name__ == '__main__':
     pygame.mouse.set_visible(True)
     all_sprites = pygame.sprite.Group()
     houses = pygame.sprite.Group()
-    House_1(11, 85, houses)
-    House_2(147, 130, houses)
-    House_3(425, 132, houses)
-    Exit_1(9, 307, houses)
+    Houses(11, 85, houses, 'house_1')
+    Houses(147, 130, houses, 'house_2')
+    Houses(425, 132, houses, 'house_3')
+    Houses(9, 307, houses, 'exit')
 
     fps = 60
     clock = pygame.time.Clock()
