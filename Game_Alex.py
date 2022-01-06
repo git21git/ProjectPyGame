@@ -16,7 +16,7 @@ def start_screen():
 
     fon = pygame.transform.scale(load_image('font_start.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font("SilafejiraRegular.otf", 60)
+    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 60)
     text_coord = 60
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color(0, 85, 0))
@@ -45,8 +45,8 @@ def start_screen():
 
 def build_level():
     for i in range(13):
-        print(i)
         Tile("block", i, 7)
+    Mushroom()
 
 
 def load_image(name, colorkey=None):
@@ -66,9 +66,46 @@ def load_image(name, colorkey=None):
     return image
 
 
+def draw_mini_text(text, color, pos):
+
+    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 20)
+    x, y = pos
+    text = font.render(text, True, color)
+    screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
+
+
+class AnimatedSprite(pygame.sprite.Sprite):
+    """Класс анимации для спрайтов"""
+
+    def __init__(self, sheet, columns, rows, x, y, group, t):
+        super().__init__(group)
+        self.count_iteration = 0
+        self.timer = t
+        self.frames = []
+        self.group = group
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
+
+    def update(self):
+        self.count_iteration += 1
+        if self.count_iteration % self.timer == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+
+
 size = WIDTH, HEIGHT = 645, 400
 tile_size = 50
 score_coins = 0
+XP = 5
 onGround = False
 jump = False
 screen = pygame.display.set_mode(size)
@@ -77,13 +114,22 @@ clock = pygame.time.Clock()
 
 tile_images = {
     'block': load_image('block.png'),
-    'mushroom': load_image('Mushroom_1_pos.png', colorkey=-1),
     'eye': load_image('Eye_1_pos.png', colorkey=-1),
     'hero': load_image("Hero3_1_pos.png", colorkey=-1)
 }
 
 coin_images = [load_image("Coin_1_pos.png", colorkey=-1), load_image("Coin_2_pos.png", colorkey=-1),
                load_image("Coin_3_pos.png", colorkey=-1), load_image("Coin_4_pos.png", colorkey=-1)]
+
+mushroom_images = [load_image("Mushroom_1_pos.png", colorkey=-1), load_image("Mushroom_2_pos.png", colorkey=-1),
+                   load_image("Mushroom_3_pos.png", colorkey=-1), load_image("Mushroom_4_pos.png", colorkey=-1),
+                   load_image("Mushroom_5_pos.png", colorkey=-1), load_image("Mushroom_6_pos.png", colorkey=-1),
+                   load_image("Mushroom_7_pos.png", colorkey=-1), load_image("Mushroom_8_pos.png", colorkey=-1)]
+
+mushroom_reverse_images = [load_image("m_Mushroom_1_pos.png", colorkey=-1), load_image("m_Mushroom_2_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_3_pos.png", colorkey=-1), load_image("m_Mushroom_4_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_5_pos.png", colorkey=-1), load_image("m_Mushroom_6_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_7_pos.png", colorkey=-1), load_image("m_Mushroom_8_pos.png", colorkey=-1)]
 
 # hero_image = load_image("Hero3_1_pos.png", colorkey=-1)
 
@@ -94,8 +140,11 @@ player_group = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 block_group = pygame.sprite.Group()
 coins_group = pygame.sprite.Group()
+menu_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
 flying_eye = pygame.sprite.Group()
+coins = AnimatedSprite(load_image("Coin-Sheet.png", colorkey=-1), 4, 1, 5, 0, menu_group, 9)
+clocks = AnimatedSprite(load_image("clocks.png", colorkey=-1), 7, 2, tile_size + 12, 0, menu_group, 6)
 
 
 # exit_group = pygame.sprite.Group()
@@ -127,8 +176,6 @@ class Tile(pygame.sprite.Sprite):
 
         if tile_type == 'block':  # Нужно для того, чтобы монетки, падая, пропадали
             self.add(block_group, tiles_group, all_sprites)
-        elif tile_type == 'mushroom':
-            self.add(mushroom_group, tiles_group, all_sprites)
         elif tile_type == 'eye':
             self.add(flying_eye, tiles_group, all_sprites)
         else:
@@ -158,7 +205,6 @@ class Player(pygame.sprite.Sprite):
         onGround = True
 
     def move_down(self):  # Потом обязательно удалю :3
-        print(self.rect.y)
         self.rect = self.rect.move(0, +50)
 
     def move_left(self):
@@ -173,6 +219,11 @@ class Player(pygame.sprite.Sprite):
         else:
             global onGround
             onGround = False
+
+    def update(self, *args):
+        if pygame.sprite.spritecollideany(self, mushroom_group):
+            global XP
+            XP = 0
 
 
 class Coins(pygame.sprite.Sprite):
@@ -200,8 +251,46 @@ class Coins(pygame.sprite.Sprite):
             score_coins += 1
             self.kill()
 
-        if pygame.sprite.spritecollideany(self, block_group):
+        if pygame.sprite.spritecollideany(self, mushroom_group):
             self.kill()
+
+        if pygame.sprite.spritecollideany(self, block_group):
+            global XP
+            XP -= 1
+            self.kill()
+
+
+class Mushroom(pygame.sprite.Sprite):
+
+    def __init__(self):
+        super().__init__()
+        self.image = mushroom_images[0]
+        # self.image = AnimatedSprite("Mushroom_sheet.png", 8, 1, self.rect.x, HEIGHT - 100, mushroom_group, 10)
+        self.rect = self.image.get_rect()
+        self.rect.x = 1
+        self.rect.y = HEIGHT - 85
+        self.counter = 0
+        self.add(mushroom_group, all_sprites)
+
+    def update(self, *args):
+        # self.rect = self.rect.move(+1, 0)
+        if self.rect.x % 10 == 0:
+            self.counter += 1
+            if self.image in mushroom_images:
+                self.image = mushroom_images[self.counter % 8]
+            elif self.image in mushroom_reverse_images:
+                self.image = mushroom_reverse_images[self.counter % 8]
+        if self.rect.x < WIDTH - 25 and self.image in mushroom_images:
+            self.rect = self.rect.move(+1, 0)
+        elif self.rect.x < WIDTH - 25 and self.image in mushroom_reverse_images and self.rect.x > 0:
+            self.rect = self.rect.move(-1, 0)
+        elif self.rect.x >= WIDTH - tile_size and self.image in mushroom_images:
+            self.image = mushroom_reverse_images[self.counter % 8]
+            self.rect = self.rect.move(-1, 0)
+        elif self.rect.x <= 0 and self.image in mushroom_reverse_images:
+            self.image = mushroom_images[self.counter % 8]
+            self.rect = self.rect.move(+1, 0)
+
 
 
 class Border(pygame.sprite.Sprite):
@@ -268,10 +357,16 @@ def main():
         if score_time % 100 == 0:  # Можно использовать как уровень сложности, типо число поменять на 50, если уровень
             #  действительно сложный!
             Coins()
-            print(score_time)
+            # print(score_time)
 
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
+        pygame.draw.rect(screen, (0, 0, 0), (0, 0, WIDTH, tile_size // 2))
+        draw_mini_text(f'x {score_coins}', (184, 15, 10), (tile_size, 12))
+        time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
+        draw_mini_text(f'  {time}', (184, 15, 10), (tile_size * 3, 12))
+        draw_mini_text(f'x  {XP}', (184, 15, 10), (tile_size * 5, 12))
+        menu_group.draw(screen)
         pygame.display.flip()
         clock.tick(fps)
     pygame.quit()
