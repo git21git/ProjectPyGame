@@ -1,7 +1,9 @@
 import os
-import pygame
 import random
 import sys
+
+import pygame
+
 from main_functions import terminate
 
 
@@ -63,11 +65,16 @@ def load_image(name, colorkey=None):
 
 
 def draw_mini_text(text, color, pos):
-
-    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 20)
+    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 25)
     x, y = pos
     text = font.render(text, True, color)
     screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
+
+
+def res_of_play():
+    """Здесь можно выводить результат игры"""
+    if player.died:
+        print('Game over')
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -122,10 +129,14 @@ mushroom_images = [load_image("Mushroom_1_pos.png", colorkey=-1), load_image("Mu
                    load_image("Mushroom_5_pos.png", colorkey=-1), load_image("Mushroom_6_pos.png", colorkey=-1),
                    load_image("Mushroom_7_pos.png", colorkey=-1), load_image("Mushroom_8_pos.png", colorkey=-1)]
 
-mushroom_reverse_images = [load_image("m_Mushroom_1_pos.png", colorkey=-1), load_image("m_Mushroom_2_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_3_pos.png", colorkey=-1), load_image("m_Mushroom_4_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_5_pos.png", colorkey=-1), load_image("m_Mushroom_6_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_7_pos.png", colorkey=-1), load_image("m_Mushroom_8_pos.png", colorkey=-1)]
+mushroom_reverse_images = [load_image("m_Mushroom_1_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_2_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_3_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_4_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_5_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_6_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_7_pos.png", colorkey=-1),
+                           load_image("m_Mushroom_8_pos.png", colorkey=-1)]
 
 # hero_image = load_image("Hero3_1_pos.png", colorkey=-1)
 
@@ -139,8 +150,8 @@ coins_group = pygame.sprite.Group()
 menu_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
 flying_eye = pygame.sprite.Group()
-coins = AnimatedSprite(load_image("Coin-Sheet.png", colorkey=-1), 4, 1, 5, 0, menu_group, 9)
-clocks = AnimatedSprite(load_image("clocks.png", colorkey=-1), 7, 2, tile_size + 12, 0, menu_group, 6)
+coins = AnimatedSprite(load_image("Coin-Sheet.png", colorkey=-1), 4, 1, 6, 0, menu_group, 10)
+clocks = AnimatedSprite(load_image("clocks.png", colorkey=-1), 7, 2, tile_size * 2, 0, menu_group, 10)
 
 
 # exit_group = pygame.sprite.Group()
@@ -242,18 +253,18 @@ class Coins(pygame.sprite.Sprite):
             self.counter += 1
             self.image = pygame.transform.scale(coin_images[self.counter % 4], (16, 16))
 
-        if pygame.sprite.spritecollideany(self, player_group):
+        """if pygame.sprite.spritecollideany(self, player_group):
             global score_coins
             score_coins += 1
-            self.kill()
+            self.kill()"""
 
-        if pygame.sprite.spritecollideany(self, mushroom_group):
-            self.kill()
+        """if pygame.sprite.spritecollideany(self, mushroom_group):
+            self.kill()"""
 
-        if pygame.sprite.spritecollideany(self, block_group):
+        """if pygame.sprite.spritecollideany(self, block_group):
             global XP
             XP -= 1
-            self.kill()
+            self.kill()"""
 
 
 class Mushroom(pygame.sprite.Sprite):
@@ -288,7 +299,6 @@ class Mushroom(pygame.sprite.Sprite):
             self.rect = self.rect.move(+1, 0)
 
 
-
 class Border(pygame.sprite.Sprite):
     # строго вертикальный или строго горизонтальный отрезок
     def __init__(self, x1, y1, x2, y2):
@@ -317,6 +327,7 @@ pygame.init()
 
 
 def game_forrest():
+    global score_coins, XP
     start_screen()
     build_level()
     fps = 85
@@ -337,14 +348,15 @@ def game_forrest():
             #     player.move_down()
             #     if pygame.sprite.spritecollideany(player, horizontal_borders):
             #         player.move_up()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                player.move_left()
-                if pygame.sprite.spritecollideany(player, vertical_borders):
-                    player.move_right()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                player.move_right()
-                if pygame.sprite.spritecollideany(player, vertical_borders):
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
                     player.move_left()
+                    if pygame.sprite.spritecollideany(player, vertical_borders):
+                        player.move_right()
+                if event.key == pygame.K_RIGHT:
+                    player.move_right()
+                    if pygame.sprite.spritecollideany(player, vertical_borders):
+                        player.move_left()
         if jump:  # Если герой не достиг конечной точки прыжка
             player.move_up()
         if onGround:  # Если герой не земле
@@ -358,12 +370,26 @@ def game_forrest():
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
         pygame.draw.rect(screen, (0, 0, 0), (0, 0, WIDTH, tile_size // 2))
-        draw_mini_text(f'x {score_coins}', (184, 15, 10), (tile_size, 12))
+        draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12))
         time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
         draw_mini_text(f'  {time}', (184, 15, 10), (tile_size * 3, 12))
-        draw_mini_text(f'x  {XP}', (184, 15, 10), (tile_size * 5, 12))
+        draw_mini_text(f'X  {XP}', (184, 15, 10), (tile_size * 5, 12))
         menu_group.draw(screen)
+        menu_group.update()
         pygame.display.flip()
+        if pygame.sprite.groupcollide(player_group, coins_group, False, True):
+            score_coins += 1
+        if pygame.sprite.groupcollide(coins_group, mushroom_group, True, False):
+            """Гриб съел монетку, можно что-то придумать"""
+            pass
+        if pygame.sprite.groupcollide(coins_group, block_group, True, False):
+            XP -= 1
+        if pygame.sprite.groupcollide(player_group, mushroom_group, False, False):
+            """Игрок столкнулся с грибом, игрок умер,
+            игра заканчивается. Вызывается функция результатов игры"""
+            # running = False
+            player.died = True
+            res_of_play()
         clock.tick(fps)
     pygame.quit()
 
