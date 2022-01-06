@@ -39,6 +39,8 @@ n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так дер�
 max_level = len(levels)
 white = (255, 255, 255)
 
+motion = 'STOP'  # по умолчанию — стоим, флаг для непрерывного движения
+
 
 def generate_level(level):
     new_player, x, y = None, None, None
@@ -133,20 +135,21 @@ class Player(Sprite):
         self.add(player_group, all_sprites)
 
     def move(self, direction, x, y):
+        speed = tile_size
         if direction == 'up':
-            self.rect = self.rect.move(0, -50)
+            self.rect = self.rect.move(0, -speed)
             self.pos[1] = y
             self.image = player_image_up
         elif direction == 'down':
-            self.rect = self.rect.move(0, +50)
+            self.rect = self.rect.move(0, +speed)
             self.pos[1] = y
             self.image = player_image_down
         elif direction == 'left':
-            self.rect = self.rect.move(-50, 0)
+            self.rect = self.rect.move(-speed, 0)
             self.pos[0] = x
             self.image = player_image_left
         elif direction == 'right':
-            self.rect = self.rect.move(+50, 0)
+            self.rect = self.rect.move(+speed, 0)
             self.pos[0] = x
             self.image = player_image
 
@@ -392,30 +395,43 @@ def move(hero, direction):
 
 
 def game_snowman():
-    global score_time, score_buckets, score_coins, level_completed, cur_level
+    global score_time, score_buckets, score_coins, level_completed, cur_level, motion
     running = True
     pygame.display.set_caption('Снеговик')
     while running:
+        go_1 = False
         score_time += 1
         if level_completed:
             cur_level += 1
             open_level(cur_level)
             level_completed = False
-
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
-            if keys:
+            if keys[pygame.K_UP] or keys[pygame.K_DOWN] or \
+                    keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
                 if keys[pygame.K_UP]:
-                    move(player, "up")
+                    motion = 'up'
                 elif keys[pygame.K_DOWN]:
-                    move(player, "down")
+                    motion = 'down'
                 elif keys[pygame.K_LEFT]:
-                    move(player, "left")
+                    motion = 'left'
                 elif keys[pygame.K_RIGHT]:
-                    move(player, "right")
+                    motion = 'right'
+                go_1 = True  # Исключаем переход через 1 клетку при однократном нажатии
+                move(player, motion)
+            if event.type == pygame.KEYUP:
+                motion = 'STOP'
             if event.type == pygame.QUIT:
                 terminate()
-
+        if score_time % 12 == 0 and not go_1:  # реализация плавного непрерывного движения
+            if motion == 'left':
+                move(player, motion)
+            elif motion == 'right':
+                move(player, motion)
+            elif motion == 'up':
+                move(player, motion)
+            elif motion == 'down':
+                move(player, motion)
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
