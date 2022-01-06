@@ -111,6 +111,7 @@ score_coins = 0
 XP = 5
 onGround = False
 jump = False
+motion = 'STOP'  # по умолчанию — стоим, флаг для непрерывного движения
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Black Forrest')
 clock = pygame.time.Clock()
@@ -327,7 +328,7 @@ pygame.init()
 
 
 def game_forrest():
-    global score_coins, XP
+    global score_coins, XP, motion
     start_screen()
     build_level()
     fps = 85
@@ -335,6 +336,7 @@ def game_forrest():
     clock = pygame.time.Clock()
     running = True
     while running:
+        go_1 = False
         score_time += 1
         all_sprites.update()
         for event in pygame.event.get():
@@ -350,13 +352,19 @@ def game_forrest():
             #         player.move_up()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
+                    go_1 = True
+                    motion = 'left'
                     player.move_left()
                     if pygame.sprite.spritecollideany(player, vertical_borders):
                         player.move_right()
                 if event.key == pygame.K_RIGHT:
+                    go_1 = True
+                    motion = 'right'
                     player.move_right()
                     if pygame.sprite.spritecollideany(player, vertical_borders):
                         player.move_left()
+            if event.type == pygame.KEYUP:
+                motion = 'stop'
         if jump:  # Если герой не достиг конечной точки прыжка
             player.move_up()
         if onGround:  # Если герой не земле
@@ -366,6 +374,14 @@ def game_forrest():
             #  действительно сложный!
             Coins()
             # print(score_time)
+        if score_time % 10 == 0 and not go_1:  # реализация плавного непрерывного движения
+            if motion == 'left':
+                player.move_left()
+            elif motion == 'right':
+                player.move_right()
+            """Можно добавить проверку на выход за границу экрана
+            if pygame.sprite.spritecollideany(player, vertical_borders):  # это не работает((
+                motion = 'stop'  """
 
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
