@@ -34,8 +34,9 @@ levels = ['snow/level_1.txt', 'snow/level_2.txt', 'snow/level_3.txt',
           'snow/level_4.txt', 'snow/level_5.txt']
 random.shuffle(levels)
 levels.append('snow/level_6.txt')
-n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так держать', 'snow/level_4.txt': 'Продолжай!',
-         'snow/level_3.txt': 'Бонусный уровень', 'snow/level_5.txt': 'Black forrest!'}  # Названия для уровней
+n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так держать',
+         'snow/level_4.txt': 'Продолжай!', 'snow/level_3.txt': 'Бонусный уровень',
+         'snow/level_5.txt': 'Black forrest!', 'snow/level_6.txt': 'Финал!'}  # Названия для уровней
 max_level = len(levels)
 white = (255, 255, 255)
 
@@ -56,19 +57,19 @@ def generate_level(level):
                 level[y][x] = "."
             elif level[y][x] == '%':  # огонь
                 Tile('empty', x, y)
-                fire = Fire(x, y)
+                _ = Fire(x, y)
             elif level[y][x] == '*':  # coins
                 Tile('empty', x, y)
-                coins = Coins(x, y)
+                _ = Coins(x, y)
             elif level[y][x] == '2':  # exit_next_level
                 Tile('empty', x, y)
-                exit = Exit(x, y)
+                _ = Exit(x, y)
             elif level[y][x] == '5':  # final_level_exit
                 Tile('empty', x, y)
-                finish = Finish(x, y)
+                _ = Finish(x, y)
             elif level[y][x] == '0':  # ведро с водой
                 Tile('empty', x, y)
-                bucket = Bucket(x, y)
+                _ = Bucket(x, y)
     return new_player, x, y
 
 
@@ -312,8 +313,8 @@ def res_of_play():
     if not player.died:
         for i in range(-300, 310, 50):
             create_particles((WIDTH // 2 + i, 0))
-        coins = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
-        clocks = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
+        _ = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
+        _ = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
         intro_text = ["Вы Выиграли!", "",
                       f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                       '', f"Монеты: {score_coins}"]
@@ -399,7 +400,6 @@ def game_snowman():
     running = True
     pygame.display.set_caption('Снеговик')
     while running:
-        go_1 = False
         score_time += 1
         if level_completed:
             cur_level += 1
@@ -417,21 +417,9 @@ def game_snowman():
                     motion = 'left'
                 elif keys[pygame.K_RIGHT]:
                     motion = 'right'
-                go_1 = True  # Исключаем переход через 1 клетку при однократном нажатии
                 move(player, motion)
-            if event.type == pygame.KEYUP:
-                motion = 'STOP'
             if event.type == pygame.QUIT:
                 terminate()
-        if score_time % 12 == 0 and not go_1:  # реализация плавного непрерывного движения
-            if motion == 'left':
-                move(player, motion)
-            elif motion == 'right':
-                move(player, motion)
-            elif motion == 'up':
-                move(player, motion)
-            elif motion == 'down':
-                move(player, motion)
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
