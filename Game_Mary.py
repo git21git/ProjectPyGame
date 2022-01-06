@@ -34,7 +34,12 @@ levels = ['snow/level_1.txt', 'snow/level_2.txt', 'snow/level_3.txt',
           'snow/level_4.txt', 'snow/level_5.txt']
 random.shuffle(levels)
 levels.append('snow/level_6.txt')
-max_level = min(len(levels) + 1, 5)
+n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так держать', 'snow/level_4.txt': 'Продолжай!',
+         'snow/level_3.txt': 'Бонусный уровень', 'snow/level_5.txt': 'Black forrest!'}  # Названия для уровней
+max_level = len(levels)
+white = (255, 255, 255)
+
+motion = 'STOP'  # по умолчанию — стоим, флаг для непрерывного движения
 
 
 def generate_level(level):
@@ -67,8 +72,8 @@ def generate_level(level):
     return new_player, x, y
 
 
-def open_level(cur_level):
-    global camera, player, level_x, level_y
+def open_level(level):
+    global camera, player, level_x, level_y, level_map
 
     all_sprites.empty()
     player_group.empty()
@@ -82,13 +87,34 @@ def open_level(cur_level):
     res_group.empty()
     bucket_group.empty()
 
-    player, level_x, level_y = generate_level(load_level(levels[cur_level]))
+    level_map = load_level(levels[level])
+    player, level_x, level_y = generate_level(level_map)
     camera = Camera((level_x, level_y))
 
 
-class Tile(pygame.sprite.Sprite):
+class SpriteGroup(pygame.sprite.Group):
+
+    def __init__(self):
+        super().__init__()
+
+    def get_event(self, event):
+        for sprite in self:
+            sprite.get_event(event)
+
+
+class Sprite(pygame.sprite.Sprite):
+
+    def __init__(self, group):
+        super().__init__(group)
+        self.rect = None
+
+    def get_event(self, event):
+        pass
+
+
+class Tile(Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tiles_group, all_sprites)
+        super().__init__(all_sprites)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(tile_size * pos_x, tile_size * pos_y)
 
@@ -98,39 +124,39 @@ class Tile(pygame.sprite.Sprite):
             self.add(tiles_group, all_sprites)
 
 
-class Player(pygame.sprite.Sprite):
+class Player(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(player_group)
         self.image = player_image
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
         self.died = False
+        self.pos = [pos_x, pos_y]
         self.add(player_group, all_sprites)
 
-    def move_up(self, num=1):
-        for i in range(num):
-            self.rect = self.rect.move(0, -50)
-        self.image = player_image_up
+    def move(self, direction, x, y):
+        speed = tile_size
+        if direction == 'up':
+            self.rect = self.rect.move(0, -speed)
+            self.pos[1] = y
+            self.image = player_image_up
+        elif direction == 'down':
+            self.rect = self.rect.move(0, +speed)
+            self.pos[1] = y
+            self.image = player_image_down
+        elif direction == 'left':
+            self.rect = self.rect.move(-speed, 0)
+            self.pos[0] = x
+            self.image = player_image_left
+        elif direction == 'right':
+            self.rect = self.rect.move(+speed, 0)
+            self.pos[0] = x
+            self.image = player_image
 
-    def move_down(self, num=1):
-        for i in range(num):
-            self.rect = self.rect.move(0, +50)
-        self.image = player_image_down
 
-    def move_left(self, num=1):
-        for i in range(num):
-            self.rect = self.rect.move(-50, 0)
-        self.image = player_image_left
-
-    def move_right(self, num=1):
-        for i in range(num):
-            self.rect = self.rect.move(+50, 0)
-        self.image = player_image
-
-
-class Fire(pygame.sprite.Sprite):
+class Fire(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(fire_group)
         self.image = tile_images['fire']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -138,9 +164,9 @@ class Fire(pygame.sprite.Sprite):
         self.add(fire_group, all_sprites)
 
 
-class Bucket(pygame.sprite.Sprite):
+class Bucket(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(bucket_group)
         self.image = tile_images['bucket']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -149,9 +175,9 @@ class Bucket(pygame.sprite.Sprite):
 
 
 #
-class Finish(pygame.sprite.Sprite):
+class Finish(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(finish_group)
         self.image = tile_images['flag']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -159,9 +185,9 @@ class Finish(pygame.sprite.Sprite):
 
 
 #
-class Exit(pygame.sprite.Sprite):
+class Exit(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(exit_group)
         self.image = tile_images['exit']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -169,9 +195,9 @@ class Exit(pygame.sprite.Sprite):
 
 
 # монетки
-class Coins(pygame.sprite.Sprite):
+class Coins(Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__()
+        super().__init__(coins_group)
         self.image = tile_images['coin']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
@@ -223,7 +249,7 @@ def draw_text(intro_text):
         screen.blit(text, (text_x, text_y))
 
 
-class Particle(pygame.sprite.Sprite):
+class Particle(Sprite):
     """Класс для системы частиц(звездочек)"""
     fire = [load_image("star.png", color_key=-1)]
     for scale in (5, 10, 20):
@@ -254,7 +280,7 @@ def create_particles(position):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
-class AnimatedSprite(pygame.sprite.Sprite):
+class AnimatedSprite(Sprite):
     """Класс анимации для спрайтов"""
 
     def __init__(self, sheet, columns, rows, x, y, group, t):
@@ -332,54 +358,80 @@ menu_group = pygame.sprite.Group()
 coins = AnimatedSprite(load_image("snow/menu_coins.png", color_key=-1), 3, 2, 5, 0, menu_group, 9)
 clocks = AnimatedSprite(load_image("snow/menu_clocks.png", color_key=-1), 7, 2, tile_size + 12, 0, menu_group, 6)
 waters = AnimatedSprite(load_image("snow/menu_water.png", color_key=-1), 3, 2, tile_size * 2.9, 0, menu_group, 8)
-doors = AnimatedSprite(load_image("snow/menu_doors.png", color_key=-1), 2, 1, WIDTH - tile_size * 1.3, 0, menu_group, 35)
+doors = AnimatedSprite(load_image("snow/menu_doors.png", color_key=-1), 2, 1, WIDTH - tile_size * 1.3, 0, menu_group,
+                       35)
 
 level_completed = False
 
 cur_level = 0
-player, level_x, level_y = generate_level(load_level(levels[cur_level]))
+level_map = load_level(levels[cur_level])
+player, level_x, level_y = generate_level(level_map)
 camera = Camera((level_x, level_y))
 
 
+def move(hero, direction):
+    x, y = hero.pos
+    green_move = [".", '2', '5', '*', '0', '%']
+    if direction == "up":
+        if y > 0 and level_map[y - 1][x] in green_move:
+            hero.move(direction, x, y - 1)
+        elif y == 0 and level_map[y - 1][x] in green_move:
+            hero.move(direction, x, level_y)
+    elif direction == "down":
+        if y < level_y and level_map[y + 1][x] in green_move:
+            hero.move(direction, x, y + 1)
+        elif y == level_y and level_map[0][x] in green_move:
+            hero.move(direction, x, 0)
+    elif direction == "left":
+        if x > 0 and level_map[y][x - 1] in green_move:
+            hero.move(direction, x - 1, y)
+        elif x == 0 and level_map[y][level_x] in green_move:
+            hero.move(direction, level_x, y)
+    elif direction == "right":
+        if x < level_x and level_map[y][x + 1] in green_move:
+            hero.move(direction, x + 1, y)
+        elif x == level_x and level_map[y][0] in green_move:
+            hero.move(direction, 0, y)
+
+
 def game_snowman():
-    global score_time, score_buckets, score_coins, level_completed, cur_level
+    global score_time, score_buckets, score_coins, level_completed, cur_level, motion
     running = True
     pygame.display.set_caption('Снеговик')
     while running:
+        go_1 = False
         score_time += 1
         if level_completed:
             cur_level += 1
-            if cur_level <= max_level:
-                open_level(cur_level)
-            else:
-                cur_level = max_level + 1
+            open_level(cur_level)
             level_completed = False
-
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                player.move_up()
-                if pygame.sprite.spritecollideany(player, box_group):
-                    player.move_down(num=2)
-                    player.move_up()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                player.move_down()
-                if pygame.sprite.spritecollideany(player, box_group):
-                    player.move_up(num=2)
-                    player.move_down()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                player.move_left()
-                if pygame.sprite.spritecollideany(player, box_group):
-                    player.move_right(num=2)
-                    player.move_left()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                player.move_right()
-                if pygame.sprite.spritecollideany(player, box_group):
-                    player.move_left(num=2)
-                    player.move_right()
-
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_UP] or keys[pygame.K_DOWN] or \
+                    keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
+                if keys[pygame.K_UP]:
+                    motion = 'up'
+                elif keys[pygame.K_DOWN]:
+                    motion = 'down'
+                elif keys[pygame.K_LEFT]:
+                    motion = 'left'
+                elif keys[pygame.K_RIGHT]:
+                    motion = 'right'
+                go_1 = True  # Исключаем переход через 1 клетку при однократном нажатии
+                move(player, motion)
+            if event.type == pygame.KEYUP:
+                motion = 'STOP'
             if event.type == pygame.QUIT:
                 terminate()
-
+        if score_time % 12 == 0 and not go_1:  # реализация плавного непрерывного движения
+            if motion == 'left':
+                move(player, motion)
+            elif motion == 'right':
+                move(player, motion)
+            elif motion == 'up':
+                move(player, motion)
+            elif motion == 'down':
+                move(player, motion)
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
@@ -394,11 +446,13 @@ def game_snowman():
 
         # Меню:
         pygame.draw.rect(screen, (181, 146, 146), (0, 0, WIDTH, tile_size // 2))
-        draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size - 10, 12))
+        draw_mini_text(f'X {score_coins}', white, (tile_size - 10, 12))
         time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
-        draw_mini_text(f'  {time}', (255, 255, 255), (tile_size * 2, 12))
-        draw_mini_text(f'X {score_buckets}', (255, 255, 255), (tile_size * 3.75, 12))
-        draw_mini_text(f'X {cur_level}', (255, 255, 255), (WIDTH - tile_size // 2, 12))
+        draw_mini_text(f'  {time}', white, (tile_size * 2, 12))
+        draw_mini_text(f'X {score_buckets}', white, (tile_size * 3.75, 12))
+        text = n_lvl[levels[cur_level]]
+        draw_mini_text(f'LEVEL {cur_level + 1}: {text}', white, (tile_size * 7, 12))
+        draw_mini_text(f'X {cur_level}', white, (WIDTH - tile_size // 2, 12))
         menu_group.draw(screen)
         menu_group.update()
 
