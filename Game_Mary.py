@@ -6,6 +6,7 @@ from main_functions import *
 pygame.init()
 size = screen_width, screen_height = (645, 400)
 tile_size = 50
+screen_size = (645, 400)
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 fps = 60
@@ -29,6 +30,11 @@ player_image = load_image('snow/snowman.png', color_key=-1)
 player_image_up = load_image('snow/snowman_up.png', color_key=-1)
 player_image_down = load_image('snow/snowman_down.png', color_key=-1)
 player_image_left = load_image('snow/snowman_left.png', color_key=-1)
+
+start_img = load_image('snow/btn_start.png')
+bg = load_image('snow/bg.png')
+back_img = load_image('snow/back_img.png', color_key=-1)
+# menu_img = load_image('snow/menu_img.png')
 
 levels = ['snow/level_1.txt', 'snow/level_2.txt', 'snow/level_3.txt',
           'snow/level_4.txt', 'snow/level_5.txt']
@@ -250,6 +256,58 @@ def draw_text(intro_text):
         screen.blit(text, (text_x, text_y))
 
 
+class Button:
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+    def update(self):
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        screen.blit(self.image, self.rect)
+
+
+start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
+                   screen_height // 2 - start_img.get_height() // 2, start_img)
+
+
+def intro_game():
+    pygame.mouse.set_visible(True)
+    running = True
+    go_back = Button(10, 10, back_img)
+    # menu = Button(screen_width // 2 - menu_img.get_width() // 2,
+    #              screen_height // 2 - menu_img.get_height() // 2, menu_img)
+    while running:
+        fon = pygame.transform.scale(bg, screen_size)
+        screen.blit(fon, (0, 0))
+        start_btn.update()
+        go_back.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return True
+
+        if start_btn.clicked:
+            return True
+        if go_back.clicked:
+            pass
+
+        pygame.display.flip()
+
+
 class Particle(Sprite):
     """Класс для системы частиц(звездочек)"""
     fire = [load_image("star.png", color_key=-1)]
@@ -397,7 +455,7 @@ def move(hero, direction):
 
 def game_snowman():
     global score_time, score_buckets, score_coins, level_completed, cur_level, motion
-    running = True
+    running = intro_game()
     pygame.display.set_caption('Снеговик')
     while running:
         score_time += 1
