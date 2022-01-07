@@ -9,7 +9,8 @@ pygame.init()
 screen_size = (645, 400)
 WIDTH, HEIGHT = 645, 400
 screen = pygame.display.set_mode(screen_size)
-FPS = 60
+FPS = 80
+onGround = False
 tile_images = {
     'wall': load_image('mario/box.png'),
     'empty': load_image('mario/grass.png'),
@@ -55,7 +56,7 @@ def generate_level(level):
             elif level[y][x] == 'M':
                 Tile('menu', x, y)
             elif level[y][x] == '#':
-                Tile('wall', x, y)
+                Wall(x, y)
             elif level[y][x] == '@':
                 new_player = Player(x, y)
                 level[y][x] = "."
@@ -95,6 +96,15 @@ class Tile(Sprite):
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
+
+
+class Wall(Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(sprite_group)
+        self.image = tile_images['wall']
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x, tile_height * pos_y)
+        self.add(wall_group)
 
 
 class AnimatedSprite(Sprite):
@@ -190,6 +200,7 @@ def res_of_play():
 running = True
 clock = pygame.time.Clock()
 sprite_group = SpriteGroup()
+wall_group = SpriteGroup()
 hero_group = SpriteGroup()
 exit_group = SpriteGroup()
 princess_group = SpriteGroup()
@@ -234,16 +245,30 @@ def start_screen():
 def move(hero, direction):
     x, y = hero.pos
     if direction == "up":
-        if y > 0 and level_map[y - 1][x] in [".", '2', 'P', '*']:
-            hero.move(x, y - 1)
+        if y > 0 and level_map[int(y) - 1][int(x)] in [".", '2', 'P', '*']:
+            global onGround
+            if not onGround:
+                print(x, y)
+                if y > 0 and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*']:
+                    hero.move(x, y - 2)
+                elif y > 0 and level_map[int(y) - 3][int(x)] in [".", '2', 'P', '*'] \
+                        and y > 0 and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*']:
+                    hero.move(x, y - 3)
+                else:
+                    hero.move(x, y - 1)
+                onGround = True
     elif direction == "down":
-        if y < max_y and level_map[y + 1][x] in [".", '2', 'P', '*']:
+        if y < max_y and level_map[int(y) + 1][int(x)] in [".", '2', 'P', '*']:
             hero.move(x, y + 1)
     elif direction == "left":
-        if x > 0 and level_map[y][x - 1] in [".", '2', 'P', '*']:
+        if x > 0 and level_map[int(y)][int(x) - 1] in [".", '2', 'P', '*']:
+            # if onGround:
+            #     hero.move(x, y - 1)
             hero.move(x - 1, y)
     elif direction == "right":
-        if x < max_x and level_map[y][x + 1] in [".", '2', 'P', '*']:
+        if x < max_x and level_map[int(y)][int(x) + 1] in [".", '2', 'P', '*']:
+            # if onGround:
+            #     hero.move(x, y - 1)
             hero.move(x + 1, y)
 
 
@@ -255,6 +280,7 @@ def open_level(level):
     exit_group.empty()
     princess_group.empty()
     coins_group.empty()
+    wall_group.empty()
     level_map = load_level(levels[level - 1])
     hero, max_x, max_y = generate_level(level_map)
 
@@ -286,9 +312,27 @@ def game_mario():
                     move(hero, "left")
                 elif event.key == pygame.K_RIGHT:
                     move(hero, "right")
+        x, y = hero.pos
+        if y < max_y and level_map[int(y) + 1][x] in [".", '2', 'P', '*']:
+            if level_map[int(y) + 1][x] not in ['#']:
+                if score_time % 8 == 0:
+                    hero.move(x, y + 1)
+            # else:
+            #     global onGround
+            #     onGround = False
+            #     print(10)
+        else:
+            global onGround
+            onGround = False
+        #         hero.move(x, y + 0.1)
+        # if onGround:
+        #     # x, y = hero.pos
+        #     hero.fall()
+
         fon = pygame.transform.scale(f_lvl[cur_level - 1], (WIDTH, HEIGHT))  # картинка
         screen.blit(fon, (0, 0))
         sprite_group.draw(screen)
+        wall_group.draw(screen)
         hero_group.draw(screen)
         exit_group.draw(screen)
         princess_group.draw(screen)
