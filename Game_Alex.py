@@ -73,7 +73,7 @@ def draw_mini_text(text, color, pos):
 
 def res_of_play():
     """Здесь можно выводить результат игры"""
-    if player.died:
+    if hero.died:
         print('Game over')
 
 
@@ -317,7 +317,7 @@ class Border(pygame.sprite.Sprite):
 
 black_forrest = BlackForrest()
 # player = Player(6, 6, False)
-player = Player(6, 6)
+hero = Player(6, 6)
 
 Border(-1, -1, WIDTH + 1, -1)  # Верхняя граница
 Border(-1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1)  # Нижняя граница
@@ -336,49 +336,49 @@ def game_forrest():
     clock = pygame.time.Clock()
     running = True
     while running:
-        go_1 = False
+        infinityRun = False
         score_time += 1
         all_sprites.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP and onGround == False:
-                player.move_up()
-                if pygame.sprite.spritecollideany(player, horizontal_borders):
-                    player.move_down()
+                hero.move_up()
+                if pygame.sprite.spritecollideany(hero, horizontal_borders):
+                    hero.move_down()
             # if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
             #     player.move_down()
             #     if pygame.sprite.spritecollideany(player, horizontal_borders):
             #         player.move_up()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    go_1 = True
+                    infinityRun = True
                     motion = 'left'
-                    player.move_left()
-                    if pygame.sprite.spritecollideany(player, vertical_borders):
-                        player.move_right()
+                    hero.move_left()
+                    if pygame.sprite.spritecollideany(hero, vertical_borders):
+                        hero.move_right()
                 if event.key == pygame.K_RIGHT:
-                    go_1 = True
+                    infinityRun = True
                     motion = 'right'
-                    player.move_right()
-                    if pygame.sprite.spritecollideany(player, vertical_borders):
-                        player.move_left()
+                    hero.move_right()
+                    if pygame.sprite.spritecollideany(hero, vertical_borders):
+                        hero.move_left()
             if event.type == pygame.KEYUP:
                 motion = 'stop'
         if jump:  # Если герой не достиг конечной точки прыжка
-            player.move_up()
+            hero.move_up()
         if onGround:  # Если герой не земле
-            player.fall()
+            hero.fall()
 
         if score_time % 100 == 0:  # Можно использовать как уровень сложности, типо число поменять на 50, если уровень
             #  действительно сложный!
             Coins()
             # print(score_time)
-        if score_time % 10 == 0 and not go_1:  # реализация плавного непрерывного движения
-            if motion == 'left':
-                player.move_left()
-            elif motion == 'right':
-                player.move_right()
+        if score_time % 10 == 0 and not infinityRun:  # реализация плавного непрерывного движения
+            if motion == 'left' and hero.rect.x > 0:
+                hero.move_left()
+            elif motion == 'right' and hero.rect.x < WIDTH - 50:
+                hero.move_right()
             """Можно добавить проверку на выход за границу экрана
             if pygame.sprite.spritecollideany(player, vertical_borders):  # это не работает((
                 motion = 'stop'  """
@@ -404,7 +404,7 @@ def game_forrest():
             """Игрок столкнулся с грибом, игрок умер,
             игра заканчивается. Вызывается функция результатов игры"""
             # running = False
-            player.died = True
+            hero.died = True
             res_of_play()
         clock.tick(fps)
     pygame.quit()
