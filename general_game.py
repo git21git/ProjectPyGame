@@ -1,6 +1,3 @@
-import os
-import pygame
-import sys
 from Game_Mary import draw_text
 from final_screen import final_game_screen
 from main_functions import *
@@ -23,6 +20,8 @@ tile_images = {
 
 }
 player_image = load_image('mario/mario.png', color_key=-1)
+start_img = load_image('mario/btn_start.png')
+bg = load_image('mario/sky_1.png')
 
 tile_size = tile_width = tile_height = 50
 level_completed = True
@@ -88,6 +87,55 @@ class Sprite(pygame.sprite.Sprite):
 
     def get_event(self, event):
         pass
+
+
+class Button:
+    """Класс для кнопок(пригодится в меню)"""
+
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+    def update(self):
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        screen.blit(self.image, self.rect)
+
+
+start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
+                   screen_height // 2 - start_img.get_height() // 2, start_img)
+
+
+def intro_game():
+    pygame.mouse.set_visible(True)
+    running = True
+    start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
+                       screen_height // 2 - start_img.get_height() // 2, start_img)
+    while running:
+        screen.blit(bg, (0, 0))
+        start_btn.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return True
+
+        if start_btn.clicked:
+            return True
+
+        pygame.display.flip()
 
 
 class Tile(Sprite):
@@ -197,7 +245,6 @@ def res_of_play():
         clock.tick(FPS)
 
 
-running = True
 clock = pygame.time.Clock()
 sprite_group = SpriteGroup()
 wall_group = SpriteGroup()
@@ -290,9 +337,9 @@ hero, max_x, max_y = generate_level(level_map)
 
 
 def game_mario():
-    global running, score_time, level_completed, cur_level, score_coins
-    start_screen()
-
+    global score_time, level_completed, cur_level, score_coins
+    # start_screen()
+    running = intro_game()
     while running:
         score_time += 1
         if level_completed:

@@ -1,11 +1,20 @@
 from Game_Alex import game_forrest
 from Game_Mary import game_snowman
-from final_screen import final_game_screen
 from general_game import game_mario
 from main_functions import *
 
+size = WIDTH, HEIGHT = 645, 400
+screen = pygame.display.set_mode(size)
+pygame.display.set_caption('ДОПИСАТЬ НАЗВАНИЕ')  # Название приложения
+pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
+pygame.mouse.set_visible(True)
+all_sprites = pygame.sprite.Group()
+houses = pygame.sprite.Group()
+fps = 60
+clock = pygame.time.Clock()
 
-def start_screen():
+
+def start_progect_screen():
     """Функция вызова(отображения) стартового экрана"""
     fon = pygame.transform.scale(load_image('start/start.png'), (WIDTH, HEIGHT))  # стартовая картинка
     pressed = False
@@ -91,20 +100,7 @@ class Houses(pygame.sprite.Sprite):
             return self.name
 
 
-if __name__ == '__main__':
-    size = WIDTH, HEIGHT = 645, 400
-    screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('ДОПИСАТЬ НАЗВАНИЕ')  # Название приложения
-    pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
-    pygame.mouse.set_visible(True)
-    all_sprites = pygame.sprite.Group()
-    houses = pygame.sprite.Group()
-    Houses(11, 85, houses, 'house_1')
-    Houses(147, 130, houses, 'house_2')
-    Houses(425, 132, houses, 'house_3')
-    Houses(9, 307, houses, 'exit')
-
-    fps = 60
-    clock = pygame.time.Clock()
-    start_screen()
-    final_game_screen()
+Houses(11, 85, houses, 'house_1')
+Houses(147, 130, houses, 'house_2')
+Houses(425, 132, houses, 'house_3')
+Houses(9, 307, houses, 'exit')

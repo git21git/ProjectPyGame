@@ -6,6 +6,7 @@ from main_functions import *
 pygame.init()
 size = screen_width, screen_height = (645, 400)
 tile_size = 50
+screen_size = (645, 400)
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 fps = 60
@@ -30,12 +31,18 @@ player_image_up = load_image('snow/snowman_up.png', color_key=-1)
 player_image_down = load_image('snow/snowman_down.png', color_key=-1)
 player_image_left = load_image('snow/snowman_left.png', color_key=-1)
 
+start_img = load_image('snow/btn_start.png')
+bg = load_image('snow/bg.png')
+back_img = load_image('snow/back_img.png', color_key=-1)
+# menu_img = load_image('snow/menu_img.png')
+
 levels = ['snow/level_1.txt', 'snow/level_2.txt', 'snow/level_3.txt',
           'snow/level_4.txt', 'snow/level_5.txt']
 random.shuffle(levels)
 levels.append('snow/level_6.txt')
-n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так держать', 'snow/level_4.txt': 'Продолжай!',
-         'snow/level_3.txt': 'Бонусный уровень', 'snow/level_5.txt': 'Black forrest!'}  # Названия для уровней
+n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так держать',
+         'snow/level_4.txt': 'Продолжай!', 'snow/level_3.txt': 'Бонусный уровень',
+         'snow/level_5.txt': 'Black forrest!', 'snow/level_6.txt': 'Финал!'}  # Названия для уровней
 max_level = len(levels)
 white = (255, 255, 255)
 
@@ -56,19 +63,19 @@ def generate_level(level):
                 level[y][x] = "."
             elif level[y][x] == '%':  # огонь
                 Tile('empty', x, y)
-                fire = Fire(x, y)
+                _ = Fire(x, y)
             elif level[y][x] == '*':  # coins
                 Tile('empty', x, y)
-                coins = Coins(x, y)
+                _ = Coins(x, y)
             elif level[y][x] == '2':  # exit_next_level
                 Tile('empty', x, y)
-                exit = Exit(x, y)
+                _ = Exit(x, y)
             elif level[y][x] == '5':  # final_level_exit
                 Tile('empty', x, y)
-                finish = Finish(x, y)
+                _ = Finish(x, y)
             elif level[y][x] == '0':  # ведро с водой
                 Tile('empty', x, y)
-                bucket = Bucket(x, y)
+                _ = Bucket(x, y)
     return new_player, x, y
 
 
@@ -249,6 +256,58 @@ def draw_text(intro_text):
         screen.blit(text, (text_x, text_y))
 
 
+class Button:
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+    def update(self):
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        screen.blit(self.image, self.rect)
+
+
+start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
+                   screen_height // 2 - start_img.get_height() // 2, start_img)
+
+
+def intro_game():
+    pygame.mouse.set_visible(True)
+    running = True
+    go_back = Button(10, 10, back_img)
+    # menu = Button(screen_width // 2 - menu_img.get_width() // 2,
+    #              screen_height // 2 - menu_img.get_height() // 2, menu_img)
+    while running:
+        fon = pygame.transform.scale(bg, screen_size)
+        screen.blit(fon, (0, 0))
+        start_btn.update()
+        go_back.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return True
+
+        if start_btn.clicked:
+            return True
+        if go_back.clicked:
+            pass
+
+        pygame.display.flip()
+
+
 class Particle(Sprite):
     """Класс для системы частиц(звездочек)"""
     fire = [load_image("star.png", color_key=-1)]
@@ -312,8 +371,8 @@ def res_of_play():
     if not player.died:
         for i in range(-300, 310, 50):
             create_particles((WIDTH // 2 + i, 0))
-        coins = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
-        clocks = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
+        _ = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
+        _ = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
         intro_text = ["Вы Выиграли!", "",
                       f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                       '', f"Монеты: {score_coins}"]
@@ -396,10 +455,9 @@ def move(hero, direction):
 
 def game_snowman():
     global score_time, score_buckets, score_coins, level_completed, cur_level, motion
-    running = True
+    running = intro_game()
     pygame.display.set_caption('Снеговик')
     while running:
-        go_1 = False
         score_time += 1
         if level_completed:
             cur_level += 1
@@ -417,21 +475,9 @@ def game_snowman():
                     motion = 'left'
                 elif keys[pygame.K_RIGHT]:
                     motion = 'right'
-                go_1 = True  # Исключаем переход через 1 клетку при однократном нажатии
                 move(player, motion)
-            if event.type == pygame.KEYUP:
-                motion = 'STOP'
             if event.type == pygame.QUIT:
                 terminate()
-        if score_time % 12 == 0 and not go_1:  # реализация плавного непрерывного движения
-            if motion == 'left':
-                move(player, motion)
-            elif motion == 'right':
-                move(player, motion)
-            elif motion == 'up':
-                move(player, motion)
-            elif motion == 'down':
-                move(player, motion)
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
