@@ -1,5 +1,6 @@
 from Game_Alex import game_forrest
 from Game_Mary import game_snowman
+from final_screen import final_game_screen
 from general_game import game_mario
 from main_functions import *
 
@@ -104,3 +105,6 @@ Houses(11, 85, houses, 'house_1')
 Houses(147, 130, houses, 'house_2')
 Houses(425, 132, houses, 'house_3')
 Houses(9, 307, houses, 'exit')
+
+start_progect_screen()
+final_game_screen()

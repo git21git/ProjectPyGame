@@ -5,40 +5,7 @@ import sys
 import pygame
 
 from main_functions import terminate
-
-
-def start_screen():
-    fps = 50
-    intro_text = ["Black Forrest", "",
-                  "press anything to start"]
-
-    fon = pygame.transform.scale(load_image('font_start.png'), (WIDTH, HEIGHT))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 60)
-    text_coord = 60
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color(0, 85, 0))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        if line == "Black Forrest":
-            intro_rect.x = (WIDTH - 253) // 2
-        elif line == "press anything to start":
-            intro_rect.x = (WIDTH - 369) // 2
-        else:
-            intro_rect.x = 225
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
-        pygame.display.flip()
-        clock.tick(fps)
+# from main import start_progect_screen
 
 
 def build_level():
@@ -153,12 +120,88 @@ mushroom_group = pygame.sprite.Group()
 flying_eye = pygame.sprite.Group()
 coins = AnimatedSprite(load_image("Coin-Sheet.png", colorkey=-1), 4, 1, 6, 0, menu_group, 10)
 clocks = AnimatedSprite(load_image("clocks.png", colorkey=-1), 7, 2, tile_size * 2, 0, menu_group, 10)
+heart_pic = load_image("heart_sheet1.png", colorkey=-1)
+start_img = load_image("start_button.png", colorkey=-1)
+back_img = load_image("back_img.png", colorkey=-1)
+back_img = pygame.transform.scale(back_img, (86, 41))
+start_img = pygame.transform.scale(start_img, (148, 68))
+heart_pic = pygame.transform.scale(heart_pic, (256, 26))
+heart = AnimatedSprite(heart_pic, 4, 1, tile_size * 4 - 15, 0, menu_group, 10)
 
 
 # exit_group = pygame.sprite.Group()
 # finish_group = pygame.sprite.Group()
 # star_group = pygame.sprite.Group()
 # res_group = pygame.sprite.Group()
+
+
+class Button:
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+    def update(self):
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        screen.blit(self.image, self.rect)
+
+
+start_btn = Button(WIDTH // 2 - start_img.get_width() // 2,
+                   HEIGHT // 2 - start_img.get_height() // 2 + 50, start_img)
+
+
+def intro_game():
+    pygame.mouse.set_visible(True)
+    intro_text = ["Black Forrest"]
+    fon = pygame.transform.scale(load_image("font_start.png"), size)
+    screen.blit(fon, (0, 0))
+    go_back = Button(10, 10, back_img)
+    text_coord = 60
+    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 60)
+    running = True
+    # fon = pygame.transform.scale(load_image("font_start.png"), size)
+    # menu = Button(screen_width // 2 - menu_img.get_width() // 2,
+    #              screen_height // 2 - menu_img.get_height() // 2, menu_img)
+
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color(0, 135, 0))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 20
+        intro_rect.top = text_coord
+        if line == "Black Forrest":
+            intro_rect.x = (WIDTH - 253) // 2 + 2
+        else:
+            intro_rect.x = 225
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while running:
+        start_btn.update()
+        go_back.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return True
+
+        if start_btn.clicked:
+            return True
+        if go_back.clicked:
+            terminate()
+
+        pygame.display.flip()
 
 
 class BlackForrest(pygame.sprite.Sprite):
@@ -197,6 +240,7 @@ class Player(pygame.sprite.Sprite):
         self.image = tile_images['hero']
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
+        self.counter = 0
         self.died = False
         # self.onGround = onGround
         self.add(player_group, all_sprites)
@@ -231,7 +275,11 @@ class Player(pygame.sprite.Sprite):
     def update(self, *args):
         if pygame.sprite.spritecollideany(self, mushroom_group):
             global XP
-            XP = 0
+            self.counter += 1
+            if self.counter == 1 or self.counter % 5 == 0:
+                XP -= 1
+        else:
+            self.counter = 0
 
 
 class Coins(pygame.sprite.Sprite):
@@ -329,7 +377,8 @@ pygame.init()
 
 def game_forrest():
     global score_coins, XP, motion
-    start_screen()
+    # start_screen()
+    intro_game()
     build_level()
     fps = 85
     score_time = 0
@@ -379,9 +428,6 @@ def game_forrest():
                 hero.move_left()
             elif motion == 'right' and hero.rect.x < WIDTH - 50:
                 hero.move_right()
-            """Можно добавить проверку на выход за границу экрана
-            if pygame.sprite.spritecollideany(player, vertical_borders):  # это не работает((
-                motion = 'stop'  """
 
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
