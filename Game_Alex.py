@@ -3,15 +3,13 @@ import random
 import sys
 
 import pygame
-
+from final_screen import final_game_screen
 from main_functions import terminate
-# from main import start_progect_screen
 
 
 def build_level():
     for i in range(13):
         Tile("block", i, 7)
-    Mushroom()
 
 
 def load_image(name, colorkey=None):
@@ -38,10 +36,15 @@ def draw_mini_text(text, color, pos):
     screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
 
 
-def res_of_play():
-    """Здесь можно выводить результат игры"""
-    if hero.died:
-        print('Game over')
+def draw_text(intro_text):
+    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 40)
+    text_coord = 50
+    for line in intro_text:
+        text = font.render(line, True, pygame.Color(255, 96, 66))
+        text_x = WIDTH // 2 - text.get_width() // 2
+        text_y = text_coord + text.get_height()
+        text_coord = text_y + 10
+        screen.blit(text, (text_x, text_y))
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -75,12 +78,14 @@ class AnimatedSprite(pygame.sprite.Sprite):
 size = WIDTH, HEIGHT = 645, 400
 tile_size = 50
 score_coins = 0
+score_time = 0
 XP = 5
 onGround = False
 jump = False
 motion = 'STOP'  # по умолчанию — стоим, флаг для непрерывного движения
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Black Forrest')
+pygame.display.set_icon(load_image("Black_Forrest.ico"))
 clock = pygame.time.Clock()
 
 tile_images = {
@@ -92,10 +97,14 @@ tile_images = {
 coin_images = [load_image("Coin_1_pos.png", colorkey=-1), load_image("Coin_2_pos.png", colorkey=-1),
                load_image("Coin_3_pos.png", colorkey=-1), load_image("Coin_4_pos.png", colorkey=-1)]
 
-mushroom_images = [load_image("Mushroom_1_pos.png", colorkey=-1), load_image("Mushroom_2_pos.png", colorkey=-1),
-                   load_image("Mushroom_3_pos.png", colorkey=-1), load_image("Mushroom_4_pos.png", colorkey=-1),
-                   load_image("Mushroom_5_pos.png", colorkey=-1), load_image("Mushroom_6_pos.png", colorkey=-1),
-                   load_image("Mushroom_7_pos.png", colorkey=-1), load_image("Mushroom_8_pos.png", colorkey=-1)]
+mushroom_images = [load_image("Mushroom_1_pos.png", colorkey=-1),
+                   load_image("Mushroom_2_pos.png", colorkey=-1),
+                   load_image("Mushroom_3_pos.png", colorkey=-1),
+                   load_image("Mushroom_4_pos.png", colorkey=-1),
+                   load_image("Mushroom_5_pos.png", colorkey=-1),
+                   load_image("Mushroom_6_pos.png", colorkey=-1),
+                   load_image("Mushroom_7_pos.png", colorkey=-1),
+                   load_image("Mushroom_8_pos.png", colorkey=-1)]
 
 mushroom_reverse_images = [load_image("m_Mushroom_1_pos.png", colorkey=-1),
                            load_image("m_Mushroom_2_pos.png", colorkey=-1),
@@ -106,7 +115,6 @@ mushroom_reverse_images = [load_image("m_Mushroom_1_pos.png", colorkey=-1),
                            load_image("m_Mushroom_7_pos.png", colorkey=-1),
                            load_image("m_Mushroom_8_pos.png", colorkey=-1)]
 
-# hero_image = load_image("Hero3_1_pos.png", colorkey=-1)
 
 all_sprites = pygame.sprite.Group()
 horizontal_borders = pygame.sprite.Group()
@@ -118,7 +126,7 @@ coins_group = pygame.sprite.Group()
 menu_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
 flying_eye = pygame.sprite.Group()
-coins = AnimatedSprite(load_image("Coin-Sheet.png", colorkey=-1), 4, 1, 6, 0, menu_group, 10)
+coins = AnimatedSprite(load_image("Coin_Sheet.png", colorkey=-1), 4, 1, 6, 0, menu_group, 10)
 clocks = AnimatedSprite(load_image("clocks.png", colorkey=-1), 7, 2, tile_size * 2, 0, menu_group, 10)
 heart_pic = load_image("heart_sheet1.png", colorkey=-1)
 start_img = load_image("start_button.png", colorkey=-1)
@@ -127,12 +135,6 @@ back_img = pygame.transform.scale(back_img, (86, 41))
 start_img = pygame.transform.scale(start_img, (148, 68))
 heart_pic = pygame.transform.scale(heart_pic, (256, 26))
 heart = AnimatedSprite(heart_pic, 4, 1, tile_size * 4 - 15, 0, menu_group, 10)
-
-
-# exit_group = pygame.sprite.Group()
-# finish_group = pygame.sprite.Group()
-# star_group = pygame.sprite.Group()
-# res_group = pygame.sprite.Group()
 
 
 class Button:
@@ -156,15 +158,13 @@ class Button:
         screen.blit(self.image, self.rect)
 
 
-start_btn = Button(WIDTH // 2 - start_img.get_width() // 2,
-                   HEIGHT // 2 - start_img.get_height() // 2 + 50, start_img)
-
-
 def intro_game():
     pygame.mouse.set_visible(True)
     intro_text = ["Black Forrest"]
     fon = pygame.transform.scale(load_image("font_start.png"), size)
     screen.blit(fon, (0, 0))
+    start_btn = Button(WIDTH // 2 - start_img.get_width() // 2,
+                       HEIGHT // 2 - start_img.get_height() // 2 + 50, start_img)
     go_back = Button(10, 10, back_img)
     text_coord = 60
     font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 60)
@@ -204,6 +204,75 @@ def intro_game():
         pygame.display.flip()
 
 
+def res_of_play():
+    """Здесь можно выводить результат игры"""
+    global hero, XP, score_time, score_coins, loop, black_forrest, mushroom
+    if hero.died:
+        loop += 1
+        counter = 0
+        fon = pygame.transform.scale(load_image('you_died.png'), (645, 400))
+        while True:
+            counter += 1
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    terminate()
+                elif event.type == pygame.KEYDOWN or \
+                        event.type == pygame.MOUSEBUTTONDOWN and counter > 200:
+                    # End()
+                    if score_coins > 50:
+                        intro_text = ["You did it!", "",
+                                      f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
+                                      '', f"Coins: {score_coins}"]
+                        fon = pygame.transform.scale(load_image('you_won.png'), size)
+                    else:
+                        intro_text = ["You died! I'm sorry...", "",
+                                      f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
+                                      '', f"Coins: {score_coins}"]
+                        fon = pygame.transform.scale(load_image('you_not_won.png'), size)
+                    restart = Button(50,
+                                     HEIGHT - 87,
+                                     pygame.transform.scale(load_image("restart_btn.png", colorkey=-1), (88, 38)))
+
+                    exit_btn = Button(WIDTH - 50 - 88,
+                                  HEIGHT - 87,
+                                  pygame.transform.scale(load_image("exit_btn.png", colorkey=-1), (88, 38)))
+
+                    while True:
+                        pygame.mouse.set_visible(True)
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                terminate()
+                        screen.blit(fon, (0, 0))
+                        draw_text(intro_text)
+                        restart.update()
+                        exit_btn.update()
+                        pygame.display.flip()
+
+                        if restart.clicked:
+                            print('pressed restart (reset)')
+                            all_sprites.empty()
+                            hero.kill()
+                            score_time = 0
+                            score_coins = 0
+                            XP = 5
+                            black_forrest = BlackForrest()
+                            # hero.kill()
+                            hero = Player(6, 6)
+                            mushroom = Mushroom()
+
+                            Border(-1, -1, WIDTH + 1, -1)  # Верхняя граница
+                            Border(-1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1)  # Нижняя граница
+                            Border(-10, -1, -10, HEIGHT + 1)
+                            Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
+
+                            pygame.init()
+                            game_forrest()
+                        if exit_btn.clicked:
+                            final_game_screen()
+            screen.blit(fon, (0, 0))
+            pygame.display.flip()
+
+
 class BlackForrest(pygame.sprite.Sprite):
     image = load_image("my_font.png", colorkey=None)
     image = pygame.transform.scale(image, (WIDTH, HEIGHT))
@@ -212,10 +281,6 @@ class BlackForrest(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.image = BlackForrest.image
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
-        # self.mask = pygame.mask.from_surface(self.image)
-        # располагаем горы внизу
-        # self.rect.bottom = HEIGHT
 
 
 class Tile(pygame.sprite.Sprite):
@@ -234,7 +299,6 @@ class Tile(pygame.sprite.Sprite):
 
 
 class Player(pygame.sprite.Sprite):
-    # def __init__(self, pos_x, pos_y, onGround):
     def __init__(self, pos_x, pos_y):
         super().__init__()
         self.image = tile_images['hero']
@@ -246,7 +310,6 @@ class Player(pygame.sprite.Sprite):
         self.add(player_group, all_sprites)
 
     def move_up(self):
-        # self.rect = self.rect.move(0, -100)
         self.rect = self.rect.move(0, -10)
         global onGround
         global jump
@@ -278,6 +341,9 @@ class Player(pygame.sprite.Sprite):
             self.counter += 1
             if self.counter == 1 or self.counter % 5 == 0:
                 XP -= 1
+                if XP == 0:
+                    self.kill()
+                    mushroom.kill()
         else:
             self.counter = 0
 
@@ -293,7 +359,6 @@ class Coins(pygame.sprite.Sprite):
         self.rect.x = list_with_blocks_centers[random.randint(0, 11)]
         self.rect.y = 0
         self.counter = 0
-        # self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
         self.add(coins_group, all_sprites)
 
     def update(self, *args):
@@ -302,26 +367,12 @@ class Coins(pygame.sprite.Sprite):
             self.counter += 1
             self.image = pygame.transform.scale(coin_images[self.counter % 4], (16, 16))
 
-        """if pygame.sprite.spritecollideany(self, player_group):
-            global score_coins
-            score_coins += 1
-            self.kill()"""
-
-        """if pygame.sprite.spritecollideany(self, mushroom_group):
-            self.kill()"""
-
-        """if pygame.sprite.spritecollideany(self, block_group):
-            global XP
-            XP -= 1
-            self.kill()"""
-
 
 class Mushroom(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
         self.image = mushroom_images[0]
-        # self.image = AnimatedSprite("Mushroom_sheet.png", 8, 1, self.rect.x, HEIGHT - 100, mushroom_group, 10)
         self.rect = self.image.get_rect()
         self.rect.x = 1
         self.rect.y = HEIGHT - 85
@@ -329,7 +380,6 @@ class Mushroom(pygame.sprite.Sprite):
         self.add(mushroom_group, all_sprites)
 
     def update(self, *args):
-        # self.rect = self.rect.move(+1, 0)
         if self.rect.x % 10 == 0:
             self.counter += 1
             if self.image in mushroom_images:
@@ -366,6 +416,7 @@ class Border(pygame.sprite.Sprite):
 black_forrest = BlackForrest()
 # player = Player(6, 6, False)
 hero = Player(6, 6)
+mushroom = Mushroom()
 
 Border(-1, -1, WIDTH + 1, -1)  # Верхняя граница
 Border(-1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1)  # Нижняя граница
@@ -381,10 +432,12 @@ def game_forrest():
     intro_game()
     build_level()
     fps = 85
-    score_time = 0
+    # score_time = 0
     clock = pygame.time.Clock()
+    global score_time
     running = True
     while running:
+        pygame.mouse.set_visible(False)
         infinityRun = False
         score_time += 1
         all_sprites.update()
@@ -395,10 +448,6 @@ def game_forrest():
                 hero.move_up()
                 if pygame.sprite.spritecollideany(hero, horizontal_borders):
                     hero.move_down()
-            # if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-            #     player.move_down()
-            #     if pygame.sprite.spritecollideany(player, horizontal_borders):
-            #         player.move_up()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     infinityRun = True
@@ -446,10 +495,13 @@ def game_forrest():
             pass
         if pygame.sprite.groupcollide(coins_group, block_group, True, False):
             XP -= 1
-        if pygame.sprite.groupcollide(player_group, mushroom_group, False, False):
-            """Игрок столкнулся с грибом, игрок умер,
-            игра заканчивается. Вызывается функция результатов игры"""
-            # running = False
+        # if pygame.sprite.groupcollide(player_group, mushroom_group, False, False):
+        #     """Игрок столкнулся с грибом, игрок умер,
+        #     игра заканчивается. Вызывается функция результатов игры"""
+        #     # running = False
+        #     hero.died = True
+        #     res_of_play()
+        if XP <= 0:
             hero.died = True
             res_of_play()
         clock.tick(fps)
