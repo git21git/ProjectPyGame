@@ -3,7 +3,7 @@ import pygame
 import random
 import sys
 from final_screen import final_game_screen
-from main_functions import terminate
+from main_functions import *
 
 
 def build_level():
@@ -168,9 +168,6 @@ def menu_forrest_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    return True
 
         if start_btn.clicked:
             game_forrest()
