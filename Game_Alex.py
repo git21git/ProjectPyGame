@@ -248,7 +248,6 @@ def res_of_play():
                         pygame.display.flip()
 
                         if restart.clicked:
-                            print('pressed restart (reset)')
                             all_sprites.empty()
                             hero.kill()
                             score_time = 0
@@ -468,7 +467,6 @@ def game_forrest():
         if score_time % 100 == 0:  # Можно использовать как уровень сложности, типо число поменять на 50, если уровень
             #  действительно сложный!
             Coins()
-            # print(score_time)
         if score_time % 10 == 0 and not infinityRun:  # реализация плавного непрерывного движения
             if motion == 'left' and hero.rect.x > 0:
                 hero.move_left()
