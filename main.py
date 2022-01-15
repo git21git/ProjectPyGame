@@ -1,7 +1,7 @@
-from Game_Alex import game_forrest
-from Game_Mary import game_snowman
+from Game_Alex import menu_forrest_game
+from Game_Mary import menu_snowman_game
 from final_screen import final_game_screen
-from general_game import game_mario
+from general_game import menu_mario_game
 from main_functions import *
 
 size = WIDTH, HEIGHT = 645, 400
@@ -31,11 +31,11 @@ def start_progect_screen():
                     if 'exit' in lst:
                         terminate()
                     elif 'house_3' in lst:
-                        game_snowman()
+                        menu_snowman_game()
                     elif 'house_2' in lst:
-                        game_mario()
+                        menu_mario_game()
                     elif 'house_1' in lst:
-                        game_forrest()
+                        menu_forrest_game()
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                 houses.update(pygame.mouse)
         screen.blit(fon, (0, 0))
