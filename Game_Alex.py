@@ -206,9 +206,8 @@ def intro_game():
 
 def res_of_play():
     """Здесь можно выводить результат игры"""
-    global hero, XP, score_time, score_coins, loop, black_forrest, mushroom
+    global hero, XP, score_time, score_coins, black_forrest, mushroom
     if hero.died:
-        loop += 1
         counter = 0
         fon = pygame.transform.scale(load_image('you_died.png'), (645, 400))
         while True:
@@ -216,8 +215,8 @@ def res_of_play():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
-                elif event.type == pygame.KEYDOWN or \
-                        event.type == pygame.MOUSEBUTTONDOWN and counter > 200:
+                elif (event.type == pygame.KEYDOWN or \
+                        event.type == pygame.MOUSEBUTTONDOWN) and counter > 200:
                     # End()
                     if score_coins > 50:
                         intro_text = ["You did it!", "",
@@ -256,7 +255,6 @@ def res_of_play():
                             score_coins = 0
                             XP = 5
                             black_forrest = BlackForrest()
-                            # hero.kill()
                             hero = Player(6, 6)
                             mushroom = Mushroom()
 
@@ -414,7 +412,6 @@ class Border(pygame.sprite.Sprite):
 
 
 black_forrest = BlackForrest()
-# player = Player(6, 6, False)
 hero = Player(6, 6)
 mushroom = Mushroom()
 
@@ -451,18 +448,18 @@ def game_forrest():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     infinityRun = True
-                    motion = 'left'
+                    motion = 'lef'
                     hero.move_left()
                     if pygame.sprite.spritecollideany(hero, vertical_borders):
                         hero.move_right()
                 if event.key == pygame.K_RIGHT:
                     infinityRun = True
-                    motion = 'right'
+                    motion = 'righ'
                     hero.move_right()
                     if pygame.sprite.spritecollideany(hero, vertical_borders):
                         hero.move_left()
             if event.type == pygame.KEYUP:
-                motion = 'stop'
+                motion = 'sto'
         if jump:  # Если герой не достиг конечной точки прыжка
             hero.move_up()
         if onGround:  # Если герой не земле
@@ -495,12 +492,6 @@ def game_forrest():
             pass
         if pygame.sprite.groupcollide(coins_group, block_group, True, False):
             XP -= 1
-        # if pygame.sprite.groupcollide(player_group, mushroom_group, False, False):
-        #     """Игрок столкнулся с грибом, игрок умер,
-        #     игра заканчивается. Вызывается функция результатов игры"""
-        #     # running = False
-        #     hero.died = True
-        #     res_of_play()
         if XP <= 0:
             hero.died = True
             res_of_play()
