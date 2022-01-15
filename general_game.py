@@ -9,7 +9,7 @@ screen = pygame.display.set_mode(screen_size)
 FPS = 80
 onGround = False
 tile_images = {
-    'wall': load_image('mario/box.png'),
+    'wall': pygame.transform.scale(load_image('mario/box2.png'), (50, 50)),
     'empty': load_image('mario/grass.png'),
     'exit': load_image('mario/new_level.png', color_key=-1),
     'princess': load_image('mario/princess_l.png', color_key=-1),
@@ -20,10 +20,10 @@ tile_images = {
 
 }
 player_image = load_image('mario/mario.png', color_key=-1)
-start_img = load_image('mario/btn_start.png')
-bg = pygame.transform.scale(load_image('mario/sky_1.png'), (WIDTH, HEIGHT))
+start_img = pygame.transform.scale(load_image('mario/start_button.png'), (148, 68))
+bg = pygame.transform.scale(load_image('mario/mario (1).jpg'), (WIDTH, HEIGHT))
 
-back_img = load_image('snow/back_img.png', color_key=-1)
+back_img = pygame.transform.scale(load_image('mario/back_img.png', color_key=-1), (86, 41))
 
 tile_size = tile_width = tile_height = 50
 level_completed = True
@@ -32,9 +32,9 @@ score_coins = 0
 score_time = 0
 levels = ['mario/level_1.txt', 'mario/level_2.txt', 'mario/level_3.txt',
           'mario/level_4.txt', 'mario/level_5.txt', 'mario/level_6.txt']
-f_lvl = [load_image('mario/sky_1.png'), load_image('mario/sky_2.png'),
-         load_image('mario/sky_3.png'), load_image('mario/sky_4.png'),
-         load_image('mario/sky_5.png'), load_image('mario/sky_6.png')]  # словарь фонов для уровней
+f_lvl = [load_image('mario/start_mario.jpg'), load_image('mario/second_peyzaj.jpg'),
+         load_image('mario/third_peizaj.jpg'), load_image('mario/far_castle.jpeg'),
+         load_image('mario/black_forrest.jpg'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
 n_lvl = ['Начало', 'Так держать', 'Продолжай!',
          'Бонусный уровень', 'Black forrest', 'Спаси принцессу!']  # Названия для уровней
 max_level = len(levels)
