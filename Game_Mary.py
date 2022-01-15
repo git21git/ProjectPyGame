@@ -256,34 +256,11 @@ def draw_text(intro_text):
         screen.blit(text, (text_x, text_y))
 
 
-class Button:
-    def __init__(self, x, y, image):
-        self.image = image
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.clicked = False
-
-    def update(self):
-        pos = pygame.mouse.get_pos()
-
-        if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
-                self.clicked = True
-
-        if pygame.mouse.get_pressed()[0] == 0:
-            self.clicked = False
-
-        screen.blit(self.image, self.rect)
-
-
-start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
-                   screen_height // 2 - start_img.get_height() // 2, start_img)
-
-
-def intro_game():
+def menu_snowman_game():
     pygame.mouse.set_visible(True)
     running = True
+    start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
+                       screen_height // 2 - start_img.get_height() // 2, start_img)
     go_back = Button(10, 10, back_img)
     # menu = Button(screen_width // 2 - menu_img.get_width() // 2,
     #              screen_height // 2 - menu_img.get_height() // 2, menu_img)
@@ -296,14 +273,11 @@ def intro_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    return True
 
         if start_btn.clicked:
-            return True
+            game_snowman()
         if go_back.clicked:
-            pass
+            return True
 
         pygame.display.flip()
 
@@ -455,7 +429,7 @@ def move(hero, direction):
 
 def game_snowman():
     global score_time, score_buckets, score_coins, level_completed, cur_level, motion
-    running = intro_game()
+    running = True
     pygame.display.set_caption('Снеговик')
     while running:
         score_time += 1

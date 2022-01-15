@@ -1,9 +1,8 @@
 """В этом файле собраны основные функции, необходимые для функционирования проекта
     (для исключения повторения их в файлах проекта)"""
 import os
-import sys
-
 import pygame
+import sys
 
 pygame.init()
 size = screen_width, screen_height = (645, 400)
@@ -41,3 +40,25 @@ def load_level(filename):
         level_map = [line.strip() for line in mapFile]
     max_width = max(map(len, level_map))
     return list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
+
+
+class Button:
+    """Класс всех кнопок"""
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+    def update(self):
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        screen.blit(self.image, self.rect)

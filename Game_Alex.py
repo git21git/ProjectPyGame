@@ -1,8 +1,7 @@
 import os
+import pygame
 import random
 import sys
-
-import pygame
 from final_screen import final_game_screen
 from main_functions import terminate
 
@@ -115,7 +114,6 @@ mushroom_reverse_images = [load_image("m_Mushroom_1_pos.png", colorkey=-1),
                            load_image("m_Mushroom_7_pos.png", colorkey=-1),
                            load_image("m_Mushroom_8_pos.png", colorkey=-1)]
 
-
 all_sprites = pygame.sprite.Group()
 horizontal_borders = pygame.sprite.Group()
 vertical_borders = pygame.sprite.Group()
@@ -137,28 +135,7 @@ heart_pic = pygame.transform.scale(heart_pic, (256, 26))
 heart = AnimatedSprite(heart_pic, 4, 1, tile_size * 4 - 15, 0, menu_group, 10)
 
 
-class Button:
-    def __init__(self, x, y, image):
-        self.image = image
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.clicked = False
-
-    def update(self):
-        pos = pygame.mouse.get_pos()
-
-        if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
-                self.clicked = True
-
-        if pygame.mouse.get_pressed()[0] == 0:
-            self.clicked = False
-
-        screen.blit(self.image, self.rect)
-
-
-def intro_game():
+def menu_forrest_game():
     pygame.mouse.set_visible(True)
     intro_text = ["Black Forrest"]
     fon = pygame.transform.scale(load_image("font_start.png"), size)
@@ -169,7 +146,6 @@ def intro_game():
     text_coord = 60
     font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 60)
     running = True
-    # fon = pygame.transform.scale(load_image("font_start.png"), size)
     # menu = Button(screen_width // 2 - menu_img.get_width() // 2,
     #              screen_height // 2 - menu_img.get_height() // 2, menu_img)
 
@@ -197,9 +173,9 @@ def intro_game():
                     return True
 
         if start_btn.clicked:
-            return True
+            game_forrest()
         if go_back.clicked:
-            terminate()
+            return True
 
         pygame.display.flip()
 
@@ -234,8 +210,8 @@ def res_of_play():
                                      pygame.transform.scale(load_image("restart_btn.png", colorkey=-1), (88, 38)))
 
                     exit_btn = Button(WIDTH - 50 - 88,
-                                  HEIGHT - 87,
-                                  pygame.transform.scale(load_image("exit_btn.png", colorkey=-1), (88, 38)))
+                                      HEIGHT - 87,
+                                      pygame.transform.scale(load_image("exit_btn.png", colorkey=-1), (88, 38)))
 
                     while True:
                         pygame.mouse.set_visible(True)
@@ -429,7 +405,6 @@ pygame.init()
 def game_forrest():
     global score_coins, XP, motion
     # start_screen()
-    intro_game()
     build_level()
     fps = 85
     # score_time = 0
