@@ -181,16 +181,21 @@ def res_of_play():
     """Здесь можно выводить результат игры"""
     global hero, XP, score_time, score_coins, black_forrest, mushroom
     if hero.died:
+        pygame.mixer.music.pause()
+        pygame.mixer.music.load("Data/BlackForrest/You_died.mp3")
+        pygame.mixer.music.play()
         counter = 0
         fon = pygame.transform.scale(load_image('you_died.png'), (645, 400))
         while True:
             counter += 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    pygame.mixer.music.pause()
                     terminate()
                 elif (event.type == pygame.KEYDOWN or \
                         event.type == pygame.MOUSEBUTTONDOWN) and counter > 200:
                     # End()
+                    pygame.mixer.music.pause()
                     if score_coins > 50:
                         intro_text = ["You did it!", "",
                                       f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
@@ -275,11 +280,14 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
         self.counter = 0
+        self.sound1 = pygame.mixer.Sound('Data/BlackForrest/jump.mp3')
+        self.sound2 = pygame.mixer.Sound('Data/BlackForrest/shag.mp3')
         self.died = False
         # self.onGround = onGround
         self.add(player_group, all_sprites)
 
     def move_up(self):
+        self.sound1.play()
         self.rect = self.rect.move(0, -10)
         global onGround
         global jump
@@ -293,9 +301,11 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(0, +50)
 
     def move_left(self):
+        self.sound2.play()
         self.rect = self.rect.move(-50, 0)
 
     def move_right(self):
+        self.sound2.play()
         self.rect = self.rect.move(+50, 0)
 
     def fall(self):
@@ -398,6 +408,8 @@ pygame.init()
 def game_forrest():
     global score_coins, XP, motion
     # start_screen()
+    pygame.mixer.music.load('Data/BlackForrest/Trivium - Built To Fall.mp3')
+    pygame.mixer.music.play()
     build_level()
     fps = 85
     # score_time = 0

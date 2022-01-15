@@ -275,8 +275,13 @@ def move(hero, direction):
                 if y > 0 and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*']:
                     hero.move(x, y - 2)
                 elif y > 0 and level_map[int(y) - 3][int(x)] in [".", '2', 'P', '*'] \
-                        and y > 0 and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*']:
+                        and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*']:
                     hero.move(x, y - 3)
+
+                elif y > 0 and level_map[int(y) - 3][int(x)] in [".", '2', 'P', '*'] \
+                        and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*'] \
+                        and level_map[int(y) - 3][int(x)] in [".", '2', 'P', '*']:
+                    hero.move(x, y - 4)
                 else:
                     hero.move(x, y - 1)
                 onGround = True
