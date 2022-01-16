@@ -81,7 +81,6 @@ score_time = 0
 XP = 5
 onGround = False
 jump = False
-motion = 'STOP'  # по умолчанию — стоим, флаг для непрерывного движения
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Black Forrest')
 pygame.display.set_icon(load_image("Black_Forrest.ico"))
@@ -142,6 +141,8 @@ heart = AnimatedSprite(heart_pic, 4, 1, tile_size * 4 - 15, 0, menu_group, 10)
 
 
 def menu_forrest_game():
+    pygame.mixer.music.load("Data/BlackForrest/start_window_black_forrest.mp3")
+    pygame.mixer.music.play()
     pygame.mouse.set_visible(True)
     intro_text = ["Black Forrest"]
     fon = pygame.transform.scale(load_image("font_start.png"), size)
@@ -168,16 +169,23 @@ def menu_forrest_game():
         screen.blit(string_rendered, intro_rect)
 
     while running:
+        sound_button = pygame.mixer.Sound("Data/BlackForrest/button (2).mp3")
         start_btn.update()
         go_back.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.music.pause()
                 terminate()
 
         if start_btn.clicked:
+            sound_button.play()
+            pygame.mixer.music.pause()
             game_forrest()
+
         if go_back.clicked:
+            pygame.mixer.music.pause()
+            sound_button.play()
             return True
 
         pygame.display.flip()
@@ -189,6 +197,7 @@ def res_of_play():
     if hero.died:
         pygame.mixer.music.pause()
         pygame.mixer.music.load("Data/BlackForrest/You_died.mp3")
+        sound_button = pygame.mixer.Sound("Data/BlackForrest/button (2).mp3")
         pygame.mixer.music.play()
         counter = 0
         fon = pygame.transform.scale(load_image('you_died.png'), (645, 400))
@@ -206,12 +215,15 @@ def res_of_play():
                         intro_text = ["You did it!", "",
                                       f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                                       '', f"Coins: {score_coins}"]
+                        pygame.mixer.music.load("Data/BlackForrest/dark_souls_15. Four Kings.mp3")
                         fon = pygame.transform.scale(load_image('you_won.png'), size)
                     else:
                         intro_text = ["You died! I'm sorry...", "",
                                       f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                                       '', f"Coins: {score_coins}"]
+                        pygame.mixer.music.load("Data/BlackForrest/when_you_lose.mp3")
                         fon = pygame.transform.scale(load_image('you_not_won.png'), size)
+                    pygame.mixer.music.play()
                     restart = Button(50,
                                      HEIGHT - 87,
                                      pygame.transform.scale(load_image("restart_btn.png", colorkey=-1), (88, 38)))
@@ -224,6 +236,7 @@ def res_of_play():
                         pygame.mouse.set_visible(True)
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
+                                pygame.mixer.music.pause()
                                 terminate()
                         screen.blit(fon, (0, 0))
                         draw_text(intro_text)
@@ -232,7 +245,10 @@ def res_of_play():
                         pygame.display.flip()
 
                         if restart.clicked:
+                            sound_button.play()
+                            pygame.mixer.music.pause()
                             all_sprites.empty()
+                            false_coin_group.empty()
                             hero.kill()
                             score_time = 0
                             score_coins = 0
@@ -249,6 +265,7 @@ def res_of_play():
                             # pygame.init() уже не понадобится, из-за 405 строчки (перед game_forrest)
                             game_forrest()
                         if exit_btn.clicked:
+                            sound_button.play()
                             final_game_screen()
             screen.blit(fon, (0, 0))
             pygame.display.flip()
@@ -288,6 +305,7 @@ class Player(pygame.sprite.Sprite):
         self.counter = 0
         self.sound1 = pygame.mixer.Sound('Data/BlackForrest/jump.mp3')
         self.sound2 = pygame.mixer.Sound('Data/BlackForrest/shag.mp3')
+        self.sound3 = pygame.mixer.Sound('Data/BlackForrest/coin..mp3')
         self.died = False
         # self.onGround = onGround
         self.add(player_group, all_sprites)
@@ -327,7 +345,7 @@ class Player(pygame.sprite.Sprite):
             self.counter += 1
             if self.counter == 1 or self.counter % 5 == 0:
                 XP -= 1
-                if XP == 0:
+                if XP <= 0:
                     self.kill()
                     mushroom.kill()
         else:
@@ -372,6 +390,7 @@ class FalseCoins(pygame.sprite.Sprite):
         if self.rect.y % 8 == 0:
             self.counter += 1
             self.image = pygame.transform.scale(false_coin_images[self.counter % 4], (16, 16))
+
 
 
 class Mushroom(pygame.sprite.Sprite):
@@ -440,7 +459,7 @@ pygame.mixer.init()
 def game_forrest():
     global score_coins, XP, motion
 
-    pygame.mixer.music.load('Data/BlackForrest/Trivium - Built To Fall.mp3')
+    pygame.mixer.music.load('Data/BlackForrest/Yuka Kitamura - Dark Souls III Soundtrack OST - Main Menu Theme.mp3')
     pygame.mixer.music.play()
     build_level()
     fps = 85
@@ -473,7 +492,7 @@ def game_forrest():
         if onGround:  # Если герой не земле
             hero.fall()
 
-        if score_time % 100 == 0:  # Можно использовать как уровень сложности, типо число поменять на 50, если уровень
+        if score_time % 100 == 0 and score_time % 1000 != 0:  # Можно использовать как уровень сложности, типо число поменять на 50, если уровень
             #  действительно сложный!
             Coins()
 
@@ -496,14 +515,21 @@ def game_forrest():
             score_coins += 1
 
         if pygame.sprite.groupcollide(player_group, false_coin_group, False, True):
+            sound4 = pygame.mixer.Sound("Data/BlackForrest/fall_coin.mp3")
+            sound4.play()
             score_coins -= 10
             if score_coins <= 0:
+                score_coins = 0
                 hero.died = True
+                res_of_play()
 
         if pygame.sprite.groupcollide(coins_group, mushroom_group, True, False):
             pass
 
         if pygame.sprite.groupcollide(false_coin_group, mushroom_group, True, False):
+            sound4 = pygame.mixer.Sound("Data/BlackForrest/fall_coin.mp3")
+            sound4.play()
+            mushroom_group.empty()
             mushroom.kill()
 
         if pygame.sprite.groupcollide(coins_group, block_group, True, False):
