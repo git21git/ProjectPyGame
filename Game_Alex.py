@@ -306,6 +306,7 @@ class Player(pygame.sprite.Sprite):
         self.sound1 = pygame.mixer.Sound('Data/BlackForrest/jump.mp3')
         self.sound2 = pygame.mixer.Sound('Data/BlackForrest/shag.mp3')
         self.sound3 = pygame.mixer.Sound('Data/BlackForrest/coin..mp3')
+        self.sound4 = pygame.mixer.Sound('Data/BlackForrest/smeh.mp3')
         self.died = False
         # self.onGround = onGround
         self.add(player_group, all_sprites)
@@ -341,6 +342,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, *args):
         if pygame.sprite.spritecollideany(self, mushroom_group):
+            self.sound4.play()
             global XP
             self.counter += 1
             if self.counter == 1 or self.counter % 5 == 0:
@@ -390,7 +392,6 @@ class FalseCoins(pygame.sprite.Sprite):
         if self.rect.y % 8 == 0:
             self.counter += 1
             self.image = pygame.transform.scale(false_coin_images[self.counter % 4], (16, 16))
-
 
 
 class Mushroom(pygame.sprite.Sprite):
@@ -492,8 +493,7 @@ def game_forrest():
         if onGround:  # Если герой не земле
             hero.fall()
 
-        if score_time % 100 == 0 and score_time % 1000 != 0:  # Можно использовать как уровень сложности, типо число поменять на 50, если уровень
-            #  действительно сложный!
+        if score_time % 100 == 0 and score_time % 1000 != 0:
             Coins()
 
         if score_time % 1000 == 0:
