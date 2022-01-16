@@ -96,6 +96,11 @@ tile_images = {
 coin_images = [load_image("Coin_1_pos.png", colorkey=-1), load_image("Coin_2_pos.png", colorkey=-1),
                load_image("Coin_3_pos.png", colorkey=-1), load_image("Coin_4_pos.png", colorkey=-1)]
 
+false_coin_images = [pygame.transform.scale(load_image("False_coin_1_pos.png", colorkey=-1), (16, 16)),
+                     pygame.transform.scale(load_image("False_coin_2_pos.png", colorkey=-1), (16, 16)),
+                     pygame.transform.scale(load_image("False_coin_3_pos.png", colorkey=-1), (16, 16)),
+                     pygame.transform.scale(load_image("False_coin_4_pos.png", colorkey=-1), (16, 16))]
+
 mushroom_images = [load_image("Mushroom_1_pos.png", colorkey=-1),
                    load_image("Mushroom_2_pos.png", colorkey=-1),
                    load_image("Mushroom_3_pos.png", colorkey=-1),
@@ -121,6 +126,7 @@ player_group = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 block_group = pygame.sprite.Group()
 coins_group = pygame.sprite.Group()
+false_coin_group = pygame.sprite.Group()
 menu_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
 flying_eye = pygame.sprite.Group()
@@ -348,6 +354,26 @@ class Coins(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(coin_images[self.counter % 4], (16, 16))
 
 
+class FalseCoins(pygame.sprite.Sprite):
+
+    def __init__(self):
+        super().__init__()
+        list_with_blocks_centers = [17, 67, 117, 167, 217, 267, 317, 367, 417, 467, 517, 567]
+        self.image = coin_images[0]
+        self.image = pygame.transform.scale(self.image, (16, 16))
+        self.rect = self.image.get_rect()
+        self.rect.x = list_with_blocks_centers[random.randint(0, 11)]
+        self.rect.y = 0
+        self.counter = 0
+        self.add(false_coin_group, all_sprites)
+
+    def update(self, *args):
+        self.rect = self.rect.move(0, +1)
+        if self.rect.y % 8 == 0:
+            self.counter += 1
+            self.image = pygame.transform.scale(false_coin_images[self.counter % 4], (16, 16))
+
+
 class Mushroom(pygame.sprite.Sprite):
 
     def __init__(self):
@@ -413,7 +439,7 @@ pygame.mixer.init()
 
 def game_forrest():
     global score_coins, XP, motion
-    # start_screen()
+
     pygame.mixer.music.load('Data/BlackForrest/Trivium - Built To Fall.mp3')
     pygame.mixer.music.play()
     build_level()
@@ -424,7 +450,6 @@ def game_forrest():
     running = True
     while running:
         pygame.mouse.set_visible(False)
-        infinityRun = False
         score_time += 1
         all_sprites.update()
         for event in pygame.event.get():
@@ -436,19 +461,13 @@ def game_forrest():
                     hero.move_down()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    infinityRun = True
-                    motion = 'lef'
                     hero.move_left()
                     if pygame.sprite.spritecollideany(hero, vertical_borders):
                         hero.move_right()
                 if event.key == pygame.K_RIGHT:
-                    infinityRun = True
-                    motion = 'righ'
                     hero.move_right()
                     if pygame.sprite.spritecollideany(hero, vertical_borders):
                         hero.move_left()
-            if event.type == pygame.KEYUP:
-                motion = 'sto'
         if jump:  # Если герой не достиг конечной точки прыжка
             hero.move_up()
         if onGround:  # Если герой не земле
@@ -457,11 +476,9 @@ def game_forrest():
         if score_time % 100 == 0:  # Можно использовать как уровень сложности, типо число поменять на 50, если уровень
             #  действительно сложный!
             Coins()
-        if score_time % 10 == 0 and not infinityRun:  # реализация плавного непрерывного движения
-            if motion == 'left' and hero.rect.x > 0:
-                hero.move_left()
-            elif motion == 'right' and hero.rect.x < WIDTH - 50:
-                hero.move_right()
+
+        if score_time % 1000 == 0:
+            FalseCoins()
 
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
@@ -474,12 +491,27 @@ def game_forrest():
         menu_group.update()
         pygame.display.flip()
         if pygame.sprite.groupcollide(player_group, coins_group, False, True):
+            sound3 = pygame.mixer.Sound("Data/BlackForrest/coin..mp3")
+            sound3.play()
             score_coins += 1
+
+        if pygame.sprite.groupcollide(player_group, false_coin_group, False, True):
+            score_coins -= 10
+            if score_coins <= 0:
+                hero.died = True
+
         if pygame.sprite.groupcollide(coins_group, mushroom_group, True, False):
-            """Гриб съел монетку, можно что-то придумать"""
             pass
+
+        if pygame.sprite.groupcollide(false_coin_group, mushroom_group, True, False):
+            mushroom.kill()
+
         if pygame.sprite.groupcollide(coins_group, block_group, True, False):
             XP -= 1
+
+        if pygame.sprite.groupcollide(false_coin_group, block_group, True, False):
+            pass
+
         if XP <= 0:
             hero.died = True
             res_of_play()
