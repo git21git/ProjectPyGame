@@ -192,8 +192,8 @@ def res_of_play():
                 if event.type == pygame.QUIT:
                     pygame.mixer.music.pause()
                     terminate()
-                elif (event.type == pygame.KEYDOWN or \
-                        event.type == pygame.MOUSEBUTTONDOWN) and counter > 200:
+                elif (event.type == pygame.KEYDOWN or
+                      event.type == pygame.MOUSEBUTTONDOWN) and counter > 200:
                     # End()
                     pygame.mixer.music.pause()
                     if score_coins > 50:
@@ -240,7 +240,7 @@ def res_of_play():
                             Border(-10, -1, -10, HEIGHT + 1)
                             Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
 
-                            pygame.init()
+                            # pygame.init() уже не понадобится, из-за 405 строчки (перед game_forrest)
                             game_forrest()
                         if exit_btn.clicked:
                             final_game_screen()
@@ -369,6 +369,7 @@ class Mushroom(pygame.sprite.Sprite):
         if self.rect.x < WIDTH - 25 and self.image in mushroom_images:
             self.rect = self.rect.move(+1, 0)
         elif self.rect.x < WIDTH - 25 and self.image in mushroom_reverse_images and self.rect.x > 0:
+            # WIDTH - 25 > self.rect.x > 0 and self.image in mushroom_reverse_images так тоже работает))
             self.rect = self.rect.move(-1, 0)
         elif self.rect.x >= WIDTH - tile_size and self.image in mushroom_images:
             self.image = mushroom_reverse_images[self.counter % 8]
@@ -403,6 +404,11 @@ Border(-10, -1, -10, HEIGHT + 1)
 Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
 
 pygame.init()
+pygame.mixer.init()
+
+
+# Звуки загружались без иниц. mixer,
+# Поэтому при закрытии была ошибка: [src/libmpg123/id3.c:482] error: No comment text / valid description?
 
 
 def game_forrest():
@@ -424,7 +430,7 @@ def game_forrest():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP and onGround == False:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP and not onGround:
                 hero.move_up()
                 if pygame.sprite.spritecollideany(hero, horizontal_borders):
                     hero.move_down()

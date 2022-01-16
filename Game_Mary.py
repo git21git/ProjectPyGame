@@ -1,8 +1,10 @@
 import random
-
 from final_screen import final_game_screen
 from main_functions import *
+from pygame import mixer
 
+pygame.mixer.pre_init()
+mixer.init()
 pygame.init()
 size = screen_width, screen_height = (645, 400)
 tile_size = 50
@@ -34,7 +36,7 @@ player_image_left = load_image('snow/snowman_left.png', color_key=-1)
 start_img = load_image('snow/btn_start.png')
 bg = load_image('snow/bg.png')
 back_img = load_image('snow/back_img.png', color_key=-1)
-# menu_img = load_image('snow/menu_img.png')
+rules_img = load_image('snow/rules_img.png', color_key=-1)
 
 levels = ['snow/level_1.txt', 'snow/level_2.txt', 'snow/level_3.txt',
           'snow/level_4.txt', 'snow/level_5.txt']
@@ -47,6 +49,24 @@ max_level = len(levels)
 white = (255, 255, 255)
 
 motion = 'STOP'  # по умолчанию — стоим, флаг для непрерывного движения
+
+# подключение музыки
+main_music_loud = 0.5
+signal_sound_loud = 1
+"""Разная музыка на каждом уровне, пока не надо
+# musics = []
+# for i in range(1, 1 + max_level):
+# musics += ['data/music{i}.mp3']"""
+coin_sound = pygame.mixer.Sound('data/snow/music/coin.mp3')
+coin_sound.set_volume(signal_sound_loud)
+buckets_sound = pygame.mixer.Sound('data/snow/music/bucket.mp3')
+buckets_sound.set_volume(signal_sound_loud)
+stop_fire_sound = pygame.mixer.Sound('data/snow/music/stop_fire.mp3')
+stop_fire_sound.set_volume(signal_sound_loud)
+new_level_sound = pygame.mixer.Sound('data/snow/music/new_level.mp3')
+new_level_sound.set_volume(signal_sound_loud)
+game_over_sound = pygame.mixer.Sound('data/snow/music/game_over.mp3')
+game_over_sound.set_volume(signal_sound_loud)
 
 
 def generate_level(level):
@@ -260,15 +280,16 @@ def menu_snowman_game():
     pygame.mouse.set_visible(True)
     running = True
     start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
-                       screen_height // 2 - start_img.get_height() // 2, start_img)
+                       screen_height // 2 - start_img.get_height() - 20, start_img)
     go_back = Button(10, 10, back_img)
-    # menu = Button(screen_width // 2 - menu_img.get_width() // 2,
-    #              screen_height // 2 - menu_img.get_height() // 2, menu_img)
+    rules = Button(screen_width // 2 - rules_img.get_width() // 2,
+                   screen_height // 2 + 20, rules_img)
     while running:
         fon = pygame.transform.scale(bg, screen_size)
         screen.blit(fon, (0, 0))
         start_btn.update()
         go_back.update()
+        rules.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -276,6 +297,8 @@ def menu_snowman_game():
 
         if start_btn.clicked:
             game_snowman()
+        if rules.clicked:
+            print('rules')
         if go_back.clicked:
             return True
 
@@ -436,6 +459,7 @@ def game_snowman():
         if level_completed:
             cur_level += 1
             open_level(cur_level)
+            new_level_sound.play()
             level_completed = False
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
@@ -477,8 +501,10 @@ def game_snowman():
         menu_group.update()
 
         if pygame.sprite.groupcollide(player_group, coins_group, False, True):
+            coin_sound.play()
             score_coins += 1
         if pygame.sprite.groupcollide(player_group, bucket_group, False, True):
+            buckets_sound.play()
             score_buckets += 1
         if pygame.sprite.groupcollide(player_group, exit_group, False, False):
             level_completed = True
@@ -487,9 +513,11 @@ def game_snowman():
             running = False
         if pygame.sprite.groupcollide(player_group, fire_group, False, True):
             if score_buckets < 1:
+                game_over_sound.play()
                 player.died = True
                 running = False
             else:
+                stop_fire_sound.play()
                 score_buckets -= 1
 
         if player.died:
