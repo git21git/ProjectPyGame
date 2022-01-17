@@ -32,11 +32,14 @@ score_coins = 0
 score_time = 0
 levels = ['mario/level_1.txt', 'mario/level_2.txt', 'mario/level_3.txt',
           'mario/level_4.txt', 'mario/level_5.txt', 'mario/level_6.txt']
+music = ['data/mario/portal.mp3', 'data/mario/field.mp3',
+         'data/mario/peace.mp3', 'data/mario/castle.mp3',
+         'data/mario/forest.mp3', 'data/mario/win.mp3']
 f_lvl = [load_image('mario/start_mario.jpg'), load_image('mario/second_peyzaj.jpg'),
          load_image('mario/third_peizaj.jpg'), load_image('mario/far_castle.jpeg'),
          load_image('mario/black_forrest.jpg'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
-n_lvl = ['Начало', 'Так держать', 'Продолжай!',
-         'Бонусный уровень', 'Black forrest', 'Спаси принцессу!']  # Названия для уровней
+n_lvl = ['Портал в лесу', 'Луг деревни Атрейдес', 'Лечебница Аркрайт',
+         'Проход через горы', 'Темный лес', 'Замок принцессы']  # Названия для уровней
 max_level = len(levels)
 
 
@@ -50,14 +53,24 @@ def draw_mini_text(text, color, pos):
 
 def generate_level(level):
     new_player, x, y = None, None, None
+    list_with_walls = list()
+    list_with_walls.clear()
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
                 pass
             elif level[y][x] == 'M':
-                Tile('menu', x, y)
+                til = Tile('menu', x, y)
+                img = til.image
+                img_rect = til.rect
+                tile = (img, img_rect)
+                list_with_walls.append(tile)
             elif level[y][x] == '#':
-                Wall(x, y)
+                wall = Wall(x, y)
+                img = wall.image
+                img_rect = wall.rect
+                tile = (img, img_rect)
+                list_with_walls.append(tile)
             elif level[y][x] == '@':
                 new_player = Player(x, y)
                 level[y][x] = "."
@@ -68,7 +81,7 @@ def generate_level(level):
             elif level[y][x] == '*':
                 AnimatedSprite(load_image("mario/menu_coins.png", color_key=-1), 3, 2,
                                tile_size * x + tile_size // 4, tile_size * y + tile_size // 4, coins_group, 9)
-    return new_player, x, y
+    return new_player, x, y, list_with_walls
 
 
 class SpriteGroup(pygame.sprite.Group):
@@ -92,6 +105,9 @@ class Sprite(pygame.sprite.Sprite):
 
 
 def menu_mario_game():
+    pygame.mixer.music.load("data/mario/honor-and-sword-main.mp3")
+    pygame.mixer.music.play()
+    sound_btn = pygame.mixer.Sound("data/BlackForrest/button (2).mp3")
     pygame.mouse.set_visible(True)
     running = True
     start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
@@ -107,8 +123,11 @@ def menu_mario_game():
                 terminate()
 
         if start_btn.clicked:
+            sound_btn.play()
+            pygame.mixer.music.stop()
             game_mario()
         if go_back.clicked:
+            sound_btn.play()
             return True
 
         pygame.display.flip()
@@ -162,15 +181,81 @@ class Player(Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(hero_group)
         self.image = player_image
+        self.index = 0
+        self.counter = 0
+
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+
+        self.gravity = 0
+        self.notOnGround = True
+        self.jumped = False
+        self.direction = 0
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.start = tile_width * pos_x + 15, tile_height * pos_y + 5
         self.pos = (pos_x, pos_y)
         self.died = False
 
-    def move(self, x, y):
-        self.pos = (x, y)
-        self.rect = self.image.get_rect().move(
-            tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
+    def update(self):
+        global onGround, level_completed
+        move_x = 0
+        move_y = 0
+
+        moving = 4
+
+        if not hero.died:
+            key = pygame.key.get_pressed()
+            if key[pygame.K_UP] and not self.jumped and not self.notOnGround:
+                self.gravity = -17
+                self.jumped = True
+            if not key[pygame.K_UP]:
+                self.jumped = False
+            if key[pygame.K_LEFT]:
+                move_x -= moving
+                self.counter += 1
+                self.direction = -1
+            if key[pygame.K_RIGHT]:
+                move_x += moving
+                self.counter += 1
+                self.direction = 1
+            if not key[pygame.K_LEFT] and not key[pygame.K_RIGHT]:
+                self.counter = 0
+                self.index = 0
+            if self.rect.x >= WIDTH:
+                self.rect = self.image.get_rect().move(self.rect.x % WIDTH, self.rect.y)
+            if self.rect.x <= 0:
+                self.rect = self.image.get_rect().move(WIDTH, self.rect.y)
+            if self.rect.y >= HEIGHT:
+                self.rect = self.image.get_rect().move(self.start)
+            self.gravity += 1
+            if self.gravity > 10:
+                self.gravity = 10
+            move_y += self.gravity
+
+            self.notOnGround = True
+
+            for tile in lst:
+                if tile[1].colliderect(self.rect.x + move_x, self.rect.y, self.width, self.height):
+                    move_x = 0
+
+                if tile[1].colliderect(self.rect.x, self.rect.y + move_y, self.width, self.height):
+                    if self.gravity < 0:
+                        move_y = tile[1].bottom - self.rect.top
+                        self.gravity = 0
+
+                    elif self.gravity >= 0:
+                        move_y = tile[1].top - self.rect.bottom
+                        self.gravity = 0
+                        self.notOnGround = False
+
+            if pygame.sprite.spritecollide(self, exit_group, False):
+                level_completed = True
+
+            self.rect.x += move_x
+            self.rect.y += move_y
+
+        screen.blit(self.image, self.rect)
 
 
 class Exit(Sprite):
@@ -265,43 +350,8 @@ def start_screen():
         clock.tick(FPS)
 
 
-def move(hero, direction):
-    x, y = hero.pos
-    if direction == "up":
-        if y > 0 and level_map[int(y) - 1][int(x)] in [".", '2', 'P', '*']:
-            global onGround
-            if not onGround:
-                print(x, y)
-                if y > 0 and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*']:
-                    hero.move(x, y - 2)
-                elif y > 0 and level_map[int(y) - 3][int(x)] in [".", '2', 'P', '*'] \
-                        and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*']:
-                    hero.move(x, y - 3)
-
-                elif y > 0 and level_map[int(y) - 3][int(x)] in [".", '2', 'P', '*'] \
-                        and level_map[int(y) - 2][int(x)] in [".", '2', 'P', '*'] \
-                        and level_map[int(y) - 3][int(x)] in [".", '2', 'P', '*']:
-                    hero.move(x, y - 4)
-                else:
-                    hero.move(x, y - 1)
-                onGround = True
-    elif direction == "down":
-        if y < max_y and level_map[int(y) + 1][int(x)] in [".", '2', 'P', '*']:
-            hero.move(x, y + 1)
-    elif direction == "left":
-        if x > 0 and level_map[int(y)][int(x) - 1] in [".", '2', 'P', '*']:
-            # if onGround:
-            #     hero.move(x, y - 1)
-            hero.move(x - 1, y)
-    elif direction == "right":
-        if x < max_x and level_map[int(y)][int(x) + 1] in [".", '2', 'P', '*']:
-            # if onGround:
-            #     hero.move(x, y - 1)
-            hero.move(x + 1, y)
-
-
 def open_level(level):
-    global hero, max_x, max_y, level_map
+    global hero, max_x, max_y, level_map, lst
 
     sprite_group.empty()
     hero_group.empty()
@@ -309,21 +359,24 @@ def open_level(level):
     princess_group.empty()
     coins_group.empty()
     wall_group.empty()
+    pygame.mixer.music.load(music[level - 1])
+    pygame.mixer.music.play()
     level_map = load_level(levels[level - 1])
-    hero, max_x, max_y = generate_level(level_map)
+    hero, max_x, max_y, lst = generate_level(level_map)
 
 
 level_map = load_level(levels[cur_level])
-hero, max_x, max_y = generate_level(level_map)
+hero, max_x, max_y, lst = generate_level(level_map)
 
 
 def game_mario():
-    global score_time, level_completed, cur_level, score_coins
+    global score_time, level_completed, cur_level, score_coins, lst
     # start_screen()
     running = True
     while running:
         score_time += 1
         if level_completed:
+            pygame.mixer.music.stop()
             cur_level += 1
             open_level(cur_level)
             level_completed = False
@@ -331,31 +384,9 @@ def game_mario():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    move(hero, "up")
-                elif event.key == pygame.K_DOWN:
-                    move(hero, "down")
-                elif event.key == pygame.K_LEFT:
-                    move(hero, "left")
-                elif event.key == pygame.K_RIGHT:
-                    move(hero, "right")
-        x, y = hero.pos
-        if y < max_y and level_map[int(y) + 1][x] in [".", '2', 'P', '*']:
-            if level_map[int(y) + 1][x] not in ['#']:
-                if score_time % 8 == 0:
-                    hero.move(x, y + 1)
-            # else:
-            #     global onGround
-            #     onGround = False
-            #     print(10)
         else:
             global onGround
             onGround = False
-        #         hero.move(x, y + 0.1)
-        # if onGround:
-        #     # x, y = hero.pos
-        #     hero.fall()
 
         fon = pygame.transform.scale(f_lvl[cur_level - 1], (WIDTH, HEIGHT))  # картинка
         screen.blit(fon, (0, 0))
@@ -366,6 +397,7 @@ def game_mario():
         princess_group.draw(screen)
         coins_group.draw(screen)
         coins_group.update()
+        hero.update()
         clock.tick(FPS)
         # Меню:
         draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size + 5, 15))  # монетки
@@ -376,10 +408,13 @@ def game_mario():
         menu_group.draw(screen)
         menu_group.update()
         if pygame.sprite.groupcollide(hero_group, coins_group, False, True):
+            sound1 = pygame.mixer.Sound("data/mario/coin..mp3")
+            sound1.play()
             score_coins += 1
         if pygame.sprite.groupcollide(hero_group, exit_group, False, False):
             level_completed = True
         if pygame.sprite.groupcollide(hero_group, princess_group, False, False):
+            pygame.mixer.music.stop()
             res_of_play()
             running = False
         pygame.display.flip()

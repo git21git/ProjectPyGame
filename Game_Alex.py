@@ -266,6 +266,7 @@ def res_of_play():
                             # pygame.init() уже не понадобится, из-за 405 строчки (перед game_forrest)
                             game_forrest()
                         if exit_btn.clicked:
+                            pygame.mixer.music.stop()
                             sound_button.play()
                             final_game_screen()
             screen.blit(fon, (0, 0))
