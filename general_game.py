@@ -127,6 +127,7 @@ def menu_mario_game():
             pygame.mixer.music.stop()
             game_mario()
         if go_back.clicked:
+            pygame.mixer.music.stop()
             sound_btn.play()
             return True
 
