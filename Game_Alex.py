@@ -250,6 +250,7 @@ def res_of_play():
                             all_sprites.empty()
                             false_coin_group.empty()
                             hero.kill()
+                            mushroom.kill()
                             score_time = 0
                             score_coins = 0
                             XP = 5
@@ -304,6 +305,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
         self.counter = 0
         self.sound1 = pygame.mixer.Sound('Data/BlackForrest/jump.mp3')
+        self.sound1.set_volume(0.5)
         self.sound2 = pygame.mixer.Sound('Data/BlackForrest/shag.mp3')
         self.sound3 = pygame.mixer.Sound('Data/BlackForrest/coin..mp3')
         self.sound4 = pygame.mixer.Sound('Data/BlackForrest/smeh.mp3')
@@ -488,6 +490,26 @@ def game_forrest():
                     hero.move_right()
                     if pygame.sprite.spritecollideany(hero, vertical_borders):
                         hero.move_left()
+
+        if pygame.sprite.groupcollide(player_group, false_coin_group, False, True):
+            hero.sound1.stop()
+            sound5 = pygame.mixer.Sound("Data/BlackForrest/fall_coin.mp3")
+            sound5.play()
+            score_coins -= 10
+            if score_coins <= 0:
+                score_coins = 0
+                hero.died = True
+
+            if score_coins == 0:
+                draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12))
+                res_of_play()
+
+        if pygame.sprite.groupcollide(player_group, coins_group, False, True):
+            hero.sound1.stop()
+            sound3 = pygame.mixer.Sound("Data/BlackForrest/coin..mp3")
+            sound3.play()
+            score_coins += 1
+
         if jump:  # Если герой не достиг конечной точки прыжка
             hero.move_up()
         if onGround:  # Если герой не земле
@@ -509,26 +531,13 @@ def game_forrest():
         menu_group.draw(screen)
         menu_group.update()
         pygame.display.flip()
-        if pygame.sprite.groupcollide(player_group, coins_group, False, True):
-            sound3 = pygame.mixer.Sound("Data/BlackForrest/coin..mp3")
-            sound3.play()
-            score_coins += 1
-
-        if pygame.sprite.groupcollide(player_group, false_coin_group, False, True):
-            sound4 = pygame.mixer.Sound("Data/BlackForrest/fall_coin.mp3")
-            sound4.play()
-            score_coins -= 10
-            if score_coins <= 0:
-                score_coins = 0
-                hero.died = True
-                res_of_play()
 
         if pygame.sprite.groupcollide(coins_group, mushroom_group, True, False):
             pass
 
         if pygame.sprite.groupcollide(false_coin_group, mushroom_group, True, False):
-            sound4 = pygame.mixer.Sound("Data/BlackForrest/fall_coin.mp3")
-            sound4.play()
+            sound5 = pygame.mixer.Sound("Data/BlackForrest/fall_coin.mp3")
+            sound5.play()
             mushroom_group.empty()
             mushroom.kill()
 
