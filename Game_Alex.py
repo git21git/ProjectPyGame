@@ -47,8 +47,6 @@ XP = 5
 onGround = False
 jump = False
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Black Forrest')
-pygame.display.set_icon(load_image("BlackForrest/Black_Forrest.ico"))
 clock = pygame.time.Clock()
 
 tile_images = {
@@ -64,8 +62,8 @@ coin_images = [load_image("BlackForrest/Coin_1_pos.png", color_key=-1),
 
 false_coin_images = [pygame.transform.scale(load_image("BlackForrest/False_coin_1_pos.png", color_key=-1), (16, 16)),
                      pygame.transform.scale(load_image("BlackForrest/False_coin_2_pos.png", color_key=-1), (16, 16)),
-                     pygame.transform.scale(load_image("False_coin_3_pos.png", color_key=-1), (16, 16)),
-                     pygame.transform.scale(load_image("False_coin_4_pos.png", color_key=-1), (16, 16))]
+                     pygame.transform.scale(load_image("BlackForrest/False_coin_3_pos.png", color_key=-1), (16, 16)),
+                     pygame.transform.scale(load_image("BlackForrest/False_coin_4_pos.png", color_key=-1), (16, 16))]
 
 mushroom_images = [load_image("BlackForrest/Mushroom_1_pos.png", color_key=-1),
                    load_image("BlackForrest/Mushroom_2_pos.png", color_key=-1),
@@ -101,6 +99,10 @@ clocks = AnimatedSprite(load_image("BlackForrest/clocks.png", color_key=-1), 7, 
 heart_pic = load_image("BlackForrest/heart_sheet1.png", color_key=-1)
 start_img = load_image("BlackForrest/start_button.png", color_key=-1)
 back_img = load_image("BlackForrest/back_img.png", color_key=-1)
+hero_right = load_image("BlackForrest/Hero3_1_pos.png", color_key=-1)
+hero_left = pygame.transform.flip(load_image("BlackForrest/Hero3_1_pos.png", color_key=-1), True, False)
+hero_jump_right = load_image("BlackForrest/hero_jump.png", color_key=-1)
+hero_jump_left = pygame.transform.flip(load_image("BlackForrest/hero_jump.png", color_key=-1), True, False)
 back_img = pygame.transform.scale(back_img, (86, 41))
 start_img = pygame.transform.scale(start_img, (148, 68))
 heart_pic = pygame.transform.scale(heart_pic, (256, 26))
@@ -108,6 +110,8 @@ heart = AnimatedSprite(heart_pic, 4, 1, tile_size * 4 - 15, 0, menu_group, 10)
 
 
 def menu_forrest_game():
+    pygame.display.set_caption('Black Forrest')
+    pygame.display.set_icon(load_image("BlackForrest/Black_Forrest.ico"))
     pygame.mixer.music.load("Data/BlackForrest/start_window_black_forrest.mp3")
     pygame.mixer.music.play()
     pygame.mouse.set_visible(True)
@@ -283,6 +287,10 @@ class Player(pygame.sprite.Sprite):
         self.add(player_group, all_sprites)
 
     def move_up(self):
+        if hero.image == hero_right:
+            hero.image = hero_jump_right
+        elif hero.image == hero_left:
+            hero.image = hero_jump_left
         self.sound1.play()
         self.rect = self.rect.move(0, -10)
         global onGround
@@ -297,10 +305,12 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(0, +50)
 
     def move_left(self):
+        hero.image = hero_left
         self.sound2.play()
         self.rect = self.rect.move(-50, 0)
 
     def move_right(self):
+        hero.image = hero_right
         self.sound2.play()
         self.rect = self.rect.move(+50, 0)
 
@@ -426,6 +436,8 @@ pygame.mixer.init()
 def game_forrest():
     global score_coins, XP, motion
 
+    pygame.display.set_caption('Black Forrest')
+    pygame.display.set_icon(load_image("BlackForrest/Black_Forrest.ico"))
     pygame.mixer.music.load('Data/BlackForrest/Yuka Kitamura - Dark Souls III Soundtrack OST - Main Menu Theme.mp3')
     pygame.mixer.music.play()
     build_level()
