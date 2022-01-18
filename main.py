@@ -20,6 +20,7 @@ def start_progect_screen():
     fon = pygame.transform.scale(load_image('start/start.png'), (WIDTH, HEIGHT))  # стартовая картинка
     pressed = False
     while True:
+        pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()

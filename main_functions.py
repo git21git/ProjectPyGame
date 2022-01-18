@@ -7,6 +7,7 @@ import sys
 pygame.init()
 size = screen_width, screen_height = (645, 400)
 screen = pygame.display.set_mode(size)
+pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
 
 
 def load_image(name, color_key=None):

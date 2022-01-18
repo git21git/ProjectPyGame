@@ -6,11 +6,11 @@ from main_functions import *
 pygame.init()
 FPS = 60
 gravity = 0.5
-WIDTH, HEIGHT = 645, 400
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+SCREEN_WIDTH, SCREEN_HEIGHT = screen_size = (645, 400)
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
-screen_rect = (0, 0, WIDTH, HEIGHT)
+screen_rect = (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 
 
 def draw_text(screen):
@@ -23,7 +23,7 @@ def draw_text(screen):
     text_coord = 26
     for line in text:
         text = font.render(line, True, pygame.Color('white'))
-        text_x = WIDTH // 2 - text.get_width() // 2
+        text_x = SCREEN_WIDTH // 2 - text.get_width() // 2
         text_y = text_coord + text.get_height()
         text_coord = text_y
         screen.blit(text, (text_x, text_y))
@@ -89,8 +89,9 @@ star_group = pygame.sprite.Group()
 
 pygame.mouse.set_visible(False)
 for i in range(-300, 400, 50):
-    create_particles((WIDTH // 2 + i, 0))
-pygame.display.set_caption('ДОПИСАТЬ НАЗВАНИЕ')  # Название приложения
+    create_particles((SCREEN_WIDTH // 2 + i, 0))
+pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
+pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
 dragon = AnimatedSprite(load_image("final/dragon_sheet8x2.png", color_key=-1), 8, 2, 483, 299)
 girl = AnimatedSprite(load_image("final/girl.png", color_key=-1), 6, 1, 295, 299)
 bird = AnimatedSprite(load_image("final/bird.png", color_key=-1), 6, 2, 15, 1)
@@ -98,8 +99,6 @@ boy = AnimatedSprite(load_image("final/boy.png", color_key=-1), 5, 4, 20, 250)
 
 
 def final_game_screen():
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
     running = True
     while running:
         for event in pygame.event.get():
@@ -107,7 +106,7 @@ def final_game_screen():
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 create_particles(pygame.mouse.get_pos())
-        fon = pygame.transform.scale(load_image('final.png'), (WIDTH, HEIGHT))  # картинка
+        fon = pygame.transform.scale(load_image('final.png'), screen_size)  # картинка
         screen.blit(fon, (0, 0))
         draw_text(screen)
         all_sprites.draw(screen)

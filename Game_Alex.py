@@ -64,8 +64,8 @@ coin_images = [load_image("BlackForrest/Coin_1_pos.png", color_key=-1),
 
 false_coin_images = [pygame.transform.scale(load_image("BlackForrest/False_coin_1_pos.png", color_key=-1), (16, 16)),
                      pygame.transform.scale(load_image("BlackForrest/False_coin_2_pos.png", color_key=-1), (16, 16)),
-                     pygame.transform.scale(load_image("False_coin_3_pos.png", color_key=-1), (16, 16)),
-                     pygame.transform.scale(load_image("False_coin_4_pos.png", color_key=-1), (16, 16))]
+                     pygame.transform.scale(load_image("BlackForrest/False_coin_3_pos.png", color_key=-1), (16, 16)),
+                     pygame.transform.scale(load_image("BlackForrest/False_coin_4_pos.png", color_key=-1), (16, 16))]
 
 mushroom_images = [load_image("BlackForrest/Mushroom_1_pos.png", color_key=-1),
                    load_image("BlackForrest/Mushroom_2_pos.png", color_key=-1),
