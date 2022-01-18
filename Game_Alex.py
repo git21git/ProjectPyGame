@@ -320,6 +320,10 @@ class Player(pygame.sprite.Sprite):
         else:
             global onGround
             onGround = False
+            if hero.image == hero_jump_left:
+                hero.image = hero_left
+            if hero.image == hero_jump_right:
+                hero.image = hero_right
 
     def update(self, *args):
         if pygame.sprite.spritecollideany(self, mushroom_group):
