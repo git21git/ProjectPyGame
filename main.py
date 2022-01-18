@@ -41,6 +41,7 @@ def start_progect_screen():
                 houses.update(pygame.mouse)
         screen.blit(fon, (0, 0))
         houses.draw(screen)
+        screen.blit(py_small, (150, 64))
         pygame.display.flip()
         clock.tick(fps)
 
@@ -106,6 +107,7 @@ Houses(11, 85, houses, 'house_1')
 Houses(147, 130, houses, 'house_2')
 Houses(425, 132, houses, 'house_3')
 Houses(9, 307, houses, 'exit')
+py_small = load_image("start/py.png", color_key=-1)
 
 start_progect_screen()
 final_game_screen()
