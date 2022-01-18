@@ -11,41 +11,6 @@ def build_level():
         Tile("block", i, 7)
 
 
-def load_image(name, colorkey=None):
-    fullname = os.path.join('data/BlackForrest', name)
-    # если файл не существует, то выходим
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    if colorkey is not None:
-        image = image.convert()
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
-
-
-def draw_mini_text(text, color, pos):
-    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 25)
-    x, y = pos
-    text = font.render(text, True, color)
-    screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
-
-
-def draw_text(intro_text):
-    font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 40)
-    text_coord = 50
-    for line in intro_text:
-        text = font.render(line, True, pygame.Color(255, 96, 66))
-        text_x = WIDTH // 2 - text.get_width() // 2
-        text_y = text_coord + text.get_height()
-        text_coord = text_y + 10
-        screen.blit(text, (text_x, text_y))
-
-
 class AnimatedSprite(pygame.sprite.Sprite):
     """Класс анимации для спрайтов"""
 
@@ -83,40 +48,42 @@ onGround = False
 jump = False
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Black Forrest')
-pygame.display.set_icon(load_image("Black_Forrest.ico"))
+pygame.display.set_icon(load_image("BlackForrest/Black_Forrest.ico"))
 clock = pygame.time.Clock()
 
 tile_images = {
-    'block': load_image('block.png'),
-    'eye': load_image('Eye_1_pos.png', colorkey=-1),
-    'hero': load_image("Hero3_1_pos.png", colorkey=-1)
+    'block': load_image('BlackForrest/block.png'),
+    'eye': load_image('BlackForrest/Eye_1_pos.png', color_key=-1),
+    'hero': load_image("BlackForrest/Hero3_1_pos.png", color_key=-1)
 }
 
-coin_images = [load_image("Coin_1_pos.png", colorkey=-1), load_image("Coin_2_pos.png", colorkey=-1),
-               load_image("Coin_3_pos.png", colorkey=-1), load_image("Coin_4_pos.png", colorkey=-1)]
+coin_images = [load_image("BlackForrest/Coin_1_pos.png", color_key=-1),
+               load_image("BlackForrest/Coin_2_pos.png", color_key=-1),
+               load_image("BlackForrest/Coin_3_pos.png", color_key=-1),
+               load_image("BlackForrest/Coin_4_pos.png", color_key=-1)]
 
-false_coin_images = [pygame.transform.scale(load_image("False_coin_1_pos.png", colorkey=-1), (16, 16)),
-                     pygame.transform.scale(load_image("False_coin_2_pos.png", colorkey=-1), (16, 16)),
-                     pygame.transform.scale(load_image("False_coin_3_pos.png", colorkey=-1), (16, 16)),
-                     pygame.transform.scale(load_image("False_coin_4_pos.png", colorkey=-1), (16, 16))]
+false_coin_images = [pygame.transform.scale(load_image("BlackForrest/False_coin_1_pos.png", color_key=-1), (16, 16)),
+                     pygame.transform.scale(load_image("BlackForrest/False_coin_2_pos.png", color_key=-1), (16, 16)),
+                     pygame.transform.scale(load_image("False_coin_3_pos.png", color_key=-1), (16, 16)),
+                     pygame.transform.scale(load_image("False_coin_4_pos.png", color_key=-1), (16, 16))]
 
-mushroom_images = [load_image("Mushroom_1_pos.png", colorkey=-1),
-                   load_image("Mushroom_2_pos.png", colorkey=-1),
-                   load_image("Mushroom_3_pos.png", colorkey=-1),
-                   load_image("Mushroom_4_pos.png", colorkey=-1),
-                   load_image("Mushroom_5_pos.png", colorkey=-1),
-                   load_image("Mushroom_6_pos.png", colorkey=-1),
-                   load_image("Mushroom_7_pos.png", colorkey=-1),
-                   load_image("Mushroom_8_pos.png", colorkey=-1)]
+mushroom_images = [load_image("BlackForrest/Mushroom_1_pos.png", color_key=-1),
+                   load_image("BlackForrest/Mushroom_2_pos.png", color_key=-1),
+                   load_image("BlackForrest/Mushroom_3_pos.png", color_key=-1),
+                   load_image("BlackForrest/Mushroom_4_pos.png", color_key=-1),
+                   load_image("BlackForrest/Mushroom_5_pos.png", color_key=-1),
+                   load_image("BlackForrest/Mushroom_6_pos.png", color_key=-1),
+                   load_image("BlackForrest/Mushroom_7_pos.png", color_key=-1),
+                   load_image("BlackForrest/Mushroom_8_pos.png", color_key=-1)]
 
-mushroom_reverse_images = [load_image("m_Mushroom_1_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_2_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_3_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_4_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_5_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_6_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_7_pos.png", colorkey=-1),
-                           load_image("m_Mushroom_8_pos.png", colorkey=-1)]
+mushroom_reverse_images = [load_image("BlackForrest/m_Mushroom_1_pos.png", color_key=-1),
+                           load_image("BlackForrest/m_Mushroom_2_pos.png", color_key=-1),
+                           load_image("BlackForrest/m_Mushroom_3_pos.png", color_key=-1),
+                           load_image("BlackForrest/m_Mushroom_4_pos.png", color_key=-1),
+                           load_image("BlackForrest/m_Mushroom_5_pos.png", color_key=-1),
+                           load_image("BlackForrest/m_Mushroom_6_pos.png", color_key=-1),
+                           load_image("BlackForrest/m_Mushroom_7_pos.png", color_key=-1),
+                           load_image("BlackForrest/m_Mushroom_8_pos.png", color_key=-1)]
 
 all_sprites = pygame.sprite.Group()
 horizontal_borders = pygame.sprite.Group()
@@ -129,11 +96,11 @@ false_coin_group = pygame.sprite.Group()
 menu_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
 flying_eye = pygame.sprite.Group()
-coins = AnimatedSprite(load_image("Coin_Sheet.png", colorkey=-1), 4, 1, 6, 0, menu_group, 10)
-clocks = AnimatedSprite(load_image("clocks.png", colorkey=-1), 7, 2, tile_size * 2, 0, menu_group, 10)
-heart_pic = load_image("heart_sheet1.png", colorkey=-1)
-start_img = load_image("start_button.png", colorkey=-1)
-back_img = load_image("back_img.png", colorkey=-1)
+coins = AnimatedSprite(load_image("BlackForrest/Coin_Sheet.png", color_key=-1), 4, 1, 6, 0, menu_group, 10)
+clocks = AnimatedSprite(load_image("BlackForrest/clocks.png", color_key=-1), 7, 2, tile_size * 2, 0, menu_group, 10)
+heart_pic = load_image("BlackForrest/heart_sheet1.png", color_key=-1)
+start_img = load_image("BlackForrest/start_button.png", color_key=-1)
+back_img = load_image("BlackForrest/back_img.png", color_key=-1)
 back_img = pygame.transform.scale(back_img, (86, 41))
 start_img = pygame.transform.scale(start_img, (148, 68))
 heart_pic = pygame.transform.scale(heart_pic, (256, 26))
@@ -145,7 +112,7 @@ def menu_forrest_game():
     pygame.mixer.music.play()
     pygame.mouse.set_visible(True)
     intro_text = ["Black Forrest"]
-    fon = pygame.transform.scale(load_image("font_start.png"), size)
+    fon = pygame.transform.scale(load_image("BlackForrest/font_start.png"), size)
     screen.blit(fon, (0, 0))
     start_btn = Button(WIDTH // 2 - start_img.get_width() // 2,
                        HEIGHT // 2 - start_img.get_height() // 2 + 50, start_img)
@@ -200,7 +167,7 @@ def res_of_play():
         sound_button = pygame.mixer.Sound("Data/BlackForrest/button (2).mp3")
         pygame.mixer.music.play()
         counter = 0
-        fon = pygame.transform.scale(load_image('you_died.png'), (645, 400))
+        fon = pygame.transform.scale(load_image('BlackForrest/you_died.png'), (645, 400))
         while True:
             counter += 1
             for event in pygame.event.get():
@@ -216,21 +183,21 @@ def res_of_play():
                                       f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                                       '', f"Coins: {score_coins}"]
                         pygame.mixer.music.load("Data/BlackForrest/dark_souls_15. Four Kings.mp3")
-                        fon = pygame.transform.scale(load_image('you_won.png'), size)
+                        fon = pygame.transform.scale(load_image('BlackForrest/you_won.png'), size)
                     else:
                         intro_text = ["You died! I'm sorry...", "",
                                       f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                                       '', f"Coins: {score_coins}"]
                         pygame.mixer.music.load("Data/BlackForrest/when_you_lose.mp3")
-                        fon = pygame.transform.scale(load_image('you_not_won.png'), size)
+                        fon = pygame.transform.scale(load_image('BlackForrest/you_not_won.png'), size)
                     pygame.mixer.music.play()
-                    restart = Button(50,
-                                     HEIGHT - 87,
-                                     pygame.transform.scale(load_image("restart_btn.png", colorkey=-1), (88, 38)))
+                    restart = Button(50, HEIGHT - 87,
+                                     pygame.transform.scale(load_image("BlackForrest/restart_btn.png", color_key=-1),
+                                                            (88, 38)))
 
-                    exit_btn = Button(WIDTH - 50 - 88,
-                                      HEIGHT - 87,
-                                      pygame.transform.scale(load_image("exit_btn.png", colorkey=-1), (88, 38)))
+                    exit_btn = Button(WIDTH - 50 - 88, HEIGHT - 87,
+                                      pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1),
+                                                             (88, 38)))
 
                     while True:
                         pygame.mouse.set_visible(True)
@@ -239,7 +206,8 @@ def res_of_play():
                                 pygame.mixer.music.pause()
                                 terminate()
                         screen.blit(fon, (0, 0))
-                        draw_text(intro_text)
+                        draw_text(intro_text, Font="data/BlackForrest/SilafejiraRegular.otf",
+                                  color=pygame.Color(255, 96, 66))
                         restart.update()
                         exit_btn.update()
                         pygame.display.flip()
@@ -274,7 +242,7 @@ def res_of_play():
 
 
 class BlackForrest(pygame.sprite.Sprite):
-    image = load_image("my_font.png", colorkey=None)
+    image = load_image("BlackForrest/my_font.png", color_key=None)
     image = pygame.transform.scale(image, (WIDTH, HEIGHT))
 
     def __init__(self):
@@ -417,8 +385,7 @@ class Mushroom(pygame.sprite.Sprite):
                 self.image = mushroom_reverse_images[self.counter % 8]
         if self.rect.x < WIDTH - 25 and self.image in mushroom_images:
             self.rect = self.rect.move(+1, 0)
-        elif self.rect.x < WIDTH - 25 and self.image in mushroom_reverse_images and self.rect.x > 0:
-            # WIDTH - 25 > self.rect.x > 0 and self.image in mushroom_reverse_images так тоже работает))
+        elif WIDTH - 25 > self.rect.x > 0 and self.image in mushroom_reverse_images:
             self.rect = self.rect.move(-1, 0)
         elif self.rect.x >= WIDTH - tile_size and self.image in mushroom_images:
             self.image = mushroom_reverse_images[self.counter % 8]
@@ -456,10 +423,6 @@ pygame.init()
 pygame.mixer.init()
 
 
-# Звуки загружались без иниц. mixer,
-# Поэтому при закрытии была ошибка: [src/libmpg123/id3.c:482] error: No comment text / valid description?
-
-
 def game_forrest():
     global score_coins, XP, motion
 
@@ -467,8 +430,6 @@ def game_forrest():
     pygame.mixer.music.play()
     build_level()
     fps = 85
-    # score_time = 0
-    clock = pygame.time.Clock()
     global score_time
     running = True
     while running:
@@ -502,7 +463,8 @@ def game_forrest():
                 hero.died = True
 
             if score_coins == 0:
-                draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12))
+                draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12),
+                               Font="data/BlackForrest/SilafejiraRegular.otf", size=25)
                 res_of_play()
 
         if pygame.sprite.groupcollide(player_group, coins_group, False, True):
@@ -525,16 +487,16 @@ def game_forrest():
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
         pygame.draw.rect(screen, (0, 0, 0), (0, 0, WIDTH, tile_size // 2))
-        draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12))
+        draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12),
+                       Font="data/BlackForrest/SilafejiraRegular.otf", size=25)
         time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
-        draw_mini_text(f'  {time}', (184, 15, 10), (tile_size * 3, 12))
-        draw_mini_text(f'X  {XP}', (184, 15, 10), (tile_size * 5, 12))
+        draw_mini_text(f'  {time}', (184, 15, 10), (tile_size * 3, 12),
+                       Font="data/BlackForrest/SilafejiraRegular.otf", size=25)
+        draw_mini_text(f'X  {XP}', (184, 15, 10), (tile_size * 5, 12),
+                       Font="data/BlackForrest/SilafejiraRegular.otf", size=25)
         menu_group.draw(screen)
         menu_group.update()
         pygame.display.flip()
-
-        if pygame.sprite.groupcollide(coins_group, mushroom_group, True, False):
-            pass
 
         if pygame.sprite.groupcollide(false_coin_group, mushroom_group, True, False):
             sound5 = pygame.mixer.Sound("Data/BlackForrest/fall_coin.mp3")
@@ -545,8 +507,8 @@ def game_forrest():
         if pygame.sprite.groupcollide(coins_group, block_group, True, False):
             XP -= 1
 
-        if pygame.sprite.groupcollide(false_coin_group, block_group, True, False):
-            pass
+        pygame.sprite.groupcollide(false_coin_group, block_group, True, False)
+        pygame.sprite.groupcollide(coins_group, mushroom_group, True, False)
 
         if XP <= 0:
             hero.died = True

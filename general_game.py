@@ -1,4 +1,3 @@
-from Game_Mary import draw_text
 from final_screen import final_game_screen
 from main_functions import *
 

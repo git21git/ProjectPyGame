@@ -44,6 +44,7 @@ def load_level(filename):
 
 class Button:
     """Класс всех кнопок"""
+
     def __init__(self, x, y, image):
         self.image = image
         self.rect = self.image.get_rect()
@@ -62,3 +63,23 @@ class Button:
             self.clicked = False
 
         screen.blit(self.image, self.rect)
+
+
+def draw_text(intro_text, Font=None, color=pygame.Color('white')):
+    """Функция для отображения текста"""
+    font = pygame.font.Font(Font, 40)
+    text_coord = 50
+    for line in intro_text:
+        text = font.render(line, True, color)
+        text_x = screen_width // 2 - text.get_width() // 2
+        text_y = text_coord + text.get_height()
+        text_coord = text_y + 10
+        screen.blit(text, (text_x, text_y))
+
+
+def draw_mini_text(text, color, pos, Font=None, size=20):
+    """Рисование текста маленького размера для меню"""
+    font = pygame.font.Font(Font, size)
+    x, y = pos
+    text = font.render(text, True, color)
+    screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))

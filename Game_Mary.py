@@ -257,25 +257,6 @@ class Camera:
         self.dy = -(target.rect.y + target.rect.h // 2 - screen_height // 2)
 
 
-def draw_mini_text(text, color, pos):
-    """Рисование текста маленького размера для меню (снеговик)"""
-    font = pygame.font.Font(None, 20)
-    x, y = pos
-    text = font.render(text, True, color)
-    screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
-
-
-def draw_text(intro_text):
-    font = pygame.font.Font(None, 40)
-    text_coord = 50
-    for line in intro_text:
-        text = font.render(line, True, pygame.Color('white'))
-        text_x = screen_width // 2 - text.get_width() // 2
-        text_y = text_coord + text.get_height()
-        text_coord = text_y + 10
-        screen.blit(text, (text_x, text_y))
-
-
 def menu_snowman_game():
     pygame.mouse.set_visible(True)
     running = True

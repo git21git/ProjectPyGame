@@ -6,7 +6,7 @@ from main_functions import *
 
 size = WIDTH, HEIGHT = 645, 400
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('ДОПИСАТЬ НАЗВАНИЕ')  # Название приложения
+pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
 pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
 pygame.mouse.set_visible(True)
 all_sprites = pygame.sprite.Group()
