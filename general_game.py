@@ -2,8 +2,7 @@ from final_screen import final_game_screen
 from main_functions import *
 
 pygame.init()
-screen_size = (645, 400)
-WIDTH, HEIGHT = 645, 400
+WIDTH, HEIGHT = screen_size = (645, 400)
 screen = pygame.display.set_mode(screen_size)
 FPS = 80
 onGround = False
@@ -104,6 +103,7 @@ class Sprite(pygame.sprite.Sprite):
 
 
 def menu_mario_game():
+    pygame.display.set_caption('Mario: Multiverse')  # Название приложения
     pygame.mixer.music.load("data/mario/honor-and-sword-main.mp3")
     pygame.mixer.music.play()
     sound_btn = pygame.mixer.Sound("data/BlackForrest/button (2).mp3")
@@ -322,7 +322,7 @@ door = AnimatedSprite(tile_images['menu_door'], 1, 1, tile_size * 11.2, 0, menu_
 
 
 def start_screen():
-    pygame.display.set_caption('Марио')  # Название приложения
+    pygame.display.set_caption('Mario: Multiverse')  # Название приложения
     intro_text = ['НУЖНО СДЕЛАТЬ МЕНЮ)))', "",
                   "Герой двигается",
                   "Карта на месте", '', 'Press any to start game']

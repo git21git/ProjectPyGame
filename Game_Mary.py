@@ -6,14 +6,12 @@ from pygame import mixer
 pygame.mixer.pre_init()
 mixer.init()
 pygame.init()
-size = screen_width, screen_height = (645, 400)
+SCREEN_WIDTH, SCREEN_HEIGHT = screen_size = (645, 400)
 tile_size = 50
-screen_size = (645, 400)
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(screen_size)
 clock = pygame.time.Clock()
 fps = 60
-WIDTH, HEIGHT = 645, 400
-screen_rect = (0, 0, WIDTH, HEIGHT)
+screen_rect = (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 # Состояние игры
 score_time = 0
 score_coins = 0
@@ -201,7 +199,6 @@ class Bucket(Sprite):
         self.add(bucket_group, all_sprites)
 
 
-#
 class Finish(Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(finish_group)
@@ -211,7 +208,6 @@ class Finish(Sprite):
         self.add(finish_group, all_sprites)
 
 
-#
 class Exit(Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(exit_group)
@@ -221,7 +217,6 @@ class Exit(Sprite):
         self.add(exit_group, all_sprites)
 
 
-# монетки
 class Coins(Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(coins_group)
@@ -253,24 +248,25 @@ class Camera:
             obj.rect.y += -obj.rect.height * (1 + self.field_size[1])
 
     def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - screen_width // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - screen_height // 2)
+        self.dx = -(target.rect.x + target.rect.w // 2 - SCREEN_WIDTH // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - SCREEN_HEIGHT // 2)
 
 
 def menu_snowman_game():
+    pygame.display.set_caption('Snow_Snow')
+    pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
     pygame.mouse.set_visible(True)
     running = True
-    start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
-                       screen_height // 2 - start_img.get_height() - 20, start_img)
+    start_btn = Button(SCREEN_WIDTH // 2 - start_img.get_width() // 2,
+                       SCREEN_HEIGHT // 2 - start_img.get_height() - 20, start_img)
     go_back = Button(10, 10, back_img)
-    rules = Button(screen_width // 2 - rules_img.get_width() // 2,
-                   screen_height // 2 + 20, rules_img)
+    rules = Button(SCREEN_WIDTH // 2 - rules_img.get_width() // 2,
+                   SCREEN_HEIGHT // 2 + 20, rules_img)
     while running:
         fon = pygame.transform.scale(bg, screen_size)
         screen.blit(fon, (0, 0))
         start_btn.update()
         go_back.update()
-        rules.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -348,13 +344,13 @@ def res_of_play():
     pygame.mouse.set_visible(False)
     if not player.died:
         for i in range(-300, 310, 50):
-            create_particles((WIDTH // 2 + i, 0))
+            create_particles((SCREEN_WIDTH // 2 + i, 0))
         _ = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
         _ = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
         intro_text = ["Вы Выиграли!", "",
                       f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                       '', f"Монеты: {score_coins}"]
-        fon = pygame.transform.scale(load_image('final.png'), size)
+        fon = pygame.transform.scale(load_image('final.png'), screen_size)
         screen.blit(fon, (0, 0))
         draw_text(intro_text)
     else:
@@ -395,7 +391,8 @@ menu_group = pygame.sprite.Group()
 coins = AnimatedSprite(load_image("snow/menu_coins.png", color_key=-1), 3, 2, 5, 0, menu_group, 9)
 clocks = AnimatedSprite(load_image("snow/menu_clocks.png", color_key=-1), 7, 2, tile_size + 12, 0, menu_group, 6)
 waters = AnimatedSprite(load_image("snow/menu_water.png", color_key=-1), 3, 2, tile_size * 2.9, 0, menu_group, 8)
-doors = AnimatedSprite(load_image("snow/menu_doors.png", color_key=-1), 2, 1, WIDTH - tile_size * 1.3, 0, menu_group,
+doors = AnimatedSprite(load_image("snow/menu_doors.png", color_key=-1), 2, 1, SCREEN_WIDTH - tile_size * 1.3, 0,
+                       menu_group,
                        35)
 
 level_completed = False
@@ -434,7 +431,8 @@ def move(hero, direction):
 def game_snowman():
     global score_time, score_buckets, score_coins, level_completed, cur_level, motion
     running = True
-    pygame.display.set_caption('Снеговик')
+    pygame.display.set_caption('Snow_Snow')
+    pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
     while running:
         score_time += 1
         if level_completed:
@@ -470,14 +468,14 @@ def game_snowman():
         bucket_group.draw(screen)
 
         # Меню:
-        pygame.draw.rect(screen, (181, 146, 146), (0, 0, WIDTH, tile_size // 2))
+        pygame.draw.rect(screen, (181, 146, 146), (0, 0, SCREEN_WIDTH, tile_size // 2))
         draw_mini_text(f'X {score_coins}', white, (tile_size - 10, 12))
         time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
         draw_mini_text(f'  {time}', white, (tile_size * 2, 12))
         draw_mini_text(f'X {score_buckets}', white, (tile_size * 3.75, 12))
         text = n_lvl[levels[cur_level]]
         draw_mini_text(f'LEVEL {cur_level + 1}: {text}', white, (tile_size * 7, 12))
-        draw_mini_text(f'X {cur_level}', white, (WIDTH - tile_size // 2, 12))
+        draw_mini_text(f'X {cur_level}', white, (SCREEN_WIDTH - tile_size // 2, 12))
         menu_group.draw(screen)
         menu_group.update()
 
