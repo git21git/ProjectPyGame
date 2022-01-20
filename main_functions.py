@@ -2,11 +2,13 @@
     (для исключения повторения их в файлах проекта)"""
 import os
 import pygame
+import random
 import sys
 
 pygame.init()
-size = screen_width, screen_height = (645, 400)
-screen = pygame.display.set_mode(size)
+SCREEN_WIDTH, SCREEN_HEIGHT = screen_size = (645, 400)
+screen_rect = (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+screen = pygame.display.set_mode(screen_size)
 pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
 
 
@@ -72,7 +74,7 @@ def draw_text(intro_text, Font=None, color=pygame.Color('white')):
     text_coord = 50
     for line in intro_text:
         text = font.render(line, True, color)
-        text_x = screen_width // 2 - text.get_width() // 2
+        text_x = SCREEN_WIDTH // 2 - text.get_width() // 2
         text_y = text_coord + text.get_height()
         text_coord = text_y + 10
         screen.blit(text, (text_x, text_y))

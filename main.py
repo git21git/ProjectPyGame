@@ -1,3 +1,4 @@
+import random
 from Game_Alex import menu_forrest_game
 from Game_Mary import main_gameplay_snow
 from final_screen import final_game_screen
@@ -9,10 +10,43 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
 pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
 pygame.mouse.set_visible(True)
+FPS = 60
+clock = pygame.time.Clock()
+
 all_sprites = pygame.sprite.Group()
 houses = pygame.sprite.Group()
-fps = 60
-clock = pygame.time.Clock()
+star_group = pygame.sprite.Group()
+
+back_img = load_image('snow/back_img.png', color_key=-1)
+
+
+class Particle(pygame.sprite.Sprite):
+    """Класс для системы частиц(звездочек)"""
+    fire = [load_image("star.png", color_key=-1)]
+    for scale in (10, 15, 25):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(star_group)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+        self.gravity = 0.1
+
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
+def create_particles(position):
+    """Функция для создания объектов класса частиц (звездочек)"""
+    numbers = range(-6, 5)
+    for _ in range(20):
+        Particle(position, random.choice(numbers), random.choice(numbers))
 
 
 def start_progect_screen():
@@ -38,14 +72,42 @@ def start_progect_screen():
                     elif 'house_1' in lst:
                         menu_forrest_game()
                     elif 'res' in lst:
-                        pass
+                        res_game_screen()
 
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                 houses.update(pygame.mouse)
         screen.blit(fon, (0, 0))
         houses.draw(screen)
         pygame.display.flip()
-        clock.tick(fps)
+        clock.tick(FPS)
+
+
+def res_game_screen():
+    running = True
+    fon = pygame.transform.scale(load_image('final/bg.png'), (WIDTH, HEIGHT))
+    go_back = Button(10, 5, back_img)
+    for i in range(-300, 310, 50):
+        create_particles((SCREEN_WIDTH // 2 + i, 0))
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.K_RETURN and event.key == pygame.K_ESCAPE):
+                running = False
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # create_particles(pygame.mouse.get_pos())
+                pass
+        screen.blit(fon, (0, 0))
+        """draw_text(screen)
+        all_sprites.draw(screen)
+        all_sprites.update()"""
+        star_group.update()
+        star_group.draw(screen)
+        go_back.update()
+        if go_back.clicked:
+            running = False
+        pygame.display.flip()
+        clock.tick(FPS)
+    return
 
 
 class Houses(pygame.sprite.Sprite):
@@ -120,4 +182,3 @@ Houses(9, 307, houses, 'exit')
 Houses(140, 55, houses, 'res')
 
 start_progect_screen()
-final_game_screen()

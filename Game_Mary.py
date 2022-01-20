@@ -7,11 +7,11 @@ pygame.mixer.pre_init()
 mixer.init()
 pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = screen_size = (645, 400)
+screen_rect = (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 tile_size = 50
 screen = pygame.display.set_mode(screen_size)
 clock = pygame.time.Clock()
 fps = 60
-screen_rect = (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 # Состояние игры
 score_time = 0
 score_coins = 0
@@ -57,10 +57,6 @@ motion = 'STOP'  # по умолчанию — стоим, флаг для не�
 # подключение музыки
 main_music_loud = 0.5
 signal_sound_loud = 1
-"""Разная музыка на каждом уровне, пока не надо
-# musics = []
-# for i in range(1, 1 + max_level):
-# musics += ['data/music{i}.mp3']"""
 coin_sound = pygame.mixer.Sound('data/snow/music/coin.mp3')
 coin_sound.set_volume(signal_sound_loud)
 buckets_sound = pygame.mixer.Sound('data/snow/music/bucket.mp3')
@@ -301,10 +297,8 @@ class Particle(Sprite):
         super().__init__(star_group)
         self.image = random.choice(self.fire)
         self.rect = self.image.get_rect()
-
         self.velocity = [dx, dy]
         self.rect.x, self.rect.y = pos
-
         self.gravity = 0.25
 
     def update(self):

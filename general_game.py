@@ -10,7 +10,6 @@ tile_images = {
     'wall': pygame.transform.scale(load_image('mario/box2.png'), (50, 50)),
     'empty': load_image('mario/grass.png'),
     'exit': load_image('mario/new_level.png', color_key=-1),
-    'princess': load_image('mario/princess_l.png', color_key=-1),
     'menu': load_image('mario/menu.png'),
     'menu_coins': load_image("mario/menu_coins.png", color_key=-1),
     'menu_clocks': load_image("mario/menu_clocks.png", color_key=-1),
@@ -25,7 +24,7 @@ back_img = pygame.transform.scale(load_image('mario/back_img.png', color_key=-1)
 
 tile_size = tile_width = tile_height = 50
 level_completed = True
-cur_level = 0
+cur_level = 5
 score_coins = 0
 score_time = 0
 levels = ['mario/level_1.txt', 'mario/level_2.txt', 'mario/level_3.txt',
@@ -109,8 +108,8 @@ def menu_mario_game():
     sound_btn = pygame.mixer.Sound("data/BlackForrest/button (2).mp3")
     pygame.mouse.set_visible(True)
     running = True
-    start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
-                       screen_height // 2 - start_img.get_height() // 2, start_img)
+    start_btn = Button(SCREEN_WIDTH // 2 - start_img.get_width() // 2,
+                       SCREEN_HEIGHT // 2 - start_img.get_height() // 2, start_img)
     go_back = Button(10, 10, back_img)
     while running:
         screen.blit(bg, (0, 0))
@@ -267,24 +266,66 @@ class Exit(Sprite):
 
 
 class Princess(Sprite):
+    princess_l = load_image('mario/princess_l.png', color_key=-1)
+    princess_r = load_image("mario/princess_r.png", color_key=-1)
+
     def __init__(self, pos_x, pos_y):
         super().__init__(princess_group)
-        self.image = tile_images['princess']
+        self.lst = [Princess.princess_l, Princess.princess_r]
+        self.image = Princess.princess_l
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
+        self.count = 0
+
+    def update(self):
+        if self.count % 109 == 0:
+            if self.count % 2 == 0:
+                self.image = self.lst[0]
+            else:
+                self.image = self.lst[1]
+        self.count += 1
+
+
+class Particle(pygame.sprite.Sprite):
+    """Класс для системы частиц(звездочек)"""
+    fire = [load_image("star.png", color_key=-1)]
+    for scale in (10, 15, 25):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(star_group)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+        self.gravity = 0.25
+
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
+def create_particles(position):
+    """Функция для создания объектов класса частиц (звездочек)"""
+    numbers = range(-6, 5)
+    for _ in range(20):
+        Particle(position, random.choice(numbers), random.choice(numbers))
 
 
 def res_of_play():
     pygame.mouse.set_visible(False)
     if not hero.died:
-        # for i in range(-300, 310, 50):
-        #    create_particles((WIDTH // 2 + i, 0))
-        # coins = AnimatedSprite(load_image("mario/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
-        # clocks = AnimatedSprite(load_image("mario/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
+        for i in range(-300, 310, 50):
+            create_particles((WIDTH // 2 + i, 0))
+        _ = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
+        _ = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
         intro_text = ["Вы Выиграли, Принцесса спасена!", "",
                       f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
                       '', f"Монеты: {score_coins}"]
-        fon = pygame.transform.scale(load_image('final.png'), size)
+        fon = pygame.transform.scale(load_image('mario/final_mario.png'), screen_size)
         screen.blit(fon, (0, 0))
         draw_text(intro_text)
     else:
@@ -299,7 +340,7 @@ def res_of_play():
                     event.type == pygame.MOUSEBUTTONDOWN:
                 final_game_screen()
         screen.blit(fon, (0, 0))
-        draw_text(intro_text)
+        draw_text(intro_text, color=pygame.Color('black'))
         res_group.draw(screen)
         res_group.update()
         pygame.display.flip()
@@ -315,6 +356,7 @@ princess_group = SpriteGroup()
 menu_group = SpriteGroup()
 coins_group = SpriteGroup()
 res_group = SpriteGroup()
+star_group = pygame.sprite.Group()
 # анимация панели меню
 coins = AnimatedSprite(tile_images['menu_coins'], 3, 2, 5, 0, menu_group, 9)
 clocks = AnimatedSprite(tile_images['menu_clocks'], 7, 2, tile_size * 1.9, 0, menu_group, 6)
@@ -398,6 +440,7 @@ def game_mario():
         coins_group.draw(screen)
         coins_group.update()
         hero.update()
+        princess_group.update()
         clock.tick(FPS)
         # Меню:
         draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size + 5, 15))  # монетки
