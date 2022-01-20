@@ -7,8 +7,6 @@ from main_functions import *
 
 size = WIDTH, HEIGHT = 645, 400
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
-pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
 pygame.mouse.set_visible(True)
 FPS = 60
 clock = pygame.time.Clock()
@@ -16,8 +14,19 @@ clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 houses = pygame.sprite.Group()
 star_group = pygame.sprite.Group()
+menu_group = pygame.sprite.Group()
 
 back_img = load_image('snow/back_img.png', color_key=-1)
+gold_coins_img = load_image("snow/menu_coins.png", color_key=-1)
+menu_clocks_img = load_image("snow/menu_clocks.png", color_key=-1)
+
+
+def clean_text(text):
+    clean_txt = []
+    for c in text:
+        coins, time = c.strip().split(';')
+        clean_txt.append(f'{coins}       {time}')
+    return clean_txt
 
 
 class Particle(pygame.sprite.Sprite):
@@ -49,12 +58,52 @@ def create_particles(position):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
+def draw_text(screen):
+    font = pygame.font.Font('data/final/seguisbi.ttf', 28)
+    text = font.render('WINNERS SCORE', True, pygame.Color('black'))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 15))
+    # Результаты игры Марио
+    with open('data/mario/res_mario.txt', encoding="utf8") as file:
+        text = file.readlines()
+    text_mario = clean_text(text)
+    text_coord = 25
+    for line in text_mario:
+        text = font.render(line, True, pygame.Color('white'))
+        text_x = 410 - text.get_width()
+        text_y = text_coord + text.get_height() + 10
+        text_coord = text_y
+        screen.blit(text, (text_x, text_y))
+
+    # Результаты игры Forrest
+    with open('data/BlackForrest/res_forrest.txt', encoding="utf8") as file:
+        text_forrest = clean_text(file.readlines())
+    text_coord = 25
+    for line in text_forrest:
+        text = font.render(line, True, pygame.Color('white'))
+        text_x = 190 - text.get_width()
+        text_y = text_coord + text.get_height() + 10
+        text_coord = text_y
+        screen.blit(text, (text_x, text_y))
+
+    # Результаты игры Snow
+    with open('data/snow/res_snow.txt', encoding="utf8") as file:
+        text_snow = clean_text(file.readlines())
+    text_coord = 25
+    for line in text_snow:
+        text = font.render(line, True, pygame.Color('white'))
+        text_x = 620 - text.get_width()
+        text_y = text_coord + text.get_height() + 10
+        text_coord = text_y
+        screen.blit(text, (text_x, text_y))
+
+
 def start_progect_screen():
     """Функция вызова(отображения) стартового экрана"""
     fon = pygame.transform.scale(load_image('start/start.png'), (WIDTH, HEIGHT))  # стартовая картинка
     pressed = False
     while True:
         pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
+        pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -88,6 +137,16 @@ def res_game_screen():
     go_back = Button(10, 5, back_img)
     for i in range(-300, 310, 50):
         create_particles((SCREEN_WIDTH // 2 + i, 0))
+    text_coord = 80
+    for _ in range(3):
+        coins = AnimatedSprite(gold_coins_img, 3, 2, 2, text_coord, menu_group, 9)
+        coins = AnimatedSprite(gold_coins_img, 3, 2, 238, text_coord, menu_group, 9)
+        coins = AnimatedSprite(gold_coins_img, 3, 2, 438, text_coord, menu_group, 9)
+        clocks = AnimatedSprite(menu_clocks_img, 7, 2, 110, text_coord, menu_group, 6)
+        clocks = AnimatedSprite(menu_clocks_img, 7, 2, 335, text_coord, menu_group, 6)
+        clocks = AnimatedSprite(menu_clocks_img, 7, 2, 540, text_coord, menu_group, 6)
+        text_coord += 50
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.K_RETURN and event.key == pygame.K_ESCAPE):
@@ -97,9 +156,9 @@ def res_game_screen():
                 # create_particles(pygame.mouse.get_pos())
                 pass
         screen.blit(fon, (0, 0))
-        """draw_text(screen)
-        all_sprites.draw(screen)
-        all_sprites.update()"""
+        draw_text(screen)
+        menu_group.draw(screen)
+        menu_group.update()
         star_group.update()
         star_group.draw(screen)
         go_back.update()
@@ -180,5 +239,4 @@ Houses(147, 130, houses, 'house_2')
 Houses(425, 132, houses, 'house_3')
 Houses(9, 307, houses, 'exit')
 Houses(140, 55, houses, 'res')
-
 start_progect_screen()
