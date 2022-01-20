@@ -297,7 +297,7 @@ def create_particles(position):
 
 
 def res_of_play():
-    pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(True)
     if not player.died:
         for i in range(-300, 310, 50):
             create_particles((SCREEN_WIDTH // 2 + i, 0))

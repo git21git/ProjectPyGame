@@ -290,7 +290,9 @@ class Princess(Sprite):
 
 
 def res_of_play():
-    pygame.mouse.set_visible(False)
+    global score_time, score_coins, lst, cur_level, level_completed
+    exit_btn_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (88, 38))
+    pygame.mouse.set_visible(True)
     if not hero.died:
         for i in range(-300, 310, 50):
             create_particles((WIDTH // 2 + i, 0))
@@ -305,6 +307,7 @@ def res_of_play():
     else:
         intro_text = ['']
         fon = load_image('mario/gameover.png', color_key=-1)
+    exit_btn = Button(SCREEN_WIDTH / 2 - 117 / 2, 299, pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
 
     while True:
         for event in pygame.event.get():
@@ -319,6 +322,14 @@ def res_of_play():
         res_group.update()
         star_group.update()
         star_group.draw(screen)
+        exit_btn.update()
+        if exit_btn.clicked:
+            cur_level = 0
+            score_coins = 0
+            score_time = 0
+            level_completed = True
+            lst.clear()
+            menu_mario_game()
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -434,7 +445,6 @@ def game_mario():
         if pygame.sprite.groupcollide(hero_group, princess_group, False, False):
             pygame.mixer.music.stop()
             res_of_play()
-            running = False
         pygame.display.flip()
     pygame.quit()
 
