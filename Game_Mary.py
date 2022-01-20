@@ -17,6 +17,12 @@ score_time = 0
 score_coins = 0
 score_buckets = 0
 
+running_authors = False
+running_res = False
+running_menu = True
+running_game = False
+running_back = False
+
 tile_images = {
     'box': load_image('snow/box.png'),
     'empty': load_image('snow/ice.png'),
@@ -253,16 +259,16 @@ class Camera:
 
 
 def menu_snowman_game():
+    global running_back, running_menu, running_game
     pygame.display.set_caption('Snow_Snow')
     pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
     pygame.mouse.set_visible(True)
-    running = True
     start_btn = Button(SCREEN_WIDTH // 2 - start_img.get_width() // 2,
                        SCREEN_HEIGHT // 2 - start_img.get_height() - 20, start_img)
     go_back = Button(10, 10, back_img)
     rules = Button(SCREEN_WIDTH // 2 - rules_img.get_width() // 2,
                    SCREEN_HEIGHT // 2 + 20, rules_img)
-    while running:
+    while running_menu:
         fon = pygame.transform.scale(bg, screen_size)
         screen.blit(fon, (0, 0))
         start_btn.update()
@@ -273,13 +279,16 @@ def menu_snowman_game():
                 terminate()
 
         if start_btn.clicked:
-            game_snowman()
+            running_game = True
+            running_menu = False
         if rules.clicked:
             print('rules')
         if go_back.clicked:
-            return True
+            running_back = True
+            running_menu = False
 
         pygame.display.flip()
+    return
 
 
 class Particle(Sprite):
@@ -430,10 +439,10 @@ def move(hero, direction):
 
 def game_snowman():
     global score_time, score_buckets, score_coins, level_completed, cur_level, motion
-    running = True
+    global running_back, running_game, running_authors, running_res
     pygame.display.set_caption('Snow_Snow')
     pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
-    while running:
+    while running_game:
         score_time += 1
         if level_completed:
             cur_level += 1
@@ -489,12 +498,12 @@ def game_snowman():
             level_completed = True
         if pygame.sprite.groupcollide(player_group, finish_group, False, False):
             res_of_play()
-            running = False
+            running_game = False
         if pygame.sprite.groupcollide(player_group, fire_group, False, True):
             if score_buckets < 1:
                 game_over_sound.play()
                 player.died = True
-                running = False
+                running_game = False
             else:
                 stop_fire_sound.play()
                 score_buckets -= 1
@@ -503,6 +512,30 @@ def game_snowman():
             res_of_play()
         pygame.display.flip()
         clock.tick(fps)
+    return
+
+
+def main_gameplay_snow():
+    """Функция для навигации по игре(возврат в главное меню и тд)"""
+    global running_back, running_menu, running_game, running_res, running_authors
+    running_back = False
+    running_menu = True
+    while not running_back:
+        print(running_back, running_menu, running_game, running_res, running_authors)
+        if running_menu:
+            menu_snowman_game()
+            print(running_back, running_menu, running_game)
+        if running_game:
+            game_snowman()
+        if running_res:
+            res_of_play()
+        if running_authors:
+            final_game_screen()
+            running_authors = False
+
+        if running_back:
+            break
+    return
 
 
 if __name__ == '__main__':

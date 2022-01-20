@@ -1,5 +1,5 @@
 from Game_Alex import menu_forrest_game
-from Game_Mary import menu_snowman_game
+from Game_Mary import main_gameplay_snow
 from final_screen import final_game_screen
 from general_game import menu_mario_game
 from main_functions import *
@@ -32,16 +32,18 @@ def start_progect_screen():
                     if 'exit' in lst:
                         terminate()
                     elif 'house_3' in lst:
-                        menu_snowman_game()
+                        main_gameplay_snow()
                     elif 'house_2' in lst:
                         menu_mario_game()
                     elif 'house_1' in lst:
                         menu_forrest_game()
+                    elif 'res' in lst:
+                        pass
+
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                 houses.update(pygame.mouse)
         screen.blit(fon, (0, 0))
         houses.draw(screen)
-        screen.blit(py_small, (150, 64))
         pygame.display.flip()
         clock.tick(fps)
 
@@ -55,6 +57,8 @@ class Houses(pygame.sprite.Sprite):
     house_3_big = load_image("start/house_3_big.png", color_key=-1)
     exit_small = load_image("start/exit_small.png", color_key=-1)
     exit_big = load_image("start/exit_big.png", color_key=-1)
+    res_small = load_image("start/res_small.png", color_key=-1)
+    res_big = load_image("start/res_big.png", color_key=-1)
 
     def __init__(self, x, y, group, name):
         super().__init__(group)
@@ -66,6 +70,8 @@ class Houses(pygame.sprite.Sprite):
             self.image = Houses.house_2_small
         elif name == 'house_3':
             self.image = Houses.house_3_small
+        elif name == 'res':
+            self.image = Houses.res_small
         self.name = name
         self.rect = self.image.get_rect()
         self.pos = [x, y]
@@ -84,6 +90,8 @@ class Houses(pygame.sprite.Sprite):
                 self.image = Houses.house_2_big
             elif self.name == 'house_3':
                 self.image = Houses.house_3_big
+            elif self.name == 'res':
+                self.image = Houses.res_big
             self.rect.x = self.pos[0] - 4
             self.rect.y = self.pos[1] - 3
         else:
@@ -95,6 +103,8 @@ class Houses(pygame.sprite.Sprite):
                 self.image = Houses.house_2_small
             elif self.name == 'house_3':
                 self.image = Houses.house_3_small
+            elif self.name == 'res':
+                self.image = Houses.res_small
             self.rect.x = self.pos[0]
             self.rect.y = self.pos[1]
 
@@ -107,7 +117,7 @@ Houses(11, 85, houses, 'house_1')
 Houses(147, 130, houses, 'house_2')
 Houses(425, 132, houses, 'house_3')
 Houses(9, 307, houses, 'exit')
-py_small = load_image("start/py.png", color_key=-1)
+Houses(140, 55, houses, 'res')
 
 start_progect_screen()
 final_game_screen()

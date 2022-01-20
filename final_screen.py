@@ -104,6 +104,7 @@ def final_game_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.K_RETURN and event.key == pygame.K_ESCAPE):
                 running = False
+                terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 create_particles(pygame.mouse.get_pos())
         fon = pygame.transform.scale(load_image('final.png'), screen_size)  # картинка
@@ -115,7 +116,7 @@ def final_game_screen():
         star_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
-    terminate()
+    return
 
 
 if __name__ == '__main__':
