@@ -46,6 +46,7 @@ def load_level(filename):
 
 
 def clean_text(text, flag='RES'):
+    """Функция для взаимодействия с текстовым файлом и преобрпзовании информаци из него(таблица)"""
     clean_txt = []
     if flag == 'RES':
         for c in text:
@@ -132,6 +133,7 @@ def draw_mini_text(text, color, pos, Font=None, size=20):
 
 
 class SpriteGroup(pygame.sprite.Group):
+    """Класс группы спрайтов"""
 
     def __init__(self):
         super().__init__()
@@ -142,6 +144,7 @@ class SpriteGroup(pygame.sprite.Group):
 
 
 class Sprite(pygame.sprite.Sprite):
+    """Класс спрайта"""
 
     def __init__(self, group):
         super().__init__(group)

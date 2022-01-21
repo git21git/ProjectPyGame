@@ -1,4 +1,3 @@
-import random
 from final_screen import final_game_screen
 from main_functions import *
 from pygame import mixer
@@ -73,6 +72,7 @@ game_over_sound.set_volume(signal_sound_loud)
 
 
 def generate_level(level):
+    """Функция преобразования уровня из карты"""
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -108,6 +108,7 @@ def generate_level(level):
 
 
 def open_level(level):
+    """Функция открытия нового уровня"""
     global camera, player, level_x, level_y, level_map
 
     all_sprites.empty()
@@ -128,6 +129,8 @@ def open_level(level):
 
 
 class Tile(Sprite):
+    """Класс Тайла уровня"""
+
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(all_sprites)
         self.image = tile_images[tile_type]
@@ -140,6 +143,8 @@ class Tile(Sprite):
 
 
 class Player(Sprite):
+    """Класс игрока"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group)
         self.image = player_image
@@ -170,6 +175,8 @@ class Player(Sprite):
 
 
 class Fire(Sprite):
+    """Класс Костра"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(fire_group)
         self.image = tile_images['fire']
@@ -180,6 +187,8 @@ class Fire(Sprite):
 
 
 class Stones(Sprite):
+    """Класс камней"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(stones_group)
         self.image = tile_images['stone']
@@ -190,6 +199,8 @@ class Stones(Sprite):
 
 
 class Bucket(Sprite):
+    """Класс ведра с водой"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(bucket_group)
         self.image = tile_images['bucket']
@@ -200,6 +211,8 @@ class Bucket(Sprite):
 
 
 class Finish(Sprite):
+    """Класс финишного флага"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(finish_group)
         self.image = tile_images['flag']
@@ -209,6 +222,8 @@ class Finish(Sprite):
 
 
 class Exit(Sprite):
+    """Класс перехода на новый уровень"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(exit_group)
         self.image = tile_images['exit']
@@ -218,6 +233,8 @@ class Exit(Sprite):
 
 
 class Coins(Sprite):
+    """Класс монеток"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(coins_group)
         self.image = tile_images['coin']
@@ -227,6 +244,8 @@ class Coins(Sprite):
 
 
 class Camera:
+    """Класс камеры"""
+
     def __init__(self, field_size):
         self.dx = 0
         self.dy = 0
@@ -253,6 +272,7 @@ class Camera:
 
 
 def menu_snowman_game():
+    """Функция меню игры"""
     global running_back, running_menu, running_game
     pygame.display.set_caption('Snow_Snow')
     pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
@@ -315,6 +335,7 @@ def create_particles(position):
 
 
 def res_of_play():
+    """Функция окна результатов игры"""
     global running_menu, score_time, score_coins, cur_level, \
         level_completed, exit_btn, NEW_BEST, running_res, running_back
     pygame.mouse.set_visible(True)
@@ -363,6 +384,7 @@ def res_of_play():
         clock.tick(fps)
 
 
+"""Группы спрайтов"""
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -393,6 +415,7 @@ camera = Camera((level_x, level_y))
 
 
 def move(hero, direction):
+    """Функция движения героя"""
     x, y = hero.pos
     green_move = [".", '2', '5', '*', '0', '%']
     if direction == "up":
@@ -418,6 +441,7 @@ def move(hero, direction):
 
 
 def game_snowman():
+    """Функция самой игры"""
     global score_time, score_buckets, score_coins, level_completed, cur_level, motion
     global running_back, running_game, running_authors, running_res
     pygame.display.set_caption('Snow_Snow')
@@ -447,6 +471,7 @@ def game_snowman():
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
+        """Рисуем группы спрайтов"""
         screen.fill(pygame.Color(255, 100, 100))
         tiles_group.draw(screen)
         fire_group.draw(screen)
@@ -457,7 +482,7 @@ def game_snowman():
         bucket_group.draw(screen)
         stones_group.draw(screen)
 
-        # Меню:
+        """Отрисовка меню"""
         pygame.draw.rect(screen, (181, 146, 146), (0, 0, SCREEN_WIDTH, tile_size // 2))
         draw_mini_text(f'X {score_coins}', white, (tile_size - 10, 12))
         time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
@@ -468,7 +493,7 @@ def game_snowman():
         draw_mini_text(f'X {cur_level}', white, (SCREEN_WIDTH - tile_size // 2, 12))
         menu_group.draw(screen)
         menu_group.update()
-
+        """проверка на столкновения"""
         if pygame.sprite.groupcollide(player_group, coins_group, False, True):
             coin_sound.play()
             score_coins += 1
@@ -488,7 +513,7 @@ def game_snowman():
             else:
                 stop_fire_sound.play()
                 score_buckets -= 1
-
+        """Если игрок умер, завершаем игру"""
         if player.died:
             running_game = False
             running_res = True
@@ -498,7 +523,7 @@ def game_snowman():
 
 
 def main_gameplay_snow():
-    """Функция для навигации по игре(возврат в главное меню и тд)"""
+    """Функция для навигации по игре"""
     global running_back, running_menu, running_game, running_res, running_authors
     running_back = False
     running_menu = True
