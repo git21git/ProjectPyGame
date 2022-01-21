@@ -7,6 +7,7 @@ WIDTH, HEIGHT = screen_size = (645, 400)
 screen = pygame.display.set_mode(screen_size)
 FPS = 80
 onGround = False
+
 tile_images = {
     'exit': load_image('mario/new_level.png', color_key=-1),
     'menu': load_image('mario/menu.png'),
@@ -18,7 +19,8 @@ tile_images = {
     'gru_wall': load_image("mario/gru_wall.png", color_key=-1),
     'snow': load_image("mario/snow.png", color_key=-1)
 }
-player_image = load_image('mario/mario.png', color_key=-1)
+
+player_image = pygame.transform.scale(load_image("mario/0.png", color_key=-1), (30, 50))
 start_img = pygame.transform.scale(load_image('mario/start_button.png'), (148, 68))
 bg = pygame.transform.scale(load_image('mario/mario (1).jpg'), (WIDTH, HEIGHT))
 
@@ -29,24 +31,45 @@ level_completed = True
 cur_level = 0
 score_coins = 0
 score_time = 0
+
 levels = ['mario/levels/level_1.txt', 'mario/levels/level_2.txt',
           'mario/levels/level_3.txt', 'mario/levels/level_4.txt',
           'mario/levels/level_5.txt', 'mario/levels/level_6.txt',
           'mario/levels/level_7.txt', 'mario/levels/level_8.txt',
           'mario/levels/level_9.txt']
+
 music = ['data/mario/music/portal.mp3', 'data/mario/music/field.mp3',
          'data/mario/music/peace.mp3', 'data/mario/music/peace.mp3',
          'data/mario/music/peace.mp3', 'data/mario/music/castle.mp3',
          'data/mario/music/forest.mp3', 'data/mario/music/win.mp3',
          'data/mario/music/peace.mp3']
+
 f_lvl = [load_image('mario/start_mario.jpg'), load_image('mario/second_peyzaj.jpg'),
          load_image('mario/third_peizaj.jpg'),
          load_image('mario/desert.png'), load_image('mario/snow_rocks.jpg'),
          load_image('mario/far_castle.jpeg'), load_image('mario/black_forrest.jpg'),
          load_image('mario/gru.png'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
+
 n_lvl = ['Портал в лесу', 'Луг деревни Атрейдес', 'Лечебница Аркрайт',
          'Пустыня Сахара', 'Зимние приключения', 'Проход через горы',
          'Темный лес', 'Злой волшебник', 'Замок принцессы']  # Названия для уровней
+
+left_run = [pygame.transform.scale(load_image("mario/l1.png", color_key=-1), (30, 50)),
+            pygame.transform.scale(load_image("mario/l2.png", color_key=-1), (30, 50)),
+            pygame.transform.scale(load_image("mario/l3.png", color_key=-1), (30, 50)),
+            pygame.transform.scale(load_image("mario/l4.png", color_key=-1), (30, 50)),
+            pygame.transform.scale(load_image("mario/l5.png", color_key=-1), (30, 50))]
+
+right_run = [pygame.transform.scale(load_image("mario/r1.png", color_key=-1), (30, 50)),
+             pygame.transform.scale(load_image("mario/r2.png", color_key=-1), (30, 50)),
+             pygame.transform.scale(load_image("mario/r3.png", color_key=-1), (30, 50)),
+             pygame.transform.scale(load_image("mario/r4.png", color_key=-1), (30, 50)),
+             pygame.transform.scale(load_image("mario/r5.png", color_key=-1), (30, 50))]
+
+jumping_img = [pygame.transform.scale(load_image("mario/j.png", color_key=-1), (30, 50)),
+               pygame.transform.scale(load_image("mario/jl.png", color_key=-1), (30, 50)),
+               pygame.transform.scale(load_image("mario/jr.png", color_key=-1), (30, 50))]
+
 max_level = len(levels)
 NEW_BEST = 'Вы попадаете в таблицу лидеров!'
 
@@ -202,29 +225,47 @@ class Player(Sprite):
 
     def update(self):
         global onGround, level_completed
+
         move_x = 0
         move_y = 0
-
         moving = 4
 
         if not hero.died:
             key = pygame.key.get_pressed()
             if key[pygame.K_UP] and not self.jumped and not self.notOnGround:
+                if self.image in left_run:
+                    self.image = jumping_img[1]
+                elif self.image in right_run:
+                    self.image = jumping_img[2]
+                else:
+                    self.image = jumping_img[0]
+
                 self.gravity = -17
                 self.jumped = True
             if not key[pygame.K_UP]:
                 self.jumped = False
             if key[pygame.K_LEFT]:
                 move_x -= moving
+                if self.counter % 8 == 0:
+                    self.image = left_run[(self.counter // 8) % 5]
                 self.counter += 1
                 self.direction = -1
             if key[pygame.K_RIGHT]:
                 move_x += moving
+                if self.counter % 8 == 0:
+                    self.image = right_run[(self.counter // 8) % 5]
                 self.counter += 1
                 self.direction = 1
             if not key[pygame.K_LEFT] and not key[pygame.K_RIGHT]:
+                self.image = player_image
                 self.counter = 0
                 self.index = 0
+            if self.image in left_run and self.notOnGround:
+                self.image = jumping_img[1]
+            elif self.image in right_run and self.notOnGround:
+                self.image = jumping_img[2]
+            elif self.image == player_image and self.notOnGround:
+                self.image = jumping_img[0]
             if self.rect.x >= WIDTH:
                 self.rect = self.image.get_rect().move(self.rect.x % WIDTH, self.rect.y)
             if self.rect.x <= 0:
