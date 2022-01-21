@@ -66,7 +66,6 @@ for i in range(-300, 400, 50):
     create_particles((SCREEN_WIDTH // 2 + i, 0))
 pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
 pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
-main_btn_exit_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (88, 38))
 dragon = AnimatedSprite(load_image("final/dragon_sheet8x2.png", color_key=-1), 8, 2, 523, 299, all_sprites, 6)
 girl = AnimatedSprite(load_image("final/girl.png", color_key=-1), 6, 1, 523, 1, all_sprites, 6)
 bird = AnimatedSprite(load_image("final/bird.png", color_key=-1), 6, 2, 15, 1, all_sprites, 6)
@@ -74,7 +73,6 @@ boy = AnimatedSprite(load_image("final/boy.png", color_key=-1), 5, 4, 20, 250, a
 
 
 def final_game_screen():
-    main_btn_exit = Button(SCREEN_WIDTH / 2 - 117 / 2, 299, pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
     running = True
     while running:
         for event in pygame.event.get():
@@ -90,10 +88,6 @@ def final_game_screen():
         all_sprites.update()
         star_group.update()
         star_group.draw(screen)
-        main_btn_exit.update()
-        if main_btn_exit.clicked:
-            print('n')
-            return
 
         pygame.display.flip()
         clock.tick(FPS)
