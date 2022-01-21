@@ -58,52 +58,29 @@ def create_particles(position):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
-class AnimatedSprite(pygame.sprite.Sprite):
-    """Класс анимации для спрайтов"""
-
-    def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(all_sprites)
-        self.count_iteration = 0
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
-        self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
-        self.rect = self.rect.move(x, y)
-
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
-
-    def update(self):
-        self.count_iteration += 1
-        if self.count_iteration % 8 == 0:
-            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-            self.image = self.frames[self.cur_frame]
-
-
 all_sprites = pygame.sprite.Group()
 star_group = pygame.sprite.Group()
 
-pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(True)
 for i in range(-300, 400, 50):
     create_particles((SCREEN_WIDTH // 2 + i, 0))
 pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
 pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
-dragon = AnimatedSprite(load_image("final/dragon_sheet8x2.png", color_key=-1), 8, 2, 483, 299)
-girl = AnimatedSprite(load_image("final/girl.png", color_key=-1), 6, 1, 295, 299)
-bird = AnimatedSprite(load_image("final/bird.png", color_key=-1), 6, 2, 15, 1)
-boy = AnimatedSprite(load_image("final/boy.png", color_key=-1), 5, 4, 20, 250)
+main_btn_exit_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (88, 38))
+dragon = AnimatedSprite(load_image("final/dragon_sheet8x2.png", color_key=-1), 8, 2, 523, 299, all_sprites, 6)
+girl = AnimatedSprite(load_image("final/girl.png", color_key=-1), 6, 1, 523, 1, all_sprites, 6)
+bird = AnimatedSprite(load_image("final/bird.png", color_key=-1), 6, 2, 15, 1, all_sprites, 6)
+boy = AnimatedSprite(load_image("final/boy.png", color_key=-1), 5, 4, 20, 250, all_sprites, 6)
 
 
 def final_game_screen():
+    main_btn_exit = Button(SCREEN_WIDTH / 2 - 117 / 2, 299, pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.K_RETURN and event.key == pygame.K_ESCAPE):
                 running = False
+                terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 create_particles(pygame.mouse.get_pos())
         fon = pygame.transform.scale(load_image('final.png'), screen_size)  # картинка
@@ -113,9 +90,13 @@ def final_game_screen():
         all_sprites.update()
         star_group.update()
         star_group.draw(screen)
+        main_btn_exit.update()
+        if main_btn_exit.clicked:
+            print('n')
+            return
+
         pygame.display.flip()
         clock.tick(FPS)
-    terminate()
 
 
 if __name__ == '__main__':

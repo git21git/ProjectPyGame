@@ -1,3 +1,4 @@
+import random
 from final_screen import final_game_screen
 from main_functions import *
 
@@ -7,15 +8,15 @@ screen = pygame.display.set_mode(screen_size)
 FPS = 80
 onGround = False
 tile_images = {
-    'wall': pygame.transform.scale(load_image('mario/box2.png'), (50, 50)),
-    'empty': load_image('mario/grass.png'),
     'exit': load_image('mario/new_level.png', color_key=-1),
-    'princess': load_image('mario/princess_l.png', color_key=-1),
     'menu': load_image('mario/menu.png'),
     'menu_coins': load_image("mario/menu_coins.png", color_key=-1),
     'menu_clocks': load_image("mario/menu_clocks.png", color_key=-1),
-    'menu_door': load_image("mario/block.png", color_key=-1)
-
+    'menu_door': load_image("mario/block.png", color_key=-1),
+    'dirt': load_image("mario/dirt.png"),
+    'grass': load_image("mario/grass.png", color_key=-1),
+    'gru_wall': load_image("mario/gru_wall.png", color_key=-1),
+    'snow': load_image("mario/snow.png", color_key=-1)
 }
 player_image = load_image('mario/mario.png', color_key=-1)
 start_img = pygame.transform.scale(load_image('mario/start_button.png'), (148, 68))
@@ -28,17 +29,26 @@ level_completed = True
 cur_level = 0
 score_coins = 0
 score_time = 0
-levels = ['mario/level_1.txt', 'mario/level_2.txt', 'mario/level_3.txt',
-          'mario/level_4.txt', 'mario/level_5.txt', 'mario/level_6.txt']
-music = ['data/mario/portal.mp3', 'data/mario/field.mp3',
-         'data/mario/peace.mp3', 'data/mario/castle.mp3',
-         'data/mario/forest.mp3', 'data/mario/win.mp3']
+levels = ['mario/levels/level_1.txt', 'mario/levels/level_2.txt',
+          'mario/levels/level_3.txt', 'mario/levels/level_4.txt',
+          'mario/levels/level_5.txt', 'mario/levels/level_6.txt',
+          'mario/levels/level_7.txt', 'mario/levels/level_8.txt',
+          'mario/levels/level_9.txt']
+music = ['data/mario/music/portal.mp3', 'data/mario/music/field.mp3',
+         'data/mario/music/peace.mp3', 'data/mario/music/peace.mp3',
+         'data/mario/music/peace.mp3', 'data/mario/music/castle.mp3',
+         'data/mario/music/forest.mp3', 'data/mario/music/win.mp3',
+         'data/mario/music/peace.mp3']
 f_lvl = [load_image('mario/start_mario.jpg'), load_image('mario/second_peyzaj.jpg'),
-         load_image('mario/third_peizaj.jpg'), load_image('mario/far_castle.jpeg'),
-         load_image('mario/black_forrest.jpg'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
+         load_image('mario/third_peizaj.jpg'),
+         load_image('mario/desert.png'), load_image('mario/fon_4.png'),
+         load_image('mario/far_castle.jpeg'), load_image('mario/black_forrest.jpg'),
+         load_image('mario/gru.png'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
 n_lvl = ['Портал в лесу', 'Луг деревни Атрейдес', 'Лечебница Аркрайт',
-         'Проход через горы', 'Темный лес', 'Замок принцессы']  # Названия для уровней
+         'Пустыня Сахара', 'Зимние приключения', 'Проход через горы',
+         'Темный лес', 'Злой волшебник', 'Замок принцессы']  # Названия для уровней
 max_level = len(levels)
+NEW_BEST = 'Вы попадаете в таблицу лидеров!'
 
 
 def draw_mini_text(text, color, pos):
@@ -59,15 +69,23 @@ def generate_level(level):
                 pass
             elif level[y][x] == 'M':
                 til = Tile('menu', x, y)
-                img = til.image
-                img_rect = til.rect
-                tile = (img, img_rect)
+                tile = (til.image, til.rect)
                 list_with_walls.append(tile)
             elif level[y][x] == '#':
-                wall = Wall(x, y)
-                img = wall.image
-                img_rect = wall.rect
-                tile = (img, img_rect)
+                wall = Wall(x, y, 'wall')
+                tile = (wall.image, wall.rect)
+                list_with_walls.append(tile)
+            elif level[y][x] == '9':
+                wall = Wall(x, y, 'dirt')
+                tile = (wall.image, wall.rect)
+                list_with_walls.append(tile)
+            elif level[y][x] == '8':
+                wall = Wall(x, y, 'gru_wall')
+                tile = (wall.image, wall.rect)
+                list_with_walls.append(tile)
+            elif level[y][x] == '5':
+                wall = Wall(x, y, 'snow')
+                tile = (wall.image, wall.rect)
                 list_with_walls.append(tile)
             elif level[y][x] == '@':
                 new_player = Player(x, y)
@@ -82,35 +100,44 @@ def generate_level(level):
     return new_player, x, y, list_with_walls
 
 
-class SpriteGroup(pygame.sprite.Group):
+class Particle(Sprite):
+    """Класс для системы частиц(звездочек)"""
+    fire = [load_image("star.png", color_key=-1)]
+    for scale in (10, 15, 25):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, pos, dx, dy):
+        super().__init__(star_group)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+        self.gravity = 0.1
 
-    def get_event(self, event):
-        for sprite in self:
-            sprite.get_event(event)
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
 
 
-class Sprite(pygame.sprite.Sprite):
-
-    def __init__(self, group):
-        super().__init__(group)
-        self.rect = None
-
-    def get_event(self, event):
-        pass
+def create_particles(position):
+    """Функция для создания объектов класса частиц (звездочек)"""
+    numbers = range(-6, 5)
+    for _ in range(20):
+        Particle(position, random.choice(numbers), random.choice(numbers))
 
 
 def menu_mario_game():
     pygame.display.set_caption('Mario: Multiverse')  # Название приложения
-    pygame.mixer.music.load("data/mario/honor-and-sword-main.mp3")
+    pygame.mixer.music.load("data/mario/music/honor-and-sword-main.mp3")
     pygame.mixer.music.play()
     sound_btn = pygame.mixer.Sound("data/BlackForrest/button (2).mp3")
     pygame.mouse.set_visible(True)
     running = True
-    start_btn = Button(screen_width // 2 - start_img.get_width() // 2,
-                       screen_height // 2 - start_img.get_height() // 2, start_img)
+    start_btn = Button(SCREEN_WIDTH // 2 - start_img.get_width() // 2,
+                       SCREEN_HEIGHT // 2 - start_img.get_height() // 2, start_img)
     go_back = Button(10, 10, back_img)
     while running:
         screen.blit(bg, (0, 0))
@@ -142,39 +169,15 @@ class Tile(Sprite):
 
 
 class Wall(Sprite):
-    def __init__(self, pos_x, pos_y):
+    def __init__(self, pos_x, pos_y, name):
         super().__init__(sprite_group)
-        self.image = tile_images['wall']
+        if name == 'wall':
+            self.image = load_image(f'mario/box{random.choice(range(1, 4))}.png')
+        else:
+            self.image = tile_images[name]
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
         self.add(wall_group)
-
-
-class AnimatedSprite(Sprite):
-    """Класс анимации для спрайтов"""
-
-    def __init__(self, sheet, columns, rows, x, y, group, t):
-        super().__init__(group)
-        self.count_iteration = 0
-        self.timer = t
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
-        self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
-        self.rect = self.rect.move(x, y)
-
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
-
-    def update(self):
-        self.count_iteration += 1
-        if self.count_iteration % self.timer == 0:
-            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-            self.image = self.frames[self.cur_frame]
 
 
 class Player(Sprite):
@@ -267,29 +270,47 @@ class Exit(Sprite):
 
 
 class Princess(Sprite):
+    princess_l = load_image('mario/princess_l.png', color_key=-1)
+    princess_r = load_image("mario/princess_r.png", color_key=-1)
+
     def __init__(self, pos_x, pos_y):
         super().__init__(princess_group)
-        self.image = tile_images['princess']
+        self.lst = [Princess.princess_l, Princess.princess_r]
+        self.image = Princess.princess_l
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
+        self.count = 0
+
+    def update(self):
+        if self.count % 109 == 0:
+            if self.count % 2 == 0:
+                self.image = self.lst[0]
+            else:
+                self.image = self.lst[1]
+        self.count += 1
 
 
 def res_of_play():
-    pygame.mouse.set_visible(False)
+    global score_time, score_coins, lst, cur_level, level_completed
+    exit_btn_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (88, 38))
+    pygame.mouse.set_visible(True)
     if not hero.died:
-        # for i in range(-300, 310, 50):
-        #    create_particles((WIDTH // 2 + i, 0))
-        # coins = AnimatedSprite(load_image("mario/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
-        # clocks = AnimatedSprite(load_image("mario/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
-        intro_text = ["Вы Выиграли, Принцесса спасена!", "",
-                      f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
-                      '', f"Монеты: {score_coins}"]
-        fon = pygame.transform.scale(load_image('final.png'), size)
+        for i in range(-300, 310, 50):
+            create_particles((WIDTH // 2 + i, 0))
+        _ = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
+        _ = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
+        time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
+        intro_text = ["Вы Выиграли. Принцесса спасена!", "", f'Время: {time}',
+                      '', f"Монеты: {score_coins}",
+                      f"{NEW_BEST if check_new_table('mario', int(score_coins), time) else ''}"]
+        fon = pygame.transform.scale(load_image('mario/final_mario.png'), screen_size)
         screen.blit(fon, (0, 0))
         draw_text(intro_text)
     else:
         intro_text = ['']
         fon = load_image('mario/gameover.png', color_key=-1)
+    exit_btn = Button(SCREEN_WIDTH / 2 - 117 / 2, 299,
+                      pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
 
     while True:
         for event in pygame.event.get():
@@ -299,9 +320,19 @@ def res_of_play():
                     event.type == pygame.MOUSEBUTTONDOWN:
                 final_game_screen()
         screen.blit(fon, (0, 0))
-        draw_text(intro_text)
+        draw_text(intro_text, color=pygame.Color('black'))
         res_group.draw(screen)
         res_group.update()
+        star_group.update()
+        star_group.draw(screen)
+        exit_btn.update()
+        if exit_btn.clicked:
+            cur_level = 0
+            score_coins = 0
+            score_time = 0
+            level_completed = True
+            lst.clear()
+            menu_mario_game()
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -315,10 +346,11 @@ princess_group = SpriteGroup()
 menu_group = SpriteGroup()
 coins_group = SpriteGroup()
 res_group = SpriteGroup()
+star_group = pygame.sprite.Group()
 # анимация панели меню
 coins = AnimatedSprite(tile_images['menu_coins'], 3, 2, 5, 0, menu_group, 9)
 clocks = AnimatedSprite(tile_images['menu_clocks'], 7, 2, tile_size * 1.9, 0, menu_group, 6)
-door = AnimatedSprite(tile_images['menu_door'], 1, 1, tile_size * 11.2, 0, menu_group, 6)
+door = AnimatedSprite(tile_images['menu_door'], 1, 1, tile_size * 11.5, 0, menu_group, 6)
 
 
 def start_screen():
@@ -371,7 +403,6 @@ hero, max_x, max_y, lst = generate_level(level_map)
 
 def game_mario():
     global score_time, level_completed, cur_level, score_coins, lst
-    # start_screen()
     running = True
     while running:
         score_time += 1
@@ -398,6 +429,7 @@ def game_mario():
         coins_group.draw(screen)
         coins_group.update()
         hero.update()
+        princess_group.update()
         clock.tick(FPS)
         # Меню:
         draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size + 5, 15))  # монетки
@@ -408,7 +440,7 @@ def game_mario():
         menu_group.draw(screen)
         menu_group.update()
         if pygame.sprite.groupcollide(hero_group, coins_group, False, True):
-            sound1 = pygame.mixer.Sound("data/mario/coin..mp3")
+            sound1 = pygame.mixer.Sound("data/mario/music/coin..mp3")
             sound1.play()
             score_coins += 1
         if pygame.sprite.groupcollide(hero_group, exit_group, False, False):
@@ -416,7 +448,6 @@ def game_mario():
         if pygame.sprite.groupcollide(hero_group, princess_group, False, False):
             pygame.mixer.music.stop()
             res_of_play()
-            running = False
         pygame.display.flip()
     pygame.quit()
 
