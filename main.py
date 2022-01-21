@@ -657,3 +657,5 @@ def main_mario_gameplay_snow():
 
 if __name__ == '__main__':
     main_mario_gameplay_snow()
+
+# pip freeze > requirements.txt
