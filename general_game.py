@@ -354,35 +354,6 @@ clocks = AnimatedSprite(tile_images['menu_clocks'], 7, 2, tile_size * 1.9, 0, me
 door = AnimatedSprite(tile_images['menu_door'], 1, 1, tile_size * 11.5, 0, menu_group, 6)
 
 
-def start_screen():
-    pygame.display.set_caption('Mario: Multiverse')  # Название приложения
-    intro_text = ['НУЖНО СДЕЛАТЬ МЕНЮ)))', "",
-                  "Герой двигается",
-                  "Карта на месте", '', 'Press any to start game']
-    fon = pygame.transform.scale(load_image(r'mario\fon.png'), screen_size)
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return
-        pygame.display.flip()
-        clock.tick(FPS)
-
-
 def open_level(level):
     global hero, max_x, max_y, level_map, lst
 

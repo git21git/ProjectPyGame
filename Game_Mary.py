@@ -460,8 +460,8 @@ def game_snowman():
         if pygame.sprite.groupcollide(player_group, exit_group, False, False):
             level_completed = True
         if pygame.sprite.groupcollide(player_group, finish_group, False, False):
-            res_of_play()
             running_game = False
+            running_res = True
         if pygame.sprite.groupcollide(player_group, fire_group, False, True):
             if score_buckets < 1:
                 game_over_sound.play()
@@ -472,7 +472,8 @@ def game_snowman():
                 score_buckets -= 1
 
         if player.died:
-            res_of_play()
+            running_game = False
+            running_res = True
         pygame.display.flip()
         clock.tick(fps)
     return

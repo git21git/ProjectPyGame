@@ -186,7 +186,7 @@ bg = pygame.transform.scale(load_image('mario/mario (1).jpg'), (WIDTH, HEIGHT))
 
 tile_size = tile_width = tile_height = 50
 level_completed = True
-cur_level = 0
+cur_level = 8
 score_coins = 0
 score_time = 0
 levels = ['mario/levels/level_1.txt', 'mario/levels/level_2.txt',
@@ -261,16 +261,16 @@ def generate_level(level):
 
 
 def menu_mario_game():
+    global running_mario_menu, running_mario_game, running_houses
     pygame.display.set_caption('Mario: Multiverse')  # Название приложения
     pygame.mixer.music.load("data/mario/music/honor-and-sword-main.mp3")
     pygame.mixer.music.play()
     sound_btn = pygame.mixer.Sound("data/BlackForrest/button (2).mp3")
     pygame.mouse.set_visible(True)
-    running = True
     start_btn = Button(SCREEN_WIDTH // 2 - start_img.get_width() // 2,
                        SCREEN_HEIGHT // 2 - start_img.get_height() // 2, start_img)
     go_back = Button(10, 10, back_img)
-    while running:
+    while running_mario_menu:
         screen.blit(bg, (0, 0))
         start_btn.update()
         go_back.update()
@@ -282,11 +282,13 @@ def menu_mario_game():
         if start_btn.clicked:
             sound_btn.play()
             pygame.mixer.music.stop()
-            game_mario()
+            running_mario_game = True
+            running_mario_menu = False
         if go_back.clicked:
             pygame.mixer.music.stop()
             sound_btn.play()
-            return True
+            running_mario_menu = False
+            running_houses = True
 
         pygame.display.flip()
 
@@ -422,7 +424,8 @@ class Princess(Sprite):
 
 
 def res_of_play():
-    global score_time, score_coins, lst, cur_level, level_completed
+    global score_time, score_coins, lst, cur_level, level_completed, \
+        running_mario_res, running_houses, running_authors
     pygame.mouse.set_visible(True)
     if not hero.died:
         for i in range(-300, 310, 50):
@@ -442,13 +445,13 @@ def res_of_play():
     exit_btn = Button(SCREEN_WIDTH / 2 - 117 / 2, 299,
                       pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
 
-    while True:
+    while running_mario_res:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
-                final_game_screen()
+                create_particles(pygame.mouse.get_pos())
         screen.blit(fon, (0, 0))
         draw_text(intro_text, color=pygame.Color('black'))
         res_group.draw(screen)
@@ -462,7 +465,8 @@ def res_of_play():
             score_time = 0
             level_completed = True
             lst.clear()
-            menu_mario_game()
+            running_houses = True
+            running_mario_res = False
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -479,35 +483,6 @@ menu_mario_group = SpriteGroup()
 coins = AnimatedSprite(tile_images['menu_coins'], 3, 2, 5, 0, menu_mario_group, 9)
 clocks = AnimatedSprite(tile_images['menu_clocks'], 7, 2, tile_size * 1.9, 0, menu_mario_group, 6)
 door = AnimatedSprite(tile_images['menu_door'], 1, 1, tile_size * 11.5, 0, menu_mario_group, 6)
-
-
-def start_screen():
-    pygame.display.set_caption('Mario: Multiverse')  # Название приложения
-    intro_text = ['НУЖНО СДЕЛАТЬ МЕНЮ)))', "",
-                  "Герой двигается",
-                  "Карта на месте", '', 'Press any to start game']
-    fon = pygame.transform.scale(load_image(r'mario\fon.png'), screen_size)
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return
-        pygame.display.flip()
-        clock.tick(FPS)
 
 
 def open_level(level):
@@ -530,9 +505,9 @@ hero, max_x, max_y, lst = generate_level(level_map)
 
 
 def game_mario():
-    global score_time, level_completed, cur_level, score_coins, lst
-    running = True
-    while running:
+    global score_time, level_completed, cur_level, score_coins, lst, \
+        running_mario_game, running_mario_res
+    while running_mario_game:
         score_time += 1
         if level_completed:
             pygame.mixer.music.stop()
@@ -542,7 +517,8 @@ def game_mario():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                running_mario_game = False
+                terminate()
         else:
             global onGround
             onGround = False
@@ -575,16 +551,18 @@ def game_mario():
             level_completed = True
         if pygame.sprite.groupcollide(hero_group, princess_group, False, False):
             pygame.mixer.music.stop()
-            res_of_play()
+            running_mario_res = True
+            running_mario_game = False
         pygame.display.flip()
-    pygame.quit()
+    return
 
 
 def start_progect_screen():
     """Функция вызова(отображения) стартового экрана"""
+    global running_houses, running_mario_menu
     fon = pygame.transform.scale(load_image('start/start.png'), (WIDTH, HEIGHT))  # стартовая картинка
     pressed = False
-    while True:
+    while running_houses:
         pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
         pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
         for event in pygame.event.get():
@@ -600,7 +578,8 @@ def start_progect_screen():
                     elif 'house_3' in lst:
                         main_gameplay_snow()
                     elif 'house_2' in lst:
-                        menu_mario_game()
+                        running_houses = False
+                        running_mario_menu = True
                     elif 'house_1' in lst:
                         menu_forrest_game()
                     elif 'res' in lst:
@@ -612,6 +591,7 @@ def start_progect_screen():
         houses.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
+    return
 
 
 def res_game_screen():
@@ -652,4 +632,28 @@ def res_game_screen():
     return
 
 
-start_progect_screen()
+def main_mario_gameplay_snow():
+    """Функция для навигации по игре(возврат в главное меню и тд)"""
+    global running_back, running_mario_menu, running_mario_game, running_mario_res, running_authors, running_houses
+    running_back = False
+    running_houses = True
+    while not running_back:
+        if running_houses:
+            start_progect_screen()
+        if running_mario_menu:
+            menu_mario_game()
+        if running_mario_game:
+            game_mario()
+        if running_mario_res:
+            res_of_play()
+        if running_authors:
+            running_authors = False
+            final_game_screen()
+
+        if running_back:
+            break
+    return
+
+
+if __name__ == '__main__':
+    main_mario_gameplay_snow()
