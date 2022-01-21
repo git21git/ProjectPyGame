@@ -41,7 +41,7 @@ music = ['data/mario/music/portal.mp3', 'data/mario/music/field.mp3',
          'data/mario/music/peace.mp3']
 f_lvl = [load_image('mario/start_mario.jpg'), load_image('mario/second_peyzaj.jpg'),
          load_image('mario/third_peizaj.jpg'),
-         load_image('mario/desert.png'), load_image('mario/fon_4.png'),
+         load_image('mario/desert.png'), load_image('mario/snow_rocks.jpg'),
          load_image('mario/far_castle.jpeg'), load_image('mario/black_forrest.jpg'),
          load_image('mario/gru.png'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
 n_lvl = ['Портал в лесу', 'Луг деревни Атрейдес', 'Лечебница Аркрайт',
