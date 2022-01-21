@@ -297,7 +297,10 @@ def create_particles(position):
 
 
 def res_of_play():
+    global running_menu, score_time, score_coins, cur_level, level_completed
     pygame.mouse.set_visible(True)
+    exit_btn = Button(SCREEN_WIDTH / 2, 300, pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
+
     if not player.died:
         for i in range(-300, 310, 50):
             create_particles((SCREEN_WIDTH // 2 + i, 0))
@@ -327,6 +330,14 @@ def res_of_play():
         star_group.draw(screen)
         res_group.draw(screen)
         res_group.update()
+        exit_btn.update()
+        if exit_btn.clicked:
+            cur_level = 0
+            score_coins = 0
+            score_time = 0
+            level_completed = True
+            running_menu = True
+            return True
         pygame.display.flip()
         clock.tick(fps)
 
