@@ -109,6 +109,7 @@ class Particle(Sprite):
     def __init__(self, pos, dx, dy):
         super().__init__(star_group)
         self.image = random.choice(self.fire)
+        self.image = random.choice(self.fire)
         self.rect = self.image.get_rect()
         self.velocity = [dx, dy]
         self.rect.x, self.rect.y = pos
