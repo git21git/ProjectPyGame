@@ -21,14 +21,6 @@ gold_coins_img = load_image("snow/menu_coins.png", color_key=-1)
 menu_clocks_img = load_image("snow/menu_clocks.png", color_key=-1)
 
 
-def clean_text(text):
-    clean_txt = []
-    for c in text:
-        coins, time = c.strip().split(';')
-        clean_txt.append(f'{coins}       {time}')
-    return clean_txt
-
-
 class Particle(pygame.sprite.Sprite):
     """Класс для системы частиц(звездочек)"""
     fire = [load_image("star.png", color_key=-1)]

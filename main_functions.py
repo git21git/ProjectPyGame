@@ -45,6 +45,49 @@ def load_level(filename):
     return list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
 
 
+def clean_text(text, flag='RES'):
+    clean_txt = []
+    if flag == 'RES':
+        for c in text:
+            coins, time = c.strip().split(';')
+            clean_txt.append(f'{coins}       {time}')
+    elif flag == 'NEW':
+        for c in text:
+            coins, time = c.strip().split(';')
+            clean_txt.append((int(coins), time))
+    elif flag == 'CONVERT':
+        for coin, time in text:
+            clean_txt.append(f'{coin};{time}')
+    return clean_txt
+
+
+def check_new_table(game, score_coins, score_time):
+    """Функция для проверки, попадает ли результат в таблицу лидеров"""
+    filename = ''
+    changed = False
+    if game == 'forrest':
+        filename = 'BlackForrest/res_forrest.txt'
+    if game == 'mario':
+        filename = 'mario/res_mario.txt'
+    if game == 'snow':
+        filename = 'snow/res_snow.txt'
+    with open(f'data/{filename}', mode='r', encoding="utf8") as file:
+        text = clean_text(file.readlines(), flag='NEW')
+    for i in range(len(text)):
+        coin, time = text[i]
+        if score_coins > coin:
+            text[i] = score_coins, score_time
+            changed = True
+        if score_coins == coin and time > score_time:
+            text[i] = score_coins, score_time
+            changed = True
+    text = clean_text(text, flag='CONVERT')
+    with open(f'data/{filename}', mode='w', encoding="utf8") as file:
+        for line in text:
+            print(line, file=file)
+    return changed
+
+
 class Button:
     """Класс всех кнопок"""
 

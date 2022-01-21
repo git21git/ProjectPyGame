@@ -48,6 +48,7 @@ n_lvl = ['Портал в лесу', 'Луг деревни Атрейдес', '
          'Пустыня Сахара', 'Зимние приключения', 'Проход через горы',
          'Темный лес', 'Злой волшебник', 'Замок принцессы']  # Названия для уровней
 max_level = len(levels)
+NEW_BEST = 'Вы попадаете в таблицу лидеров!'
 
 
 def draw_mini_text(text, color, pos):
@@ -298,16 +299,18 @@ def res_of_play():
             create_particles((WIDTH // 2 + i, 0))
         _ = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
         _ = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
-        intro_text = ["Вы Выиграли, Принцесса спасена!", "",
-                      f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
-                      '', f"Монеты: {score_coins}"]
+        time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
+        intro_text = ["Вы Выиграли. Принцесса спасена!", "", f'Время: {time}',
+                      '', f"Монеты: {score_coins}",
+                      f"{NEW_BEST if check_new_table('mario', int(score_coins), time) else ''}"]
         fon = pygame.transform.scale(load_image('mario/final_mario.png'), screen_size)
         screen.blit(fon, (0, 0))
         draw_text(intro_text)
     else:
         intro_text = ['']
         fon = load_image('mario/gameover.png', color_key=-1)
-    exit_btn = Button(SCREEN_WIDTH / 2 - 117 / 2, 299, pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
+    exit_btn = Button(SCREEN_WIDTH / 2 - 117 / 2, 299,
+                      pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
 
     while True:
         for event in pygame.event.get():

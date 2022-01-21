@@ -22,6 +22,7 @@ running_res = False
 running_menu = True
 running_game = False
 running_back = False
+NEW_BEST = 'Вы попадаете в таблицу лидеров!'
 
 tile_images = {
     'box': load_image('snow/box.png'),
@@ -37,6 +38,7 @@ player_image_up = load_image('snow/snowman_up.png', color_key=-1)
 player_image_down = load_image('snow/snowman_down.png', color_key=-1)
 player_image_left = load_image('snow/snowman_left.png', color_key=-1)
 
+exit_btn = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49))
 start_img = load_image('snow/btn_start.png')
 bg = load_image('snow/bg.png')
 back_img = load_image('snow/back_img.png', color_key=-1)
@@ -297,18 +299,19 @@ def create_particles(position):
 
 
 def res_of_play():
-    global running_menu, score_time, score_coins, cur_level, level_completed
+    global running_menu, score_time, score_coins, cur_level, \
+        level_completed, exit_btn, NEW_BEST, running_res
     pygame.mouse.set_visible(True)
-    exit_btn = Button(SCREEN_WIDTH / 2, 300, pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
+    # exit_btn = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, exit_btn)
 
     if not player.died:
         for i in range(-300, 310, 50):
             create_particles((SCREEN_WIDTH // 2 + i, 0))
         _ = AnimatedSprite(load_image("snow/coins.png", color_key=-1), 3, 2, 155, 212, res_group, 5)
         _ = AnimatedSprite(load_image("snow/clocks.png", color_key=-1), 7, 2, 148, 130, res_group, 5)
-        intro_text = ["Вы Выиграли!", "",
-                      f'Время: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
-                      '', f"Монеты: {score_coins}"]
+        time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
+        intro_text = ["Вы Выиграли!", "", f'Время: {time}', '', f"Монеты: {score_coins}",
+                      f"{NEW_BEST if check_new_table('snow', int(score_coins), time) else ''}"]
         fon = pygame.transform.scale(load_image('final.png'), screen_size)
         screen.blit(fon, (0, 0))
         draw_text(intro_text)
@@ -330,13 +333,14 @@ def res_of_play():
         star_group.draw(screen)
         res_group.draw(screen)
         res_group.update()
-        exit_btn.update()
+        # exit_btn.update()
         if exit_btn.clicked:
             cur_level = 0
             score_coins = 0
             score_time = 0
             level_completed = True
             running_menu = True
+            running_res = False
             return True
         pygame.display.flip()
         clock.tick(fps)

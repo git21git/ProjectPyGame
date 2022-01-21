@@ -20,6 +20,7 @@ onGround = False
 jump = False
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
+NEW_BEST = 'Вы попадаете в таблицу лидеров!'
 
 tile_images = {
     'block': load_image('BlackForrest/block.png'),
@@ -155,9 +156,10 @@ def res_of_play():
                     # End()
                     pygame.mixer.music.pause()
                     if score_coins > 50:
-                        intro_text = ["You did it!", "",
-                                      f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
-                                      '', f"Coins: {score_coins}"]
+                        time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
+                        intro_text = ["You did it!", "", f'Time: {time}',
+                                      '', f"Coins: {score_coins}",
+                                      f"{NEW_BEST if check_new_table('forrest', int(score_coins), time) else ''}"]
                         pygame.mixer.music.load("Data/BlackForrest/dark_souls_15. Four Kings.mp3")
                         fon = pygame.transform.scale(load_image('BlackForrest/you_won.png'), size)
                     else:
