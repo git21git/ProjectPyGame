@@ -32,6 +32,7 @@ tile_images = {
     'flag': load_image('snow/flag.png', color_key=-1),
     'coin': load_image('snow/coin.png', color_key=-1),
     'bucket': load_image('snow/bucket.png', color_key=-1),
+    'stone': load_image('snow/stones.png')
 }
 player_image = load_image('snow/snowman.png', color_key=-1)
 player_image_up = load_image('snow/snowman_up.png', color_key=-1)
@@ -79,6 +80,8 @@ def generate_level(level):
                 Tile('empty', x, y)
             elif level[y][x] == '#':  # стена
                 Tile('box', x, y)
+            elif level[y][x] == 'B':  # стена
+                Tile('box1', x, y)
             elif level[y][x] == '@':  # игрок
                 Tile('empty', x, y)
                 new_player = Player(x, y)
@@ -86,6 +89,9 @@ def generate_level(level):
             elif level[y][x] == '%':  # огонь
                 Tile('empty', x, y)
                 _ = Fire(x, y)
+            elif level[y][x] == 'V':  # камни
+                Tile('empty', x, y)
+                _ = Stones(x, y)
             elif level[y][x] == '*':  # coins
                 Tile('empty', x, y)
                 _ = Coins(x, y)
@@ -171,6 +177,16 @@ class Fire(Sprite):
         self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
 
         self.add(fire_group, all_sprites)
+
+
+class Stones(Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(stones_group)
+        self.image = tile_images['stone']
+        self.rect = self.image.get_rect()
+        self.rect = self.rect.move(tile_size * pos_x, tile_size * pos_y)
+
+        self.add(stones_group, all_sprites)
 
 
 class Bucket(Sprite):
@@ -302,7 +318,7 @@ def res_of_play():
     global running_menu, score_time, score_coins, cur_level, \
         level_completed, exit_btn, NEW_BEST, running_res, running_back
     pygame.mouse.set_visible(True)
-    exit_btn = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, exit_btn)
+    exit_btn = Button(SCREEN_WIDTH / 2, 350, exit_btn)
 
     if not player.died:
         for i in range(-300, 310, 50):
@@ -358,6 +374,7 @@ finish_group = pygame.sprite.Group()
 star_group = pygame.sprite.Group()
 res_group = pygame.sprite.Group()
 bucket_group = pygame.sprite.Group()
+stones_group = pygame.sprite.Group()
 menu_group = pygame.sprite.Group()
 # меню
 coins = AnimatedSprite(load_image("snow/menu_coins.png", color_key=-1), 3, 2, 5, 0, menu_group, 9)
@@ -438,6 +455,7 @@ def game_snowman():
         exit_group.draw(screen)
         player_group.draw(screen)
         bucket_group.draw(screen)
+        stones_group.draw(screen)
 
         # Меню:
         pygame.draw.rect(screen, (181, 146, 146), (0, 0, SCREEN_WIDTH, tile_size // 2))
@@ -502,4 +520,4 @@ def main_gameplay_snow():
 
 
 if __name__ == '__main__':
-    game_snowman()
+    main_gameplay_snow()
