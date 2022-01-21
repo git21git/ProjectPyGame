@@ -300,9 +300,9 @@ def create_particles(position):
 
 def res_of_play():
     global running_menu, score_time, score_coins, cur_level, \
-        level_completed, exit_btn, NEW_BEST, running_res
+        level_completed, exit_btn, NEW_BEST, running_res, running_back
     pygame.mouse.set_visible(True)
-    # exit_btn = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, exit_btn)
+    exit_btn = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, exit_btn)
 
     if not player.died:
         for i in range(-300, 310, 50):
@@ -333,15 +333,16 @@ def res_of_play():
         star_group.draw(screen)
         res_group.draw(screen)
         res_group.update()
-        # exit_btn.update()
+        exit_btn.update()
         if exit_btn.clicked:
             cur_level = 0
             score_coins = 0
             score_time = 0
-            level_completed = True
-            running_menu = True
+            level_completed = False
             running_res = False
-            return True
+            running_back = True
+            running_menu = True
+            return
         pygame.display.flip()
         clock.tick(fps)
 
@@ -486,14 +487,13 @@ def main_gameplay_snow():
         print(running_back, running_menu, running_game, running_res, running_authors)
         if running_menu:
             menu_snowman_game()
-            print(running_back, running_menu, running_game)
         if running_game:
             game_snowman()
         if running_res:
             res_of_play()
         if running_authors:
-            final_game_screen()
             running_authors = False
+            final_game_screen()
 
         if running_back:
             break
