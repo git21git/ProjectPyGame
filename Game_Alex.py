@@ -67,6 +67,8 @@ false_coin_group = pygame.sprite.Group()
 menu_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
 flying_eye = pygame.sprite.Group()
+exit_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (88, 38))
+restart_img = pygame.transform.scale(load_image("BlackForrest/restart_btn.png", color_key=-1), (88, 38))
 coins = AnimatedSprite(load_image("BlackForrest/Coin_Sheet.png", color_key=-1), 4, 1, 6, 0, menu_group, 10)
 clocks = AnimatedSprite(load_image("BlackForrest/clocks.png", color_key=-1), 7, 2, tile_size * 2, 0, menu_group, 10)
 heart_pic = load_image("BlackForrest/heart_sheet1.png", color_key=-1)
@@ -82,7 +84,7 @@ heart_pic = pygame.transform.scale(heart_pic, (256, 26))
 heart = AnimatedSprite(heart_pic, 4, 1, tile_size * 4 - 15, 0, menu_group, 10)
 
 
-def menu_forrest_game():
+def menu_forrest_game(dic_game):
     pygame.display.set_caption('Black Forrest')
     pygame.display.set_icon(load_image("BlackForrest/Black_Forrest.ico"))
     pygame.mixer.music.load("Data/BlackForrest/start_window_black_forrest.mp3")
@@ -96,7 +98,6 @@ def menu_forrest_game():
     go_back = Button(10, 10, back_img)
     text_coord = 60
     font = pygame.font.Font("data/BlackForrest/SilafejiraRegular.otf", 60)
-    running = True
     # menu = Button(screen_width // 2 - menu_img.get_width() // 2,
     #              screen_height // 2 - menu_img.get_height() // 2, menu_img)
 
@@ -112,7 +113,7 @@ def menu_forrest_game():
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
-    while running:
+    while dic_game['forrest_menu']:
         sound_button = pygame.mixer.Sound("Data/BlackForrest/button (2).mp3")
         start_btn.update()
         go_back.update()
@@ -120,103 +121,114 @@ def menu_forrest_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.mixer.music.pause()
-                terminate()
+                dic_game['forrest_menu'] = False
+                dic_game['game'] = False
 
         if start_btn.clicked:
             sound_button.play()
             pygame.mixer.music.pause()
-            game_forrest()
+            dic_game['forrest_game'] = True
+            dic_game['forrest_menu'] = False
 
         if go_back.clicked:
             pygame.mixer.music.pause()
             sound_button.play()
-            return True
+            dic_game['forrest_menu'] = False
+            dic_game['houses'] = True
 
         pygame.display.flip()
+    return dic_game
 
 
-def res_of_play():
+def res_of_play_forrest(dic_game):
     """Здесь можно выводить результат игры"""
-    global hero, XP, score_time, score_coins, black_forrest, mushroom
+    global hero, XP, score_time, score_coins, black_forrest, mushroom, restart_img, pressed
+    pressed = False
+    sound_button = pygame.mixer.Sound("Data/BlackForrest/button (2).mp3")
     if hero.died:
         pygame.mixer.music.pause()
         pygame.mixer.music.load("Data/BlackForrest/You_died.mp3")
-        sound_button = pygame.mixer.Sound("Data/BlackForrest/button (2).mp3")
         pygame.mixer.music.play()
         counter = 0
-        fon = pygame.transform.scale(load_image('BlackForrest/you_died.png'), (645, 400))
+        bg = pygame.transform.scale(load_image('BlackForrest/demon_bg.png'), (645, 400))
+        fon = pygame.transform.scale(load_image('BlackForrest/you_died.png', color_key=-1), (645, 400))
         while True:
             counter += 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.mixer.music.pause()
-                    terminate()
+                    dic_game['forrest_res'] = False
+                    dic_game['game'] = False
                 elif (event.type == pygame.KEYDOWN or
                       event.type == pygame.MOUSEBUTTONDOWN) and counter > 200:
-                    # End()
                     pygame.mixer.music.pause()
-                    if score_coins > 50:
-                        time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
-                        intro_text = ["You did it!", "", f'Time: {time}',
-                                      '', f"Coins: {score_coins}",
-                                      f"{NEW_BEST if check_new_table('forrest', int(score_coins), time) else ''}"]
-                        pygame.mixer.music.load("Data/BlackForrest/dark_souls_15. Four Kings.mp3")
-                        fon = pygame.transform.scale(load_image('BlackForrest/you_won.png'), size)
-                    else:
-                        intro_text = ["You died! I'm sorry...", "",
-                                      f'Time: {str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}',
-                                      '', f"Coins: {score_coins}"]
-                        pygame.mixer.music.load("Data/BlackForrest/when_you_lose.mp3")
-                        fon = pygame.transform.scale(load_image('BlackForrest/you_not_won.png'), size)
-                    pygame.mixer.music.play()
-                    restart = Button(50, HEIGHT - 87,
-                                     pygame.transform.scale(load_image("BlackForrest/restart_btn.png", color_key=-1),
-                                                            (88, 38)))
-
-                    exit_btn = Button(WIDTH - 50 - 88, HEIGHT - 87,
-                                      pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1),
-                                                             (88, 38)))
-
-                    while True:
-                        pygame.mouse.set_visible(True)
-                        for event in pygame.event.get():
-                            if event.type == pygame.QUIT:
-                                pygame.mixer.music.pause()
-                                terminate()
-                        screen.blit(fon, (0, 0))
-                        draw_text(intro_text, Font="data/BlackForrest/SilafejiraRegular.otf",
-                                  color=pygame.Color(255, 96, 66))
-                        restart.update()
-                        exit_btn.update()
-                        pygame.display.flip()
-
-                        if restart.clicked:
-                            sound_button.play()
-                            pygame.mixer.music.pause()
-                            all_sprites.empty()
-                            false_coin_group.empty()
-                            hero.kill()
-                            mushroom.kill()
-                            score_time = 0
-                            score_coins = 0
-                            XP = 5
-                            black_forrest = BlackForrest()
-                            hero = Player(6, 6)
-                            mushroom = Mushroom()
-
-                            Border(-1, -1, WIDTH + 1, -1)  # Верхняя граница
-                            Border(-1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1)  # Нижняя граница
-                            Border(-10, -1, -10, HEIGHT + 1)
-                            Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
-
-                            # pygame.init() уже не понадобится, из-за 405 строчки (перед game_forrest)
-                            game_forrest()
-                        if exit_btn.clicked:
-                            pygame.mixer.music.stop()
-                            sound_button.play()
-                            final_game_screen()
+                    pressed = True
+            screen.blit(bg, (0, 0))
             screen.blit(fon, (0, 0))
+
             pygame.display.flip()
+            if pressed or not dic_game['forrest_res']:
+                break
+    if pressed:
+        if score_coins > 50:
+            time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
+            intro_text = ["You did it!", "", f'Time: {time}',
+                          '', f"Coins: {score_coins}",
+                          f"{NEW_BEST if check_new_table('forrest', int(score_coins), time) else ''}"]
+            pygame.mixer.music.load("Data/BlackForrest/dark_souls_15. Four Kings.mp3")
+            fon = pygame.transform.scale(load_image('BlackForrest/you_won.png'), size)
+        else:
+            time = f'{str(score_time // 3600).rjust(2, "0")}:{str(score_time % 3600 // 60).rjust(2, "0")}'
+            intro_text = ["You died! I'm sorry...", "",
+                          f'Time: {time}', '', f"Coins: {score_coins}"]
+            pygame.mixer.music.load("Data/BlackForrest/when_you_lose.mp3")
+            fon = pygame.transform.scale(load_image('BlackForrest/you_not_won.png'), size)
+        pygame.mixer.music.play()
+        restart = Button(50, HEIGHT - 87, restart_img)
+
+        exit_btn = Button(WIDTH - 50 - 88, HEIGHT - 87, exit_img)
+
+        while dic_game['forrest_res']:
+            pygame.mouse.set_visible(True)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.mixer.music.pause()
+                    dic_game['forrest_res'] = False
+                    dic_game['game'] = False
+            screen.blit(fon, (0, 0))
+            draw_text(intro_text, Font="data/BlackForrest/SilafejiraRegular.otf",
+                      color=pygame.Color(255, 150, 150))  # было 255, 96, 66 плохо видно
+            restart.update()
+            exit_btn.update()
+            pygame.display.flip()
+
+            if restart.clicked:
+                sound_button.play()
+                pygame.mixer.music.pause()
+                all_sprites.empty()
+                false_coin_group.empty()
+                hero.kill()
+                mushroom.kill()
+                score_time = 0
+                score_coins = 0
+                XP = 5
+                black_forrest = BlackForrest()
+                hero = Player(6, 6)
+                mushroom = Mushroom()
+
+                Border(-1, -1, WIDTH + 1, -1)  # Верхняя граница
+                Border(-1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1)  # Нижняя граница
+                Border(-10, -1, -10, HEIGHT + 1)
+                Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
+
+                dic_game['forrest_res'] = False
+                dic_game['forrest_game'] = True
+            if exit_btn.clicked:
+                pygame.mixer.music.stop()
+                sound_button.play()
+                dic_game['authors'] = True
+                dic_game['forrest_res'] = False
+    return dic_game
 
 
 class BlackForrest(pygame.sprite.Sprite):
@@ -411,8 +423,8 @@ pygame.init()
 pygame.mixer.init()
 
 
-def game_forrest():
-    global score_coins, XP, motion
+def game_forrest(dic_game):
+    global score_coins, XP
 
     pygame.display.set_caption('Black Forrest')
     pygame.display.set_icon(load_image("BlackForrest/Black_Forrest.ico"))
@@ -421,14 +433,14 @@ def game_forrest():
     build_level()
     fps = 85
     global score_time
-    running = True
-    while running:
+    while dic_game['forrest_game']:
         pygame.mouse.set_visible(False)
         score_time += 1
         all_sprites.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                dic_game['forrest_game'] = False
+                dic_game['game'] = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP and not onGround:
                 hero.move_up()
                 if pygame.sprite.spritecollideany(hero, horizontal_borders):
@@ -455,7 +467,8 @@ def game_forrest():
             if score_coins == 0:
                 draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12),
                                Font="data/BlackForrest/SilafejiraRegular.otf", size=25)
-                res_of_play()
+                dic_game['forrest_game'] = False
+                dic_game['forrest_res'] = True
 
         if pygame.sprite.groupcollide(player_group, coins_group, False, True):
             hero.sound1.stop()
@@ -502,10 +515,28 @@ def game_forrest():
 
         if XP <= 0:
             hero.died = True
-            res_of_play()
+            dic_game['forrest_game'] = False
+            dic_game['forrest_res'] = True
         clock.tick(fps)
-    pygame.quit()
+    return dic_game
 
 
 if __name__ == '__main__':
-    game_forrest()
+    dic_game = {'houses': False, 'authors': False, 'table': False, 'game': True,
+                'mario_game': False, 'mario_menu': False, 'mario_res': False,
+                'snow_game': False, 'snow_menu': False, 'snow_res': False,
+                'forrest_game': False, 'forrest_menu': True, 'forrest_res': False}
+    while dic_game['game']:
+        if dic_game['houses']:
+            dic_game['forrest_menu'] = True
+            dic_game['houses'] = False
+        if dic_game['forrest_menu']:
+            dic_game = menu_forrest_game(dic_game)
+        if dic_game['forrest_game']:
+            dic_game = game_forrest(dic_game)
+        if dic_game['forrest_res']:
+            dic_game = res_of_play_forrest(dic_game)
+        if dic_game['authors']:
+            dic_game = final_game_screen(dic_game)
+        if not dic_game['game']:
+            break

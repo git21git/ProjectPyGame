@@ -7,6 +7,7 @@ WIDTH, HEIGHT = screen_size = (645, 400)
 screen = pygame.display.set_mode(screen_size)
 FPS = 80
 onGround = False
+
 tile_images = {
     'exit': load_image('mario/new_level.png', color_key=-1),
     'menu': load_image('mario/menu.png'),
@@ -18,35 +19,59 @@ tile_images = {
     'gru_wall': load_image("mario/gru_wall.png", color_key=-1),
     'snow': load_image("mario/snow.png", color_key=-1)
 }
-player_image = load_image('mario/mario.png', color_key=-1)
+
+player_image = pygame.transform.scale(load_image("mario/0.png", color_key=-1), (30, 50))
 start_img = pygame.transform.scale(load_image('mario/start_button.png'), (148, 68))
 bg = pygame.transform.scale(load_image('mario/mario (1).jpg'), (WIDTH, HEIGHT))
 
-back_img = pygame.transform.scale(load_image('mario/back_img.png', color_key=-1), (86, 41))
+back_img = load_image('mario/back_img.png', color_key=-1)
+exit_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49))
+restart_img = pygame.transform.scale(load_image("BlackForrest/restart_btn.png", color_key=-1), (117, 49))
 
 tile_size = tile_width = tile_height = 50
 level_completed = True
 cur_level = 0
 score_coins = 0
 score_time = 0
+
 levels = ['mario/levels/level_1.txt', 'mario/levels/level_2.txt',
           'mario/levels/level_3.txt', 'mario/levels/level_4.txt',
           'mario/levels/level_5.txt', 'mario/levels/level_6.txt',
           'mario/levels/level_7.txt', 'mario/levels/level_8.txt',
           'mario/levels/level_9.txt']
+
 music = ['data/mario/music/portal.mp3', 'data/mario/music/field.mp3',
          'data/mario/music/peace.mp3', 'data/mario/music/peace.mp3',
          'data/mario/music/peace.mp3', 'data/mario/music/castle.mp3',
          'data/mario/music/forest.mp3', 'data/mario/music/win.mp3',
          'data/mario/music/peace.mp3']
+
 f_lvl = [load_image('mario/start_mario.jpg'), load_image('mario/second_peyzaj.jpg'),
          load_image('mario/third_peizaj.jpg'),
          load_image('mario/desert.png'), load_image('mario/snow_rocks.jpg'),
          load_image('mario/far_castle.jpeg'), load_image('mario/black_forrest.jpg'),
          load_image('mario/gru.png'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
+
 n_lvl = ['Портал в лесу', 'Луг деревни Атрейдес', 'Лечебница Аркрайт',
          'Пустыня Сахара', 'Зимние приключения', 'Проход через горы',
          'Темный лес', 'Злой волшебник', 'Замок принцессы']  # Названия для уровней
+
+left_run = [pygame.transform.scale(load_image("mario/l1.png", color_key=-1), (30, 50)),
+            pygame.transform.scale(load_image("mario/l2.png", color_key=-1), (30, 50)),
+            pygame.transform.scale(load_image("mario/l3.png", color_key=-1), (30, 50)),
+            pygame.transform.scale(load_image("mario/l4.png", color_key=-1), (30, 50)),
+            pygame.transform.scale(load_image("mario/l5.png", color_key=-1), (30, 50))]
+
+right_run = [pygame.transform.scale(load_image("mario/r1.png", color_key=-1), (30, 50)),
+             pygame.transform.scale(load_image("mario/r2.png", color_key=-1), (30, 50)),
+             pygame.transform.scale(load_image("mario/r3.png", color_key=-1), (30, 50)),
+             pygame.transform.scale(load_image("mario/r4.png", color_key=-1), (30, 50)),
+             pygame.transform.scale(load_image("mario/r5.png", color_key=-1), (30, 50))]
+
+jumping_img = [pygame.transform.scale(load_image("mario/j.png", color_key=-1), (30, 50)),
+               pygame.transform.scale(load_image("mario/jl.png", color_key=-1), (30, 50)),
+               pygame.transform.scale(load_image("mario/jr.png", color_key=-1), (30, 50))]
+
 max_level = len(levels)
 NEW_BEST = 'Вы попадаете в таблицу лидеров!'
 
@@ -109,7 +134,6 @@ class Particle(Sprite):
     def __init__(self, pos, dx, dy):
         super().__init__(star_group)
         self.image = random.choice(self.fire)
-        self.image = random.choice(self.fire)
         self.rect = self.image.get_rect()
         self.velocity = [dx, dy]
         self.rect.x, self.rect.y = pos
@@ -130,35 +154,38 @@ def create_particles(position):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
-def menu_mario_game():
+def menu_mario_game(dic_game):
     pygame.display.set_caption('Mario: Multiverse')  # Название приложения
     pygame.mixer.music.load("data/mario/music/honor-and-sword-main.mp3")
     pygame.mixer.music.play()
     sound_btn = pygame.mixer.Sound("data/BlackForrest/button (2).mp3")
     pygame.mouse.set_visible(True)
-    running = True
     start_btn = Button(SCREEN_WIDTH // 2 - start_img.get_width() // 2,
                        SCREEN_HEIGHT // 2 - start_img.get_height() // 2, start_img)
     go_back = Button(10, 10, back_img)
-    while running:
+    while dic_game['mario_menu']:
         screen.blit(bg, (0, 0))
         start_btn.update()
         go_back.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
+                dic_game['game'] = False
+                dic_game['mario_menu'] = False
 
         if start_btn.clicked:
             sound_btn.play()
             pygame.mixer.music.stop()
-            game_mario()
+            dic_game['mario_game'] = True
+            dic_game['mario_menu'] = False
         if go_back.clicked:
             pygame.mixer.music.stop()
             sound_btn.play()
-            return True
-
+            dic_game['houses'] = True
+            dic_game['mario_menu'] = False
+        clock.tick(FPS)
         pygame.display.flip()
+    return dic_game
 
 
 class Tile(Sprite):
@@ -203,29 +230,47 @@ class Player(Sprite):
 
     def update(self):
         global onGround, level_completed
+
         move_x = 0
         move_y = 0
-
         moving = 4
 
         if not hero.died:
             key = pygame.key.get_pressed()
             if key[pygame.K_UP] and not self.jumped and not self.notOnGround:
+                if self.image in left_run:
+                    self.image = jumping_img[1]
+                elif self.image in right_run:
+                    self.image = jumping_img[2]
+                else:
+                    self.image = jumping_img[0]
+
                 self.gravity = -17
                 self.jumped = True
             if not key[pygame.K_UP]:
                 self.jumped = False
             if key[pygame.K_LEFT]:
                 move_x -= moving
+                if self.counter % 8 == 0:
+                    self.image = left_run[(self.counter // 8) % 5]
                 self.counter += 1
                 self.direction = -1
             if key[pygame.K_RIGHT]:
                 move_x += moving
+                if self.counter % 8 == 0:
+                    self.image = right_run[(self.counter // 8) % 5]
                 self.counter += 1
                 self.direction = 1
             if not key[pygame.K_LEFT] and not key[pygame.K_RIGHT]:
+                self.image = player_image
                 self.counter = 0
                 self.index = 0
+            if self.image in left_run and self.notOnGround:
+                self.image = jumping_img[1]
+            elif self.image in right_run and self.notOnGround:
+                self.image = jumping_img[2]
+            elif self.image == player_image and self.notOnGround:
+                self.image = jumping_img[0]
             if self.rect.x >= WIDTH:
                 self.rect = self.image.get_rect().move(self.rect.x % WIDTH, self.rect.y)
             if self.rect.x <= 0:
@@ -291,9 +336,8 @@ class Princess(Sprite):
         self.count += 1
 
 
-def res_of_play():
+def res_of_play_mario(dic_game):
     global score_time, score_coins, lst, cur_level, level_completed
-    exit_btn_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (88, 38))
     pygame.mouse.set_visible(True)
     if not hero.died:
         for i in range(-300, 310, 50):
@@ -310,16 +354,14 @@ def res_of_play():
     else:
         intro_text = ['']
         fon = load_image('mario/gameover.png', color_key=-1)
-    exit_btn = Button(SCREEN_WIDTH / 2 - 117 / 2, 299,
-                      pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49)))
+    exit_btn = Button(500, 350, exit_img)
+    restart_btn = Button(35, 350, restart_img)
 
-    while True:
+    while dic_game['mario_res']:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                final_game_screen()
+                dic_game['game'] = False
+                dic_game['mario_res'] = False
         screen.blit(fon, (0, 0))
         draw_text(intro_text, color=pygame.Color('black'))
         res_group.draw(screen)
@@ -327,15 +369,26 @@ def res_of_play():
         star_group.update()
         star_group.draw(screen)
         exit_btn.update()
+        restart_btn.update()
+        if restart_btn.clicked:
+            cur_level = 0
+            score_coins = 0
+            score_time = 0
+            lst.clear()
+            level_completed = True
+            dic_game['mario_res'] = False
+            dic_game['mario_game'] = True
         if exit_btn.clicked:
             cur_level = 0
             score_coins = 0
             score_time = 0
-            level_completed = True
             lst.clear()
-            menu_mario_game()
+            level_completed = True
+            dic_game['mario_res'] = False
+            dic_game['authors'] = True
         pygame.display.flip()
         clock.tick(FPS)
+    return dic_game
 
 
 clock = pygame.time.Clock()
@@ -373,10 +426,9 @@ level_map = load_level(levels[cur_level])
 hero, max_x, max_y, lst = generate_level(level_map)
 
 
-def game_mario():
+def game_mario(dic_game):
     global score_time, level_completed, cur_level, score_coins, lst
-    running = True
-    while running:
+    while dic_game['mario_game']:
         score_time += 1
         if level_completed:
             pygame.mixer.music.stop()
@@ -386,7 +438,8 @@ def game_mario():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                dic_game['mario_game'] = False
+                dic_game['game'] = False
         else:
             global onGround
             onGround = False
@@ -419,10 +472,28 @@ def game_mario():
             level_completed = True
         if pygame.sprite.groupcollide(hero_group, princess_group, False, False):
             pygame.mixer.music.stop()
-            res_of_play()
+            dic_game['mario_game'] = False
+            dic_game['mario_res'] = True
         pygame.display.flip()
-    pygame.quit()
+    return dic_game
 
 
 if __name__ == '__main__':
-    game_mario()
+    dic_game = {'houses': False, 'authors': False, 'table': False, 'game': True,
+                'mario_game': False, 'mario_menu': True, 'mario_res': False,
+                'snow_game': False, 'snow_menu': False, 'snow_res': False,
+                'forrest_game': False, 'forrest_menu': False, 'forrest_res': False}
+    while dic_game['game']:
+        if dic_game['houses']:
+            dic_game['mario_menu'] = True
+            dic_game['houses'] = False
+        if dic_game['mario_menu']:
+            dic_game = menu_mario_game(dic_game)
+        if dic_game['mario_game']:
+            dic_game = game_mario(dic_game)
+        if dic_game['mario_res']:
+            dic_game = res_of_play_mario(dic_game)
+        if dic_game['authors']:
+            dic_game = final_game_screen(dic_game)
+        if not dic_game['game']:
+            break

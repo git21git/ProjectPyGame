@@ -66,6 +66,9 @@ for i in range(-300, 400, 50):
     create_particles((SCREEN_WIDTH // 2 + i, 0))
 pygame.display.set_caption('PyPurble Game Studio')  # Название приложения
 pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
+
+exit_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49))
+
 """Анмированные герои"""
 dragon = AnimatedSprite(load_image("final/dragon_sheet8x2.png", color_key=-1), 8, 2, 523, 299, all_sprites, 6)
 girl = AnimatedSprite(load_image("final/girl.png", color_key=-1), 6, 1, 523, 1, all_sprites, 6)
@@ -73,14 +76,15 @@ bird = AnimatedSprite(load_image("final/bird.png", color_key=-1), 6, 2, 15, 1, a
 boy = AnimatedSprite(load_image("final/boy.png", color_key=-1), 5, 4, 20, 250, all_sprites, 6)
 
 
-def final_game_screen():
+def final_game_screen(dic_game):
     """Функция отображения окна с авторами"""
-    running = True
-    while running:
+    global exit_img
+    exit_btn = Button(255.5, 350, exit_img)
+    while dic_game['authors']:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.K_RETURN and event.key == pygame.K_ESCAPE):
-                running = False
-                terminate()
+                dic_game['authors'] = False
+                dic_game['game'] = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 create_particles(pygame.mouse.get_pos())
         fon = pygame.transform.scale(load_image('final.png'), screen_size)  # картинка
@@ -90,10 +94,19 @@ def final_game_screen():
         all_sprites.update()
         star_group.update()
         star_group.draw(screen)
+        exit_btn.update()
+        if exit_btn.clicked:
+            dic_game['authors'] = False
+            dic_game['houses'] = True
 
         pygame.display.flip()
         clock.tick(FPS)
+    return dic_game
 
 
 if __name__ == '__main__':
-    final_game_screen()
+    dic_game = {'houses': False, 'authors': True, 'table': False, 'game': True,
+                'mario_game': False, 'mario_menu': False, 'mario_res': False,
+                'snow_game': False, 'snow_menu': False, 'snow_res': False,
+                'forrest_game': False, 'forrest_menu': False, 'forrest_res': False}
+    final_game_screen(dic_game)

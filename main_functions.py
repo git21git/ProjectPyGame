@@ -179,3 +179,42 @@ class AnimatedSprite(Sprite):
         if self.count_iteration % self.timer == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
+
+
+def draw_table_text(screen):
+    font = pygame.font.Font('data/final/seguisbi.ttf', 28)
+    text = font.render('WINNERS SCORE', True, pygame.Color('black'))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 15))
+    # Результаты игры Марио
+    with open('data/mario/res_mario.txt', encoding="utf8") as file:
+        text = file.readlines()
+    text_mario = clean_text(text)
+    text_coord = 25
+    for line in text_mario:
+        text = font.render(line, True, pygame.Color('white'))
+        text_x = 410 - text.get_width()
+        text_y = text_coord + text.get_height() + 10
+        text_coord = text_y
+        screen.blit(text, (text_x, text_y))
+
+    # Результаты игры Forrest
+    with open('data/BlackForrest/res_forrest.txt', encoding="utf8") as file:
+        text_forrest = clean_text(file.readlines())
+    text_coord = 25
+    for line in text_forrest:
+        text = font.render(line, True, pygame.Color('white'))
+        text_x = 190 - text.get_width()
+        text_y = text_coord + text.get_height() + 10
+        text_coord = text_y
+        screen.blit(text, (text_x, text_y))
+
+    # Результаты игры Snow
+    with open('data/snow/res_snow.txt', encoding="utf8") as file:
+        text_snow = clean_text(file.readlines())
+    text_coord = 25
+    for line in text_snow:
+        text = font.render(line, True, pygame.Color('white'))
+        text_x = 620 - text.get_width()
+        text_y = text_coord + text.get_height() + 10
+        text_coord = text_y
+        screen.blit(text, (text_x, text_y))

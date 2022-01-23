@@ -16,11 +16,6 @@ score_time = 0
 score_coins = 0
 score_buckets = 0
 
-running_authors = False
-running_res = False
-running_menu = True
-running_game = False
-running_back = False
 NEW_BEST = 'Вы попадаете в таблицу лидеров!'
 
 tile_images = {
@@ -38,7 +33,8 @@ player_image_up = load_image('snow/snowman_up.png', color_key=-1)
 player_image_down = load_image('snow/snowman_down.png', color_key=-1)
 player_image_left = load_image('snow/snowman_left.png', color_key=-1)
 
-exit_btn = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49))
+exit_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (117, 49))
+restart_img = pygame.transform.scale(load_image("BlackForrest/restart_btn.png", color_key=-1), (117, 49))
 start_img = load_image('snow/btn_start.png')
 bg = load_image('snow/bg.png')
 back_img = load_image('snow/back_img.png', color_key=-1)
@@ -122,6 +118,7 @@ def open_level(level):
     star_group.empty()
     res_group.empty()
     bucket_group.empty()
+    stones_group.empty()
 
     level_map = load_level(levels[level])
     player, level_x, level_y = generate_level(level_map)
@@ -271,9 +268,8 @@ class Camera:
         self.dy = -(target.rect.y + target.rect.h // 2 - SCREEN_HEIGHT // 2)
 
 
-def menu_snowman_game():
+def menu_snowman_game(dic_game):
     """Функция меню игры"""
-    global running_back, running_menu, running_game
     pygame.display.set_caption('Snow_Snow')
     pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
     pygame.mouse.set_visible(True)
@@ -282,7 +278,7 @@ def menu_snowman_game():
     go_back = Button(10, 10, back_img)
     rules = Button(SCREEN_WIDTH // 2 - rules_img.get_width() // 2,
                    SCREEN_HEIGHT // 2 + 20, rules_img)
-    while running_menu:
+    while dic_game['snow_menu']:
         fon = pygame.transform.scale(bg, screen_size)
         screen.blit(fon, (0, 0))
         start_btn.update()
@@ -290,19 +286,20 @@ def menu_snowman_game():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
+                dic_game['game'] = False
+                dic_game['snow_menu'] = False
 
         if start_btn.clicked:
-            running_game = True
-            running_menu = False
+            dic_game['snow_game'] = True
+            dic_game['snow_menu'] = False
         if rules.clicked:
             print('rules')
         if go_back.clicked:
-            running_back = True
-            running_menu = False
+            dic_game['houses'] = True
+            dic_game['snow_menu'] = False
 
         pygame.display.flip()
-    return
+    return dic_game
 
 
 class Particle(Sprite):
@@ -334,12 +331,13 @@ def create_particles(position):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
-def res_of_play():
+def res_of_play_snow(dic_game):
     """Функция окна результатов игры"""
-    global running_menu, score_time, score_coins, cur_level, \
-        level_completed, exit_btn, NEW_BEST, running_res, running_back
+    global score_time, score_coins, cur_level, \
+        level_completed, exit_img, NEW_BEST, restart_img
     pygame.mouse.set_visible(True)
-    exit_btn = Button(SCREEN_WIDTH / 2, 350, exit_btn)
+    exit_btn = Button(500, 350, exit_img)
+    restart_btn = Button(35, 350, restart_img)
 
     if not player.died:
         for i in range(-300, 310, 50):
@@ -356,13 +354,11 @@ def res_of_play():
         intro_text = ['']
         fon = load_image('snow/gameover.png', color_key=-1)
 
-    while True:
+    while dic_game['snow_res']:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                final_game_screen()
+                dic_game['game'] = False
+                dic_game['snow_res'] = False
         screen.blit(fon, (0, 0))
         draw_text(intro_text)
 
@@ -371,17 +367,27 @@ def res_of_play():
         res_group.draw(screen)
         res_group.update()
         exit_btn.update()
+        restart_btn.update()
+        pygame.display.flip()
+        clock.tick(fps)
+        if restart_btn.clicked:
+            cur_level = 0
+            score_coins = 0
+            score_time = 0
+            level_completed = False
+            open_level(cur_level)
+            dic_game['snow_res'] = False
+            dic_game['snow_game'] = True
         if exit_btn.clicked:
             cur_level = 0
             score_coins = 0
             score_time = 0
             level_completed = False
-            running_res = False
-            running_back = True
-            running_menu = True
-            return
-        pygame.display.flip()
-        clock.tick(fps)
+            open_level(cur_level)
+            dic_game['snow_res'] = False
+            dic_game['authors'] = True
+
+    return dic_game
 
 
 """Группы спрайтов"""
@@ -440,13 +446,12 @@ def move(hero, direction):
             hero.move(direction, 0, y)
 
 
-def game_snowman():
+def game_snowman(dic_game):
     """Функция самой игры"""
     global score_time, score_buckets, score_coins, level_completed, cur_level, motion
-    global running_back, running_game, running_authors, running_res
     pygame.display.set_caption('Snow_Snow')
     pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
-    while running_game:
+    while dic_game['snow_game']:
         score_time += 1
         if level_completed:
             cur_level += 1
@@ -467,7 +472,9 @@ def game_snowman():
                     motion = 'right'
                 move(player, motion)
             if event.type == pygame.QUIT:
-                terminate()
+                dic_game['game'] = False
+                dic_game['snow_game'] = False
+
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
@@ -503,46 +510,40 @@ def game_snowman():
         if pygame.sprite.groupcollide(player_group, exit_group, False, False):
             level_completed = True
         if pygame.sprite.groupcollide(player_group, finish_group, False, False):
-            running_game = False
-            running_res = True
+            dic_game['snow_game'] = False
+            dic_game['snow_res'] = True
         if pygame.sprite.groupcollide(player_group, fire_group, False, True):
             if score_buckets < 1:
                 game_over_sound.play()
                 player.died = True
-                running_game = False
             else:
                 stop_fire_sound.play()
                 score_buckets -= 1
         """Если игрок умер, завершаем игру"""
         if player.died:
-            running_game = False
-            running_res = True
+            dic_game['snow_game'] = False
+            dic_game['snow_res'] = True
         pygame.display.flip()
         clock.tick(fps)
-    return
-
-
-def main_gameplay_snow():
-    """Функция для навигации по игре"""
-    global running_back, running_menu, running_game, running_res, running_authors
-    running_back = False
-    running_menu = True
-    while not running_back:
-        print(running_back, running_menu, running_game, running_res, running_authors)
-        if running_menu:
-            menu_snowman_game()
-        if running_game:
-            game_snowman()
-        if running_res:
-            res_of_play()
-        if running_authors:
-            running_authors = False
-            final_game_screen()
-
-        if running_back:
-            break
-    return
+    return dic_game
 
 
 if __name__ == '__main__':
-    main_gameplay_snow()
+    dic_game = {'houses': False, 'authors': False, 'table': False, 'game': True,
+                'mario_game': False, 'mario_menu': False, 'mario_res': False,
+                'snow_game': False, 'snow_menu': True, 'snow_res': False,
+                'forrest_game': False, 'forrest_menu': False, 'forrest_res': False}
+    while dic_game['game']:
+        if dic_game['houses']:
+            dic_game['snow_menu'] = True
+            dic_game['houses'] = False
+        if dic_game['snow_menu']:
+            dic_game = menu_snowman_game(dic_game)
+        if dic_game['snow_game']:
+            dic_game = game_snowman(dic_game)
+        if dic_game['snow_res']:
+            dic_game = res_of_play_snow(dic_game)
+        if dic_game['authors']:
+            dic_game = final_game_screen(dic_game)
+        if not dic_game['game']:
+            break
