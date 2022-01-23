@@ -50,8 +50,6 @@ n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так дер�
 max_level = len(levels)
 white = (255, 255, 255)
 
-motion = 'STOP'  # по умолчанию — стоим, флаг для непрерывного движения
-
 # подключение музыки
 main_music_loud = 0.5
 signal_sound_loud = 1
@@ -448,7 +446,7 @@ def move(hero, direction):
 
 def game_snowman(dic_game):
     """Функция самой игры"""
-    global score_time, score_buckets, score_coins, level_completed, cur_level, motion
+    global score_time, score_buckets, score_coins, level_completed, cur_level
     pygame.display.set_caption('Snow_Snow')
     pygame.display.set_icon(load_image("icon.ico"))  # Иконка приложения
     while dic_game['snow_game']:
@@ -460,17 +458,18 @@ def game_snowman(dic_game):
             level_completed = False
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_UP] or keys[pygame.K_DOWN] or \
-                    keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
-                if keys[pygame.K_UP]:
-                    motion = 'up'
-                elif keys[pygame.K_DOWN]:
-                    motion = 'down'
-                elif keys[pygame.K_LEFT]:
-                    motion = 'left'
-                elif keys[pygame.K_RIGHT]:
-                    motion = 'right'
-                move(player, motion)
+            if keys[pygame.K_UP] or keys[pygame.K_w] or \
+                    keys[pygame.K_DOWN] or keys[pygame.K_s] or \
+                    keys[pygame.K_LEFT] or keys[pygame.K_a] or \
+                    keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                if keys[pygame.K_UP] or keys[pygame.K_w]:
+                    move(player, 'up')
+                elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
+                    move(player, 'down')
+                elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+                    move(player, 'left')
+                elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                    move(player, 'right')
             if event.type == pygame.QUIT:
                 dic_game['game'] = False
                 dic_game['snow_game'] = False

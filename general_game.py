@@ -5,7 +5,7 @@ from main_functions import *
 pygame.init()
 WIDTH, HEIGHT = screen_size = (645, 400)
 screen = pygame.display.set_mode(screen_size)
-FPS = 80
+FPS = 60
 onGround = False
 
 tile_images = {
@@ -237,7 +237,7 @@ class Player(Sprite):
 
         if not hero.died:
             key = pygame.key.get_pressed()
-            if key[pygame.K_UP] and not self.jumped and not self.notOnGround:
+            if (key[pygame.K_UP] or key[pygame.K_w]) and not self.jumped and not self.notOnGround:
                 if self.image in left_run:
                     self.image = jumping_img[1]
                 elif self.image in right_run:
@@ -247,21 +247,21 @@ class Player(Sprite):
 
                 self.gravity = -17
                 self.jumped = True
-            if not key[pygame.K_UP]:
+            if not (key[pygame.K_UP] or key[pygame.K_w]):
                 self.jumped = False
-            if key[pygame.K_LEFT]:
+            if key[pygame.K_LEFT] or key[pygame.K_a]:
                 move_x -= moving
                 if self.counter % 8 == 0:
                     self.image = left_run[(self.counter // 8) % 5]
                 self.counter += 1
                 self.direction = -1
-            if key[pygame.K_RIGHT]:
+            if key[pygame.K_RIGHT] or key[pygame.K_d]:
                 move_x += moving
                 if self.counter % 8 == 0:
                     self.image = right_run[(self.counter // 8) % 5]
                 self.counter += 1
                 self.direction = 1
-            if not key[pygame.K_LEFT] and not key[pygame.K_RIGHT]:
+            if not (key[pygame.K_LEFT] or key[pygame.K_a]) and not (key[pygame.K_RIGHT] or key[pygame.K_d]):
                 self.image = player_image
                 self.counter = 0
                 self.index = 0
@@ -416,6 +416,7 @@ def open_level(level):
     princess_group.empty()
     coins_group.empty()
     wall_group.empty()
+    res_group.empty()
     pygame.mixer.music.load(music[level - 1])
     pygame.mixer.music.play()
     level_map = load_level(levels[level - 1])

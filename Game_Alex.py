@@ -441,16 +441,17 @@ def game_forrest(dic_game):
             if event.type == pygame.QUIT:
                 dic_game['forrest_game'] = False
                 dic_game['game'] = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP and not onGround:
+            if event.type == pygame.KEYDOWN and not onGround and \
+                    (event.key == pygame.K_UP or event.key == pygame.K_w):
                 hero.move_up()
                 if pygame.sprite.spritecollideany(hero, horizontal_borders):
                     hero.move_down()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     hero.move_left()
                     if pygame.sprite.spritecollideany(hero, vertical_borders):
                         hero.move_right()
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                     hero.move_right()
                     if pygame.sprite.spritecollideany(hero, vertical_borders):
                         hero.move_left()
@@ -468,7 +469,7 @@ def game_forrest(dic_game):
                 draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12),
                                Font="data/BlackForrest/SilafejiraRegular.otf", size=25)
                 dic_game['forrest_game'] = False
-                dic_game['forrest_res'] = True
+                dic_game['forrest_res'] = Trued
 
         if pygame.sprite.groupcollide(player_group, coins_group, False, True):
             hero.sound1.stop()
