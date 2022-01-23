@@ -66,7 +66,7 @@ coins_group = pygame.sprite.Group()
 false_coin_group = pygame.sprite.Group()
 menu_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
-flying_eye = pygame.sprite.Group()
+heart_group = pygame.sprite.Group()
 exit_img = pygame.transform.scale(load_image("BlackForrest/exit_btn.png", color_key=-1), (88, 38))
 restart_img = pygame.transform.scale(load_image("BlackForrest/restart_btn.png", color_key=-1), (88, 38))
 coins = AnimatedSprite(load_image("BlackForrest/Coin_Sheet.png", color_key=-1), 4, 1, 6, 0, menu_group, 10)
@@ -207,6 +207,7 @@ def res_of_play_forrest(dic_game):
                 pygame.mixer.music.pause()
                 all_sprites.empty()
                 false_coin_group.empty()
+                heart_group.empty()
                 hero.kill()
                 mushroom.kill()
                 score_time = 0
@@ -250,8 +251,6 @@ class Tile(pygame.sprite.Sprite):
 
         if tile_type == 'block':  # Нужно для того, чтобы монетки, падая, пропадали
             self.add(block_group, tiles_group, all_sprites)
-        elif tile_type == 'eye':
-            self.add(flying_eye, tiles_group, all_sprites)
         else:
             self.add(tiles_group, all_sprites)
 
@@ -365,6 +364,22 @@ class FalseCoins(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(false_coin_images[self.counter % 4], (16, 16))
 
 
+class Heart(pygame.sprite.Sprite):
+
+    def __init__(self):
+        super().__init__()
+        list_with_blocks_centers = [17, 67, 117, 167, 217, 267, 317, 367, 417, 467, 517, 567]
+        self.image = pygame.transform.scale(load_image("BlackForrest\heart_for_heart.png", color_key=-1), (16, 16))
+        self.rect = self.image.get_rect()
+        self.rect.x = list_with_blocks_centers[random.randint(0, 11)]
+        self.rect.y = 0
+        self.counter = 0
+        self.add(heart_group, all_sprites)
+
+    def update(self, *args):
+        self.rect = self.rect.move(0, +1)
+
+
 class Mushroom(pygame.sprite.Sprite):
 
     def __init__(self):
@@ -469,7 +484,10 @@ def game_forrest(dic_game):
                 draw_mini_text(f'X {score_coins}', (184, 15, 10), (tile_size, 12),
                                Font="data/BlackForrest/SilafejiraRegular.otf", size=25)
                 dic_game['forrest_game'] = False
-                dic_game['forrest_res'] = Trued
+                dic_game['forrest_res'] = True
+        if pygame.sprite.groupcollide(player_group, heart_group, False, True):
+            if XP < 5:
+                XP += 1
 
         if pygame.sprite.groupcollide(player_group, coins_group, False, True):
             hero.sound1.stop()
@@ -482,11 +500,15 @@ def game_forrest(dic_game):
         if onGround:  # Если герой не земле
             hero.fall()
 
-        if score_time % 100 == 0 and score_time % 1000 != 0:
+        if score_time % 100 == 0 and score_time % 1000 != 0 and score_time % 260 != 0:
             Coins()
 
-        if score_time % 1000 == 0:
+        if score_time % 1200 == 0:
+            Heart()
+
+        if score_time % 1000 == 0 and score_time % 260 != 0:
             FalseCoins()
+
 
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
@@ -513,6 +535,7 @@ def game_forrest(dic_game):
 
         pygame.sprite.groupcollide(false_coin_group, block_group, True, False)
         pygame.sprite.groupcollide(coins_group, mushroom_group, True, False)
+        pygame.sprite.groupcollide(heart_group, mushroom_group, True, False)
 
         if XP <= 0:
             hero.died = True
