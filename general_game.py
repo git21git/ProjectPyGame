@@ -16,7 +16,7 @@ tile_images = {
     'menu_door': load_image("mario/block.png", color_key=-1),
     'dirt': load_image("mario/dirt.png"),
     'grass': load_image("mario/grass.png", color_key=-1),
-    'gru_wall': load_image("mario/gru_wall.png", color_key=-1),
+    'gru_wall': pygame.transform.scale(load_image("BlackForrest/block.png", color_key=-1), (50, 50)),
     'snow': load_image("mario/snow.png", color_key=-1)
 }
 
@@ -41,16 +41,16 @@ levels = ['mario/levels/level_1.txt', 'mario/levels/level_2.txt',
           'mario/levels/level_9.txt']
 
 music = ['data/mario/music/portal.mp3', 'data/mario/music/field.mp3',
-         'data/mario/music/peace.mp3', 'data/mario/music/peace.mp3',
-         'data/mario/music/peace.mp3', 'data/mario/music/castle.mp3',
-         'data/mario/music/forest.mp3', 'data/mario/music/win.mp3',
-         'data/mario/music/peace.mp3']
+         'data/mario/music/peace.mp3', 'data/mario/music/desert.mp3',
+         'data/mario/music/snow_back.mp3', 'data/mario/music/castle.mp3',
+         'data/mario/music/forest.mp3', 'data/mario/music/evil_wizard.mp3',
+         'data/mario/music/win.mp3']
 
-f_lvl = [load_image('mario/start_mario.jpg'), load_image('mario/second_peyzaj.jpg'),
+f_lvl = [load_image('mario/portal.jpg'), load_image('mario/second_peyzaj.jpg'),
          load_image('mario/third_peizaj.jpg'),
-         load_image('mario/desert.png'), load_image('mario/snow_rocks.jpg'),
-         load_image('mario/far_castle.jpeg'), load_image('mario/black_forrest.jpg'),
-         load_image('mario/gru.png'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
+         load_image('mario/desert.jpeg'), load_image('mario/snow_rocks.jpg'),
+         load_image('mario/far_castle.jpeg'), load_image('mario/dark_forrest.jpg'),
+         load_image('mario/evil_mag.jpg'), load_image('mario/last_fon.jpg')]  # словарь фонов для уровней
 
 n_lvl = ['Портал в лесу', 'Луг деревни Атрейдес', 'Лечебница Аркрайт',
          'Пустыня Сахара', 'Зимние приключения', 'Проход через горы',
@@ -72,6 +72,36 @@ jumping_img = [pygame.transform.scale(load_image("mario/j.png", color_key=-1), (
                pygame.transform.scale(load_image("mario/jl.png", color_key=-1), (30, 50)),
                pygame.transform.scale(load_image("mario/jr.png", color_key=-1), (30, 50))]
 
+skeleton_images = [pygame.transform.scale(load_image("Mario/Skeleton1.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton2.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton3.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton4.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton5.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton6.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton7.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton8.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton9.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton10.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton11.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton12.png", color_key=-1), (50, 50)),
+                   pygame.transform.scale(load_image("Mario/Skeleton13.png", color_key=-1), (50, 50))
+                   ]
+
+skeleton_images_reverse = [pygame.transform.flip(skeleton_images[0], True, False),
+                           pygame.transform.flip(skeleton_images[1], True, False),
+                           pygame.transform.flip(skeleton_images[2], True, False),
+                           pygame.transform.flip(skeleton_images[3], True, False),
+                           pygame.transform.flip(skeleton_images[4], True, False),
+                           pygame.transform.flip(skeleton_images[5], True, False),
+                           pygame.transform.flip(skeleton_images[6], True, False),
+                           pygame.transform.flip(skeleton_images[7], True, False),
+                           pygame.transform.flip(skeleton_images[8], True, False),
+                           pygame.transform.flip(skeleton_images[9], True, False),
+                           pygame.transform.flip(skeleton_images[10], True, False),
+                           pygame.transform.flip(skeleton_images[11], True, False),
+                           pygame.transform.flip(skeleton_images[12], True, False),
+                           ]
+
 max_level = len(levels)
 NEW_BEST = 'Вы попадаете в таблицу лидеров!'
 
@@ -86,8 +116,11 @@ def draw_mini_text(text, color, pos):
 
 def generate_level(level):
     new_player, x, y = None, None, None
+    enemy_group.empty()
     list_with_walls = list()
+    invisible_blocks_list = list()
     list_with_walls.clear()
+    invisible_blocks_list.clear()
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
@@ -119,10 +152,16 @@ def generate_level(level):
                 Exit(x, y)
             elif level[y][x] == 'P':
                 Princess(x, y)
+            elif level[y][x] == 'i':
+                invisible_blocks = Invisible(x, y)
+                tile = (invisible_blocks.image, invisible_blocks.rect)
+                invisible_blocks_list.append(tile)
+            elif level[y][x] == 'e':
+                Enemy(x, y)
             elif level[y][x] == '*':
                 AnimatedSprite(load_image("mario/menu_coins.png", color_key=-1), 3, 2,
                                tile_size * x + tile_size // 4, tile_size * y + tile_size // 4, coins_group, 9)
-    return new_player, x, y, list_with_walls
+    return new_player, x, y, list_with_walls, invisible_blocks_list
 
 
 class Particle(Sprite):
@@ -196,6 +235,15 @@ class Tile(Sprite):
             tile_width * pos_x, tile_height * pos_y)
 
 
+class Invisible(Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(sprite_group)
+        self.image = pygame.transform.scale(load_image("mario/invisible_block.png", color_key=-1), (50, 50))
+        # self.image = pygame.transform.scale(load_image("mario/invisible_block.png"), (50, 50))
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x, tile_height * pos_y)
+
+
 class Wall(Sprite):
     def __init__(self, pos_x, pos_y, name):
         super().__init__(sprite_group)
@@ -206,6 +254,59 @@ class Wall(Sprite):
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
         self.add(wall_group)
+
+
+class Enemy(Sprite):
+
+    def __init__(self, pos_x, pos_y):
+        super().__init__(enemy_group)
+        self.image = skeleton_images[0]
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x, tile_height * pos_y)
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+        self.counter = 0
+        self.motion = "right"
+
+    def update(self):
+
+        move_x = 0
+        moving = 1
+
+        if self.motion == "left":
+            move_x -= moving
+        if self.motion == "right":
+            move_x += moving
+
+        if self.counter % 8 == 0 and self.motion == "right":
+            self.image = skeleton_images[(self.counter // 8) % 13]
+        if self.counter % 8 == 0 and self.motion == "left":
+            self.image = skeleton_images_reverse[(self.counter // 8) % 13]
+        self.counter += 1
+
+        for tile in invisible_lst:
+            if tile[1].colliderect(self.rect.x + move_x, self.rect.y, self.width, self.height) or \
+                    self.rect.x + move_x > WIDTH - 50 or self.rect.x + move_x < 0:
+                if self.motion == "left":
+                    self.motion = "right"
+                    move_x += 2 * moving
+                elif self.motion == "right":
+                    self.motion = "left"
+                    move_x -= 2 * moving
+
+        for tile in lst:
+            if tile[1].colliderect(self.rect.x + move_x, self.rect.y, self.width, self.height) or \
+                    self.rect.x + move_x > WIDTH - 50 or self.rect.x + move_x < 0:
+                if self.motion == "left":
+                    self.motion = "right"
+                    move_x += 2 * moving
+                elif self.motion == "right":
+                    self.motion = "left"
+                    move_x -= 2 * moving
+
+        self.rect.x += move_x
+
+        screen.blit(self.image, self.rect)
 
 
 class Player(Sprite):
@@ -271,6 +372,8 @@ class Player(Sprite):
                 self.image = jumping_img[2]
             elif self.image == player_image and self.notOnGround:
                 self.image = jumping_img[0]
+            if pygame.sprite.spritecollideany(self, enemy_group):
+                self.rect = self.image.get_rect().move(self.start)
             if self.rect.x >= WIDTH:
                 self.rect = self.image.get_rect().move(self.rect.x % WIDTH, self.rect.y)
             if self.rect.x <= 0:
@@ -396,6 +499,7 @@ sprite_group = SpriteGroup()
 wall_group = SpriteGroup()
 hero_group = SpriteGroup()
 exit_group = SpriteGroup()
+enemy_group = SpriteGroup()
 princess_group = SpriteGroup()
 menu_group = SpriteGroup()
 coins_group = SpriteGroup()
@@ -408,7 +512,7 @@ door = AnimatedSprite(tile_images['menu_door'], 1, 1, tile_size * 11.5, 0, menu_
 
 
 def open_level(level):
-    global hero, max_x, max_y, level_map, lst
+    global hero, max_x, max_y, level_map, lst, invisible_lst
 
     sprite_group.empty()
     hero_group.empty()
@@ -420,11 +524,11 @@ def open_level(level):
     pygame.mixer.music.load(music[level - 1])
     pygame.mixer.music.play()
     level_map = load_level(levels[level - 1])
-    hero, max_x, max_y, lst = generate_level(level_map)
+    hero, max_x, max_y, lst, invisible_lst = generate_level(level_map)
 
 
 level_map = load_level(levels[cur_level])
-hero, max_x, max_y, lst = generate_level(level_map)
+hero, max_x, max_y, lst, invisible_lst = generate_level(level_map)
 
 
 def game_mario(dic_game):
@@ -449,6 +553,7 @@ def game_mario(dic_game):
         screen.blit(fon, (0, 0))
         sprite_group.draw(screen)
         wall_group.draw(screen)
+        enemy_group.draw(screen)
         hero_group.draw(screen)
         exit_group.draw(screen)
         princess_group.draw(screen)
@@ -456,6 +561,7 @@ def game_mario(dic_game):
         coins_group.update()
         hero.update()
         princess_group.update()
+        enemy_group.update()
         clock.tick(FPS)
         # Меню:
         draw_mini_text(f'X {score_coins}', (255, 255, 255), (tile_size + 5, 15))  # монетки

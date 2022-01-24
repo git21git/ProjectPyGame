@@ -532,7 +532,7 @@ def game_forrest(dic_game):
 
         if pygame.sprite.groupcollide(coins_group, block_group, True, False):
             XP -= 1
-
+        pygame.sprite.groupcollide(heart_group, block_group, True, False)
         pygame.sprite.groupcollide(false_coin_group, block_group, True, False)
         pygame.sprite.groupcollide(coins_group, mushroom_group, True, False)
         pygame.sprite.groupcollide(heart_group, mushroom_group, True, False)
