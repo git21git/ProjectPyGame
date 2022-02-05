@@ -1,7 +1,8 @@
 import os
-import pygame
 import random
 import sys
+
+import pygame
 from final_screen import final_game_screen
 from main_functions import *
 
@@ -508,7 +509,6 @@ def game_forrest(dic_game):
 
         if score_time % 1000 == 0 and score_time % 260 != 0:
             FalseCoins()
-
 
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
