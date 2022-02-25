@@ -105,6 +105,8 @@ def final_game_screen(dic_game):
 
 
 if __name__ == '__main__':
+    """Если запустить этот файл отдельно, 
+        то будет отображаться только окно с авторами"""
     dic_game = {'houses': False, 'authors': True, 'table': False, 'game': True,
                 'mario_game': False, 'mario_menu': False, 'mario_res': False,
                 'snow_game': False, 'snow_menu': False, 'snow_res': False,

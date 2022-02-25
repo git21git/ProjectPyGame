@@ -1,6 +1,5 @@
-import random
-
 import pygame
+import random
 from Game_Alex import *
 from Game_Mary import *
 from final_screen import final_game_screen
@@ -61,6 +60,7 @@ def create_particles(position):
 
 
 class Houses(pygame.sprite.Sprite):
+    """Класс домиков на главном экране"""
     house_1_small = load_image("start/house_1_small.png", color_key=-1)
     house_1_big = load_image("start/house_1_big.png", color_key=-1)
     house_2_small = load_image("start/house_2_small.png", color_key=-1)
@@ -76,6 +76,7 @@ class Houses(pygame.sprite.Sprite):
 
     def __init__(self, x, y, group, name):
         super().__init__(group)
+        """В соотв с именем выбирается картинка спрайта"""
         if name == 'exit':
             self.image = Houses.exit_small
         elif name == 'house_1':
@@ -96,6 +97,8 @@ class Houses(pygame.sprite.Sprite):
 
     def update(self, *args):
         if args and self.rect.collidepoint(args[0].get_pos()):
+            """Если курсор мыши попал в прямоугольник спрайта, 
+                то изменяем изображение на большее"""
             if self.name == 'exit':
                 self.image = Houses.exit_big
             elif self.name == 'house_1':
@@ -111,6 +114,8 @@ class Houses(pygame.sprite.Sprite):
             self.rect.x = self.pos[0] - 4
             self.rect.y = self.pos[1] - 3
         else:
+            """Если курсор мыши не попал в прямоугольник спрайта, 
+                            то изменяем изображение на меньшее"""
             if self.name == 'exit':
                 self.image = Houses.exit_small
             elif self.name == 'house_1':
@@ -127,6 +132,7 @@ class Houses(pygame.sprite.Sprite):
             self.rect.y = self.pos[1]
 
     def check_push(self, *args):
+        """Проверка нажатия на спрайт"""
         if args and self.rect.collidepoint(args[0].get_pos()):
             return self.name
 

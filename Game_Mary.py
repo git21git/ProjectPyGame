@@ -528,6 +528,8 @@ def game_snowman(dic_game):
 
 
 if __name__ == '__main__':
+    """Если запустить файл отдельно, то будет работать только эта игра
+            (меню, игра, результат, окно с авторами)"""
     dic_game = {'houses': False, 'authors': False, 'table': False, 'game': True,
                 'mario_game': False, 'mario_menu': False, 'mario_res': False,
                 'snow_game': False, 'snow_menu': True, 'snow_res': False,
