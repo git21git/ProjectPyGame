@@ -1,9 +1,10 @@
 """В этом файле собраны основные функции, необходимые для функционирования проекта
     (для исключения повторения их в файлах проекта)"""
 import os
-import pygame
 import random
 import sys
+
+import pygame
 
 pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = screen_size = (645, 400)
@@ -48,17 +49,17 @@ def load_level(filename):
 def clean_text(text, flag='RES'):
     """Функция для взаимодействия с текстовым файлом и преобрпзовании информаци из него(таблица)"""
     clean_txt = []
-    if flag == 'RES':
+    if flag == 'RES':  # возвращение строки для таблицы
         for c in text:
-            coins, time = c.strip().split(';')
-            clean_txt.append(f'{coins}       {time}')
-    elif flag == 'NEW':
+            name, coins, time = c.strip().split(';')
+            clean_txt.append(f'  {name}        {coins}         {time}')
+    elif flag == 'NEW':  # проверка нового рекорда
         for c in text:
-            coins, time = c.strip().split(';')
-            clean_txt.append((int(coins), time))
-    elif flag == 'CONVERT':
-        for coin, time in text:
-            clean_txt.append(f'{coin};{time}')
+            name, coins, time = c.strip().split(';')
+            clean_txt.append((name, int(coins), time))
+    elif flag == 'CONVERT':  # преобразование для хранения
+        for name, coin, time in text:
+            clean_txt.append(f'{name};{coin};{time}')
     return clean_txt
 
 
@@ -74,14 +75,18 @@ def check_new_table(game, score_coins, score_time):
         filename = 'snow/res_snow.txt'
     with open(f'data/{filename}', mode='r', encoding="utf8") as file:
         text = clean_text(file.readlines(), flag='NEW')
+    with open(f'data/player_name.txt', mode='r', encoding="utf8") as file:
+        player_name = file.read()
     for i in range(len(text)):
-        coin, time = text[i]
+        name, coin, time = text[i]
         if score_coins > coin:
-            text[i] = score_coins, score_time
+            text[i] = player_name, score_coins, score_time
             changed = True
+            break
         if score_coins == coin and time > score_time:
-            text[i] = score_coins, score_time
+            text[i] = player_name, score_coins, score_time
             changed = True
+            break
     text = clean_text(text, flag='CONVERT')
     with open(f'data/{filename}', mode='w', encoding="utf8") as file:
         for line in text:
@@ -130,6 +135,14 @@ def draw_mini_text(text, color, pos, Font=None, size=20):
     x, y = pos
     text = font.render(text, True, color)
     screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
+
+
+def draw_sign_text(text, Font=None, color=pygame.Color('blue'), size=65):
+    """Функция отображения текста авторизации"""
+    text_coord = 125
+    font = pygame.font.Font(Font, size)
+    text = font.render(text, True, color)
+    screen.blit(text, (text_coord, text_coord + 33))
 
 
 class SpriteGroup(pygame.sprite.Group):
@@ -182,14 +195,14 @@ class AnimatedSprite(Sprite):
 
 
 def draw_table_text(screen):
-    font = pygame.font.Font('data/final/seguisbi.ttf', 28)
+    font = pygame.font.Font('data/final/seguisbi.ttf', 14)
     text = font.render('WINNERS SCORE', True, pygame.Color('black'))
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 15))
     # Результаты игры Марио
     with open('data/mario/res_mario.txt', encoding="utf8") as file:
         text = file.readlines()
     text_mario = clean_text(text)
-    text_coord = 25
+    text_coord = 50
     for line in text_mario:
         text = font.render(line, True, pygame.Color('white'))
         text_x = 410 - text.get_width()
@@ -200,7 +213,7 @@ def draw_table_text(screen):
     # Результаты игры Forrest
     with open('data/BlackForrest/res_forrest.txt', encoding="utf8") as file:
         text_forrest = clean_text(file.readlines())
-    text_coord = 25
+    text_coord = 50
     for line in text_forrest:
         text = font.render(line, True, pygame.Color('white'))
         text_x = 190 - text.get_width()
@@ -211,10 +224,10 @@ def draw_table_text(screen):
     # Результаты игры Snow
     with open('data/snow/res_snow.txt', encoding="utf8") as file:
         text_snow = clean_text(file.readlines())
-    text_coord = 25
+    text_coord = 50
     for line in text_snow:
         text = font.render(line, True, pygame.Color('white'))
-        text_x = 620 - text.get_width()
+        text_x = 630 - text.get_width()
         text_y = text_coord + text.get_height() + 10
         text_coord = text_y
         screen.blit(text, (text_x, text_y))

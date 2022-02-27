@@ -1,12 +1,14 @@
 import os
-import pygame
 import random
 import sys
+
+import pygame
 from final_screen import final_game_screen
 from main_functions import *
 
 
 def build_level():
+    """Функция постройки уровня"""
     for i in range(13):
         Tile("block", i, 7)
 
@@ -85,6 +87,7 @@ heart = AnimatedSprite(heart_pic, 4, 1, tile_size * 4 - 15, 0, menu_group, 10)
 
 
 def menu_forrest_game(dic_game):
+    """Функция меню игры"""
     pygame.display.set_caption('Black Forrest')
     pygame.display.set_icon(load_image("BlackForrest/Black_Forrest.ico"))
     pygame.mixer.music.load("Data/BlackForrest/start_window_black_forrest.mp3")
@@ -249,6 +252,7 @@ def res_of_play_forrest(dic_game):
 
 
 class BlackForrest(pygame.sprite.Sprite):
+    """Класс игры"""
     image = load_image("BlackForrest/my_font.png", color_key=None)
     image = pygame.transform.scale(image, (WIDTH, HEIGHT))
 
@@ -259,6 +263,7 @@ class BlackForrest(pygame.sprite.Sprite):
 
 
 class Tile(pygame.sprite.Sprite):
+    """Класс блока"""
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
         self.image = tile_images[tile_type]
@@ -272,6 +277,7 @@ class Tile(pygame.sprite.Sprite):
 
 
 class Player(pygame.sprite.Sprite):
+    """Класс игрока"""
     def __init__(self, pos_x, pos_y):
         super().__init__()
         self.image = tile_images['hero']
@@ -341,7 +347,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class Coins(pygame.sprite.Sprite):
-
+    """Класс монеток"""
     def __init__(self):
         super().__init__()
         list_with_blocks_centers = [17, 67, 117, 167, 217, 267, 317, 367, 417, 467, 517, 567]
@@ -361,7 +367,7 @@ class Coins(pygame.sprite.Sprite):
 
 
 class FalseCoins(pygame.sprite.Sprite):
-
+    """Класс монеток, отнимающих жизнь"""
     def __init__(self):
         super().__init__()
         list_with_blocks_centers = [17, 67, 117, 167, 217, 267, 317, 367, 417, 467, 517, 567]
@@ -381,7 +387,7 @@ class FalseCoins(pygame.sprite.Sprite):
 
 
 class Heart(pygame.sprite.Sprite):
-
+    """Класс сердечек"""
     def __init__(self):
         super().__init__()
         list_with_blocks_centers = [17, 67, 117, 167, 217, 267, 317, 367, 417, 467, 517, 567]
@@ -397,7 +403,7 @@ class Heart(pygame.sprite.Sprite):
 
 
 class Mushroom(pygame.sprite.Sprite):
-
+    """Класс гриба(враг)"""
     def __init__(self):
         super().__init__()
         self.image = mushroom_images[0]
@@ -455,6 +461,7 @@ pygame.mixer.init()
 
 
 def game_forrest(dic_game):
+    """Функция игры"""
     global score_coins, XP
 
     pygame.display.set_caption('Black Forrest')
@@ -525,7 +532,6 @@ def game_forrest(dic_game):
         if score_time % 1000 == 0 and score_time % 260 != 0:
             FalseCoins()
 
-
         screen.fill(pygame.Color("black"))
         all_sprites.draw(screen)
         pygame.draw.rect(screen, (0, 0, 0), (0, 0, WIDTH, tile_size // 2))
@@ -562,6 +568,8 @@ def game_forrest(dic_game):
 
 
 if __name__ == '__main__':
+    """Если запустить файл отдельно, то будет работать только эта игра
+        (меню, игра, результат, окно с авторами)"""
     dic_game = {'houses': False, 'authors': False, 'table': False, 'game': True,
                 'mario_game': False, 'mario_menu': False, 'mario_res': False,
                 'snow_game': False, 'snow_menu': False, 'snow_res': False,

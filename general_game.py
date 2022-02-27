@@ -115,6 +115,8 @@ def draw_mini_text(text, color, pos):
 
 
 def generate_level(level):
+    """Функция генерации уровня
+            (формирование групп спрайтов, списков блоков)"""
     new_player, x, y = None, None, None
     enemy_group.empty()
     list_with_walls = list()
@@ -194,6 +196,7 @@ def create_particles(position):
 
 
 def menu_mario_game(dic_game):
+    """Функция меню игры Марио"""
     pygame.display.set_caption('Mario: Multiverse')  # Название приложения
     pygame.mixer.music.load("data/mario/music/honor-and-sword-main.mp3")
     pygame.mixer.music.play()
@@ -236,6 +239,8 @@ class Tile(Sprite):
 
 
 class Invisible(Sprite):
+    """Класс невидимых блоков(для движения монстров по блокам)"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(sprite_group)
         self.image = pygame.transform.scale(load_image("mario/invisible_block.png", color_key=-1), (50, 50))
@@ -257,6 +262,7 @@ class Wall(Sprite):
 
 
 class Enemy(Sprite):
+    """Класс врагов(скелетов)"""
 
     def __init__(self, pos_x, pos_y):
         super().__init__(enemy_group)
@@ -310,6 +316,8 @@ class Enemy(Sprite):
 
 
 class Player(Sprite):
+    """Класс игрока Марио"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(hero_group)
         self.image = player_image
@@ -330,6 +338,7 @@ class Player(Sprite):
         self.died = False
 
     def update(self):
+        """Метод движения игрока"""
         global onGround, level_completed
 
         move_x = 0
@@ -411,6 +420,8 @@ class Player(Sprite):
 
 
 class Exit(Sprite):
+    """Класс перехода на новый уровень (флаг)"""
+
     def __init__(self, pos_x, pos_y):
         super().__init__(exit_group)
         self.image = tile_images['exit']
@@ -419,6 +430,7 @@ class Exit(Sprite):
 
 
 class Princess(Sprite):
+    """Класс принцессы (цель игры)"""
     princess_l = load_image('mario/princess_l.png', color_key=-1)
     princess_r = load_image("mario/princess_r.png", color_key=-1)
 
@@ -440,6 +452,7 @@ class Princess(Sprite):
 
 
 def res_of_play_mario(dic_game):
+    """Функция отображения результатов игры Марио"""
     global score_time, score_coins, lst, cur_level, level_completed
     pygame.mouse.set_visible(True)
     if not hero.died:
@@ -495,6 +508,7 @@ def res_of_play_mario(dic_game):
 
 
 clock = pygame.time.Clock()
+# Группы спрайтов
 sprite_group = SpriteGroup()
 wall_group = SpriteGroup()
 hero_group = SpriteGroup()
@@ -512,6 +526,8 @@ door = AnimatedSprite(tile_images['menu_door'], 1, 1, tile_size * 11.5, 0, menu_
 
 
 def open_level(level):
+    """Функция открытия уровня
+        (обнуление групп спрайтов, генерация уровня, загрузка музыки)"""
     global hero, max_x, max_y, level_map, lst, invisible_lst
 
     sprite_group.empty()
@@ -532,6 +548,7 @@ hero, max_x, max_y, lst, invisible_lst = generate_level(level_map)
 
 
 def game_mario(dic_game):
+    """Функция игры Марио"""
     global score_time, level_completed, cur_level, score_coins, lst
     while dic_game['mario_game']:
         score_time += 1
@@ -586,6 +603,8 @@ def game_mario(dic_game):
 
 
 if __name__ == '__main__':
+    """Если запустить файл отдельно, то будет работать только эта игра
+            (меню, игра, результат, окно с авторами)"""
     dic_game = {'houses': False, 'authors': False, 'table': False, 'game': True,
                 'mario_game': False, 'mario_menu': True, 'mario_res': False,
                 'snow_game': False, 'snow_menu': False, 'snow_res': False,
