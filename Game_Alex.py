@@ -183,6 +183,22 @@ def res_of_play_forrest(dic_game):
                           f'Time: {time}', '', f"Coins: {score_coins}"]
             pygame.mixer.music.load("Data/BlackForrest/when_you_lose.mp3")
             fon = pygame.transform.scale(load_image('BlackForrest/you_not_won.png'), size)
+        all_sprites.empty()
+        false_coin_group.empty()
+        heart_group.empty()
+        hero.kill()
+        mushroom.kill()
+        score_time = 0
+        score_coins = 0
+        XP = 5
+        black_forrest = BlackForrest()
+        hero = Player(6, 6)
+        mushroom = Mushroom()
+
+        Border(-1, -1, WIDTH + 1, -1)  # Верхняя граница
+        Border(-1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1)  # Нижняя граница
+        Border(-10, -1, -10, HEIGHT + 1)
+        Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
         pygame.mixer.music.play()
         restart = Button(50, HEIGHT - 87, restart_img)
 
@@ -205,22 +221,22 @@ def res_of_play_forrest(dic_game):
             if restart.clicked:
                 sound_button.play()
                 pygame.mixer.music.pause()
-                all_sprites.empty()
-                false_coin_group.empty()
-                heart_group.empty()
-                hero.kill()
-                mushroom.kill()
-                score_time = 0
-                score_coins = 0
-                XP = 5
-                black_forrest = BlackForrest()
-                hero = Player(6, 6)
-                mushroom = Mushroom()
-
-                Border(-1, -1, WIDTH + 1, -1)  # Верхняя граница
-                Border(-1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1)  # Нижняя граница
-                Border(-10, -1, -10, HEIGHT + 1)
-                Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
+                # all_sprites.empty()
+                # false_coin_group.empty()
+                # heart_group.empty()
+                # hero.kill()
+                # mushroom.kill()
+                # score_time = 0
+                # score_coins = 0
+                # XP = 5
+                # black_forrest = BlackForrest()
+                # hero = Player(6, 6)
+                # mushroom = Mushroom()
+                #
+                # Border(-1, -1, WIDTH + 1, -1)  # Верхняя граница
+                # Border(-1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1)  # Нижняя граница
+                # Border(-10, -1, -10, HEIGHT + 1)
+                # Border(WIDTH + 10, -1, WIDTH + 10, HEIGHT + 1)
 
                 dic_game['forrest_res'] = False
                 dic_game['forrest_game'] = True
