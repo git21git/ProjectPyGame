@@ -194,6 +194,7 @@ def start_progect_screen():
 
 def table_screen():
     global dic_game
+    menu_group.empty()
     fon = pygame.transform.scale(load_image('final/bg.png'), (WIDTH, HEIGHT))
     go_back = Button(10, 5, back_img)
     for i in range(-300, 310, 50):

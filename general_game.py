@@ -455,6 +455,8 @@ def res_of_play_mario(dic_game):
     """Функция отображения результатов игры Марио"""
     global score_time, score_coins, lst, cur_level, level_completed
     pygame.mouse.set_visible(True)
+    res_group.empty()
+    star_group.empty()
     if not hero.died:
         for i in range(-300, 310, 50):
             create_particles((WIDTH // 2 + i, 0))

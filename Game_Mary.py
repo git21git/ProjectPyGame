@@ -49,7 +49,7 @@ n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так дер�
          'snow/level_5.txt': 'Black forrest!', 'snow/level_6.txt': 'Финал!'}  # Названия для уровней
 max_level = len(levels)
 white = (255, 255, 255)
-
+fffon = pygame.transform.scale(load_image('snow/grass_bg.png'), screen_size)
 # подключение музыки
 main_music_loud = 0.5
 signal_sound_loud = 1
@@ -119,6 +119,7 @@ def open_level(level):
     stones_group.empty()
 
     level_map = load_level(levels[level])
+    print(levels[level])
     player, level_x, level_y = generate_level(level_map)
     camera = Camera((level_x, level_y))
 
@@ -336,7 +337,7 @@ def res_of_play_snow(dic_game):
     pygame.mouse.set_visible(True)
     exit_btn = Button(500, 350, exit_img)
     restart_btn = Button(35, 350, restart_img)
-
+    res_group.empty()
     if not player.died:
         for i in range(-300, 310, 50):
             create_particles((SCREEN_WIDTH // 2 + i, 0))
@@ -478,7 +479,7 @@ def game_snowman(dic_game):
         for sprite in all_sprites:
             camera.apply(sprite)
         """Рисуем группы спрайтов"""
-        screen.fill(pygame.Color(255, 100, 100))
+        screen.blit(fffon, (0, 0))
         tiles_group.draw(screen)
         fire_group.draw(screen)
         coins_group.draw(screen)
