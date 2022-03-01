@@ -49,7 +49,7 @@ n_lvl = {'snow/level_1.txt': 'Начало', 'snow/level_2.txt': 'Так дер�
          'snow/level_5.txt': 'Black forrest!', 'snow/level_6.txt': 'Финал!'}  # Названия для уровней
 max_level = len(levels)
 white = (255, 255, 255)
-fffon = pygame.transform.scale(load_image('snow/grass.png'), screen_size)
+fffon = pygame.transform.scale(load_image('snow/grass.jpg'), screen_size)
 # подключение музыки
 main_music_loud = 0.5
 signal_sound_loud = 1
